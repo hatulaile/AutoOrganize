@@ -9,6 +9,12 @@ public interface ILoggerService
 
     LoggerConfig Config { get; }
 
+    bool IsEnabledLogger { get; }
+
+    bool IsWriteToFile { get; }
+
+    bool IsWriteToView { get; }
+
     LoggingLevelSwitch LevelSwitch { get; }
 
     LoggingLevelSwitch FileLevelSwitch { get; }

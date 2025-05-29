@@ -34,9 +34,7 @@ public class FileConfigManager : IFileConfigManager
     public TConfig GetConfigOrLoad<TConfig>() where TConfig : IConfig, new()
     {
         if (_configs.TryGetValue(typeof(TConfig), out ConfigInfo? info))
-        {
             return (TConfig)info.Config;
-        }
 
         return LoadConfigOrNew<TConfig>();
     }
@@ -92,6 +90,21 @@ public class FileConfigManager : IFileConfigManager
     [UnconditionalSuppressMessage("Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
         Justification = "因为这里使用了Config, 所以会警告, 但是 Config 一定会设置 TypeInfoResolverChain, 所以忽略")]
+    public void SaveConfig(IConfig config)
+    {
+        if (!_configs.TryGetValue(config.GetType(), out var info))
+        {
+            SetConfig(config);
+            return;
+        }
+
+        File.WriteAllText(info.Path,
+            JsonSerializer.Serialize(info.Config, info.ConfigType, _jsonSerializerOptions));
+    }
+
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config 一定会设置 TypeInfoResolverChain, 所以忽略")]
     public void SaveConfig(ConfigInfo config)
     {
         File.WriteAllText(config.Path,
@@ -101,15 +114,14 @@ public class FileConfigManager : IFileConfigManager
     [UnconditionalSuppressMessage("Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
         Justification = "因为这里使用了Config, 所以会警告, 但是 Config 一定会设置 TypeInfoResolverChain, 所以忽略")]
-    public TConfig LoadConfigOrNew<TConfig>() where TConfig : IConfig, new()
+    private TConfig LoadConfigOrNew<TConfig>() where TConfig : IConfig, new()
     {
         string path = GetConfigPath<TConfig>();
 
         TConfig config;
         if (File.Exists(path))
         {
-            config = (TConfig?)JsonSerializer.Deserialize(
-                File.ReadAllText(path), typeof(TConfig), _jsonSerializerOptions) ?? new TConfig();
+            config = JsonSerializer.Deserialize<TConfig>(File.ReadAllText(path), _jsonSerializerOptions) ?? new TConfig();
         }
         else
         {
@@ -118,7 +130,7 @@ public class FileConfigManager : IFileConfigManager
 
         var info = new ConfigInfo(typeof(TConfig), config, path);
         SaveConfig(info);
-        _configs[typeof(TConfig)] = info;
+        _configs.TryAdd(info.ConfigType, info);
         return config;
     }
 
@@ -243,7 +255,23 @@ public class FileConfigManager : IFileConfigManager
     [UnconditionalSuppressMessage("Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
         Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
-    public async Task<TConfig> LoadConfigOrNewAsync<TConfig>(CancellationToken token = default)
+    public async Task SaveConfigAsync(IConfig config, CancellationToken token = default)
+    {
+        if (!_configs.TryGetValue(config.GetType(), out var info))
+        {
+            await SetConfigAsync(config, token).ConfigureAwait(false);
+            return;
+        }
+
+        await File.WriteAllTextAsync(info.Path,
+            JsonSerializer.Serialize(info.Config, info.ConfigType, _jsonSerializerOptions),
+            token).ConfigureAwait(false);
+    }
+
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
+    private async Task<TConfig> LoadConfigOrNewAsync<TConfig>(CancellationToken token = default)
         where TConfig : IConfig, new()
     {
         token.ThrowIfCancellationRequested();
@@ -252,9 +280,7 @@ public class FileConfigManager : IFileConfigManager
         TConfig config;
         if (File.Exists(path))
         {
-            config = (TConfig?)JsonSerializer.Deserialize(
-                await File.ReadAllTextAsync(path, token).ConfigureAwait(false), typeof(TConfig),
-                _jsonSerializerOptions) ?? new TConfig();
+            config = JsonSerializer.Deserialize<TConfig>(await File.ReadAllTextAsync(path, token).ConfigureAwait(false), _jsonSerializerOptions) ?? new TConfig();
         }
         else
         {
@@ -263,7 +289,7 @@ public class FileConfigManager : IFileConfigManager
 
         var info = new ConfigInfo(typeof(TConfig), config, path);
         await SaveConfigAsync(info, token).ConfigureAwait(false);
-        _configs[typeof(TConfig)] = info;
+        _configs.TryAdd(info.ConfigType, info);
         return config;
     }
 

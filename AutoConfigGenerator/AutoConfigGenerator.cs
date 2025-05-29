@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -90,8 +92,10 @@ public sealed class AutoConfigGenerator : IIncrementalGenerator
               #nullable enable
               namespace {{namespaceName}};
 
-              public partial class {{className}}
+              public partial class {{className}} : IEquatable<{{className}}>
               {
+                  public CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger WeakReferenceMessenger { get; } = new();
+
               """);
 
         builder.AppendLine();
@@ -128,6 +132,7 @@ public sealed class AutoConfigGenerator : IIncrementalGenerator
                                      partial void On{{symbol.Name}}Changed({{symbol.Type}} oldValue, {{symbol.Type}} newValue)
                                      {
                                          {{symbol.Name}}Changed?.Invoke(new {{CONFIG_PROPERTY_CHANGE_EVENT_ARGS}}<{{symbol.Type}}>(oldValue, newValue));
+                                         CommunityToolkit.Mvvm.Messaging.IMessengerExtensions.Send(WeakReferenceMessenger, new {{symbol.Name}}ChangedMessage(oldValue, newValue));
                                      }
                                  """);
             builder.AppendLine();
@@ -140,8 +145,7 @@ public sealed class AutoConfigGenerator : IIncrementalGenerator
 
         foreach (IPropertySymbol symbol in properties.Select(x => x.symbol))
         {
-            if (symbol.Type.BaseType?.GetMembers().OfType<IMethodSymbol>() is not { } iMethodSymbols ||
-                iMethodSymbols.FirstOrDefault(x => x.Name.Equals("Clone")) is not { } cloneMethodSymbol)
+            if (!TryGetCopyMethod(symbol.Type, out var copyMethodSymbol))
             {
                 builder.AppendLine(
                     $$"""
@@ -152,17 +156,150 @@ public sealed class AutoConfigGenerator : IIncrementalGenerator
 
             builder.AppendLine(
                 $$"""
-                          target.{{symbol.Name}} = source.{{symbol.Name}}.{{cloneMethodSymbol.Name}}();
+                          {{copyMethodSymbol.ReceiverType}}.{{copyMethodSymbol.Name}}(source.{{symbol.Name}}, target.{{symbol.Name}});
                   """);
         }
 
 
         builder.AppendLine("    }");
-        builder.Append("}");
 
+        if (!info.Symbol.GetMembers("Equals").OfType<IMethodSymbol>().Any(x =>
+                SymbolEqualityComparer.Default.Equals(x.Parameters.FirstOrDefault()?.Type, info.Symbol)))
+        {
+            builder.AppendLine();
+            var baseType = info.Symbol.BaseType;
+            var equalsIMethodSymbols =
+                baseType?.GetMembers("Equals").OfType<IMethodSymbol>()?.ToArray();
+            if (baseType is not null && baseType.SpecialType is not SpecialType.System_Object &&
+                equalsIMethodSymbols?.Length is > 0)
+            {
+                IMethodSymbol? equalsBase = equalsIMethodSymbols.FirstOrDefault(x =>
+                    SymbolEqualityComparer.Default.Equals(x.Parameters.FirstOrDefault()?.Type, baseType));
+                if (equalsBase is not null && equalsBase.IsVirtual)
+                {
+                    builder.AppendLine($$"""
+                                             public override bool Equals({{baseType}}? obj)
+                                             {
+                                                 if(base.Equals(obj))
+                                                    return true;
+
+                                                 if(obj is not {{className}} target)
+                                                     return false;
+
+                                                 return Equals(target);
+                                             }
+                                         """);
+                }
+            }
+            else
+            {
+                builder.AppendLine($$"""
+                                         public override bool Equals(object? obj)
+                                         {
+                                             if(obj is not {{className}} target)
+                                                return ReferenceEquals(this, obj);
+
+                                             return Equals(target);
+                                         }
+                                     """);
+                builder.AppendLine();
+            }
+
+            AppendClassEquals(builder, className, properties.Select(x => x.symbol), info);
+        }
+
+        if (!info.Symbol.BaseType?.GetMembers("GetHashCode").OfType<IMethodSymbol>().Any() ?? true)
+        {
+            builder.AppendLine();
+            bool isFirst = true;
+            builder.Append($$"""
+                                 public override int GetHashCode()
+                                 {
+                                     return
+                             """);
+
+            if (info.Symbol.BaseType?.SpecialType is not SpecialType.System_Object)
+            {
+                builder.Append(" base.GetHashCode()");
+                isFirst = false;
+            }
+
+            foreach (IPropertySymbol propertySymbol in properties.Select(x => x.symbol))
+            {
+                if (isFirst)
+                {
+                    builder.Append($" {propertySymbol.Name}.GetHashCode()");
+                    continue;
+                }
+
+                builder.Append($" + {propertySymbol.Name}.GetHashCode()");
+            }
+
+            builder.AppendLine(";");
+            builder.AppendLine("    }");
+        }
+
+        foreach (IPropertySymbol propertySymbol in properties.Select(x => x.symbol))
+        {
+            builder.AppendLine();
+            builder.AppendLine($"    public sealed record {propertySymbol.Name}ChangedMessage({propertySymbol.Type} OldValue, {propertySymbol.Type} NewValue);");
+        }
+
+        builder.Append("}");
         context.AddSource($"{classFullName}.g.cs", builder.ToString());
     }
 
+    private bool TryGetCopyMethod(ITypeSymbol typeSymbol, [NotNullWhen(true)] out IMethodSymbol? copyMethodSymbol)
+    {
+        ITypeSymbol? nowSymbol = typeSymbol;
+        do
+        {
+            var methodSymbol = nowSymbol.GetMembers("Copy").OfType<IMethodSymbol>().FirstOrDefault(x => x is
+                {
+                    Parameters.Length: 2,
+                } && SymbolEqualityComparer.Default.Equals(x.Parameters.ElementAt(0).Type, typeSymbol) && SymbolEqualityComparer.Default.Equals(x.Parameters.ElementAt(1).Type, typeSymbol)
+            );
+            if (methodSymbol is not null)
+            {
+                copyMethodSymbol = methodSymbol;
+                return true;
+            }
+
+            nowSymbol = nowSymbol.BaseType;
+        } while (nowSymbol is not null && nowSymbol.SpecialType is SpecialType.None);
+
+        copyMethodSymbol = null;
+        return false;
+    }
+
+    private void AppendClassEquals(StringBuilder builder, string className, IEnumerable<IPropertySymbol> properties,
+        ConfigClassInfo info)
+    {
+        builder.AppendLine($$"""
+                                 public {{(info.Symbol.IsSealed ? string.Empty : "virtual ")}}bool Equals({{className}}? obj)
+                                 {
+                                     if(obj is null)
+                                         return false;
+
+                                     if(ReferenceEquals(this, obj))
+                                        return true;
+
+                             """);
+
+        foreach (IPropertySymbol symbol in properties)
+        {
+            builder.AppendLine(
+                $$"""
+                          if (!Equals({{symbol.Name}}, obj.{{symbol.Name}}))
+                              return false;
+                  """);
+
+            builder.AppendLine();
+        }
+
+        builder.AppendLine("        return true;");
+        builder.AppendLine("    }");
+    }
 
     public sealed class ConfigClassInfo
     {

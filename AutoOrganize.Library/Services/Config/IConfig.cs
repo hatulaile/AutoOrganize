@@ -29,6 +29,9 @@ public abstract class ConfigBase<TSelf> : ObservableObject, IConfig<TSelf>
 {
     protected abstract void CopyMembers(TSelf target, TSelf source);
 
+    public static void Copy(TSelf source, TSelf target) =>
+        source.CopyTo(target);
+
     public virtual void CopyTo(TSelf target)
     {
         CopyMembers(target, (TSelf)this);

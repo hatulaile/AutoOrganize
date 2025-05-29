@@ -134,7 +134,7 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     public void NavigateToSelectFilesViewModel()
     {
         _logger.LogDebug("导航到文件选择页面");
-        _navigationService.NavigateTo<SelectFilesViewModel, IEnumerable<string>?>(HostScreens.Home, null);
+        _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
     }
 
     [RelayCommand]

@@ -28,9 +28,14 @@ public partial class App : Application
 
     public override void Initialize()
     {
-        BuildAppServiceProvider();
         AddViewLocator();
         AvaloniaXamlLoader.Load(this);
+    }
+
+    public override void RegisterServices()
+    {
+        base.RegisterServices();
+        BuildAppServiceProvider();
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -71,10 +76,10 @@ public partial class App : Application
                 var logViewModel = provider.GetRequiredService<LogViewModel>();
                 Logger logger = new LoggerConfiguration()
                     .MinimumLevel.ControlledBy(loggerService.LevelSwitch)
-                    .Filter.ByIncludingOnly(_ => loggerService.Config.IsEnabledLogger)
+                    .Filter.ByIncludingOnly(_ => loggerService.IsEnabledLogger)
                     .WriteTo.Conditional
                     (
-                        _ => loggerService.Config.IsWriteToFile,
+                        _ => loggerService.IsWriteToFile,
                         configuration => configuration.Async(sinkConfiguration => sinkConfiguration.File
                         (
                             Path.Join(PathUtils.GetDefaultAppdataPath(), "Logs", "log-.log"),
@@ -85,7 +90,8 @@ public partial class App : Application
                             levelSwitch: loggerService.FileLevelSwitch
                         ))
                     )
-                    .WriteTo.View(logViewModel, loggerService.ViewLevelSwitch)
+                    .WriteTo.Conditional(_ => loggerService.IsWriteToView,
+                        configuration => configuration.View(logViewModel, loggerService.ViewLevelSwitch))
 #if DEBUG
                     .WriteTo.Console
                     (

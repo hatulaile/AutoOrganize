@@ -13,7 +13,7 @@ public partial class ThemoviedbMetadataProvider : IMovieMetadataProvider
     public async Task<IEnumerable<MovieMetadata>> SearchMovieAsync(SearchQuery query, string? language = null,
         CancellationToken token = default)
     {
-        var searchContainer = await _client.SearchMovieAsync(query.Name, year: query.Year ?? 0,
+        var searchContainer = await Client.SearchMovieAsync(query.Name, year: query.Year ?? 0,
             language: language, cancellationToken: token).ConfigureAwait(false);
         if (searchContainer?.Results is null)
             return [];
@@ -25,7 +25,7 @@ public partial class ThemoviedbMetadataProvider : IMovieMetadataProvider
     public async Task<MovieMetadata?> SearchMovieSingleAsync(SearchQuery query, string? language = null,
         CancellationToken token = default)
     {
-        var searchContainer = await _client.SearchMovieAsync(query.Name, year: query.Year ?? 0,
+        var searchContainer = await Client.SearchMovieAsync(query.Name, year: query.Year ?? 0,
             language: language, cancellationToken: token).ConfigureAwait(false);
         if (searchContainer?.Results is not { Count: > 0 })
             return null;
@@ -43,11 +43,11 @@ public partial class ThemoviedbMetadataProvider : IMovieMetadataProvider
         CancellationToken token = default)
     {
         await IfNotHasConfigGet(token).ConfigureAwait(false);
-        var movie = await _client.GetMovieAsync(id, language: language, cancellationToken: token).ConfigureAwait(false);
+        var movie = await Client.GetMovieAsync(id, language: language, cancellationToken: token).ConfigureAwait(false);
         if (movie is null)
             return null;
 
-        ImagesWithId? images = await _client.GetMovieImagesAsync(movie.Id, token).ConfigureAwait(false);
+        ImagesWithId? images = await Client.GetMovieImagesAsync(movie.Id, token).ConfigureAwait(false);
         return new MovieMetadata
         {
             Name = movie.Title,

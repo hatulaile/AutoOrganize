@@ -8,8 +8,8 @@ namespace AutoOrganize.Library.Services.PathNameGenerators.Configs;
 public partial class MovieFileNameGeneratorConfig : ConfigBase<MovieFileNameGeneratorConfig>
 {
     [ObservableProperty]
-    public partial string MoviePattern { get; set; } = PathNameGenerator.MOVIE_PATTERN;
+    public partial string MoviePattern { get; set; } = FileNameGenerator.MOVIE_PATTERN;
 
     [ObservableProperty]
-    public partial string MovieFolderPattern { get; set; } = PathNameGenerator.MOVIE_FOLDER_PATTERN;
+    public partial string MovieFolderPattern { get; set; } = FileNameGenerator.MOVIE_FOLDER_PATTERN;
 }

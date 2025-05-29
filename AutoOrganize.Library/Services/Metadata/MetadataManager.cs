@@ -17,7 +17,7 @@ public sealed class MetadataManager : IMetadataManager
     //todo: default language setting
     public const string LANGUAGE_DEFAULT = "zh-CN";
 
-    private IEnumerable<IMetadataProvider> Providers => field.OrderByDescending(p => p.Config.Priority);
+    private IEnumerable<IMetadataProvider> AllProviders { get; }
     private readonly IFlightCoordinator _flightCoordinator;
     private readonly IMetadataCache _metadataCache;
     private readonly ILogger<MetadataManager> _logger;
@@ -38,7 +38,7 @@ public sealed class MetadataManager : IMetadataManager
         using IFlightLease acquireResultLease = cacheAcquireResult.FlightLease;
 
         SeriesMetadata? series = null;
-        foreach (var provider in Providers)
+        foreach (var provider in GetAvailableProviders())
         {
             if (provider is not ITvMetadataProvider tvMetadataProvider) continue;
             _logger.LogDebug("使用提供程序 {Provider} 搜索剧集: {@Query}", provider.Info.ProviderId, query);
@@ -104,7 +104,7 @@ public sealed class MetadataManager : IMetadataManager
             return season;
         }
 
-        foreach (var provider in Providers)
+        foreach (var provider in GetAvailableProviders())
         {
             if (provider is not IMetadataProvider<IMetadataProviderInfo> metadataProvider ||
                 series.ExternalIds is null ||
@@ -172,7 +172,7 @@ public sealed class MetadataManager : IMetadataManager
             return episode;
         }
 
-        foreach (var provider in Providers)
+        foreach (var provider in GetAvailableProviders())
         {
             if (provider is not IMetadataProvider<IMetadataProviderInfo> metadataProvider ||
                 season.Series.ExternalIds is null ||
@@ -184,7 +184,9 @@ public sealed class MetadataManager : IMetadataManager
                 provider.Info.ProviderId, id, seasonNumber, episodeNumber);
 
             var temp = await tvMetadataProvider.GetEpisodeMetadataAsync(id,
-                    season.SeasonNumber ?? throw new NullReferenceException(), episodeNumber, LANGUAGE_DEFAULT,
+                    season.SeasonNumber ??
+                    throw new InvalidOperationException("SeasonNumber is null when searching episode"), episodeNumber,
+                    LANGUAGE_DEFAULT,
                     token)
                 .ConfigureAwait(false);
             if (temp is null)
@@ -227,7 +229,7 @@ public sealed class MetadataManager : IMetadataManager
         using IFlightLease acquireResultLease = cacheAcquireResult.FlightLease;
 
         MovieMetadata? movie = null;
-        foreach (var provider in Providers)
+        foreach (var provider in GetAvailableProviders())
         {
             if (provider is not IMovieMetadataProvider movieMetadataProvider) continue;
             _logger.LogDebug("使用提供程序 {Provider} 搜索电影: {@Query}", provider.Info.ProviderId, query);
@@ -270,11 +272,9 @@ public sealed class MetadataManager : IMetadataManager
             acquireResult = await _flightCoordinator.AcquireAsync(cacheKey, token: token).ConfigureAwait(false);
             if (acquireResult.Acquired) break;
             if (!_metadataCache.TryGet(cacheKey, out metadata))
-            {
-                _logger.LogDebug("缓存命中，Key: {CacheKey}", cacheKey);
                 continue;
-            }
 
+            _logger.LogDebug("缓存命中，Key: {CacheKey}", cacheKey);
             return new CacheAcquireResult<TMetadata>(metadata);
         } while (true);
 
@@ -282,10 +282,17 @@ public sealed class MetadataManager : IMetadataManager
         return new CacheAcquireResult<TMetadata>(acquireResult.Lease);
     }
 
-    public MetadataManager(IEnumerable<IMetadataProvider> providers, IFlightCoordinator flightCoordinator,
+    private IEnumerable<IMetadataProvider> GetAvailableProviders()
+    {
+        return AllProviders
+            .Where(x => x.Config.IsEnabled)
+            .OrderByDescending(x => x.Config.Priority);
+    }
+
+    public MetadataManager(IEnumerable<IMetadataProvider> allProviders, IFlightCoordinator flightCoordinator,
         IMetadataCache metadataCache, ILogger<MetadataManager> logger)
     {
-        Providers = providers;
+        AllProviders = allProviders;
         _flightCoordinator = flightCoordinator;
         _metadataCache = metadataCache;
         _logger = logger;

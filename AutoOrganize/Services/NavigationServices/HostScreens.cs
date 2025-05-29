@@ -7,4 +7,5 @@ public enum HostScreens
     Home,
     MetadataEdit,
     TransferResult,
+    Settings
 }

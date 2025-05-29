@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Services.Caches;
 using AutoOrganize.Library.Services.Config;
@@ -43,9 +45,10 @@ public static class ServiceCollectionExtension
             services
                 .AddSingleton<IMetadataManager, MetadataManager>()
                 .AddSingleton<IWindowService, WindowService>()
-                .AddSingleton<IWindowProvider>(provider => (IWindowProvider)provider.GetRequiredService<IWindowService>())
+                .AddSingleton<IWindowProvider>(provider =>
+                    (IWindowProvider)provider.GetRequiredService<IWindowService>())
                 .AddSingleton<IFlightCoordinator, FlightCoordinator>()
-                .AddSingleton<IPathNameGenerator, PathNameGenerator>()
+                .AddSingleton<IFileNameGenerator, FileNameGenerator>()
                 .AddSingleton<IFileTransferBatchService, FileTransferBatchService>()
                 .AddSingleton<ILauncherServices, LauncherServices>()
                 .AddSingleton<IClipboardServices, ClipboardServices>()
@@ -64,11 +67,12 @@ public static class ServiceCollectionExtension
         public IServiceCollection AddNavigationService()
         {
             services
-                .AddSingleton<INavigationService, NavigationService>()
-                .AddRoutingState(HostScreens.Main)
-                .AddRoutingState(HostScreens.Home)
-                .AddRoutingState(HostScreens.MetadataEdit)
-                .AddRoutingState(HostScreens.TransferResult);
+                .AddSingleton<INavigationService, NavigationService>();
+            foreach (HostScreens screens in Enum.GetValues<HostScreens>().Skip(1))
+            {
+                services.AddRoutingState(screens);
+            }
+
             return services;
         }
 
@@ -77,14 +81,7 @@ public static class ServiceCollectionExtension
             services
                 .AddTransient<IMetadataProvider>(x =>
                     x.GetRequiredKeyedService<IMetadataProvider>(nameof(MetadataProviderType.ThemovieDB)))
-                .AddKeyedSingleton<IMetadataProvider>(nameof(MetadataProviderType.ThemovieDB),
-                    (provider, _) => new ThemoviedbMetadataProvider(
-                        //这里的 api key 是我的, 请不要到其他地方使用, 申请自己的 api key 地址 https://www.themoviedb.org/settings/api
-                        //这里使用了 api.tmdb.org, 国内访问默认的 api.themoviedb.org 会有问题
-                        new TMDbClient(TmdbConstants.TMDB_API_KEY, baseUrl: "api.tmdb.org"),
-                        provider.GetRequiredService<IFileConfigManager>()
-                            .GetConfigOrLoad<ThemoviedbMetadataProviderConfig>()));
-
+                .AddKeyedSingleton<IMetadataProvider, ThemoviedbMetadataProvider>(nameof(MetadataProviderType.ThemovieDB));
             return services;
         }
 

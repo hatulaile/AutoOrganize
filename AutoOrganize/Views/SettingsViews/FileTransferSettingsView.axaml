@@ -1,0 +1,100 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:mf="using:AutoOrganize.Library.Models.FileTransfers"
+             xmlns:vm="using:AutoOrganize.ViewModels.SettingsViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:FileTransferSettingsViewModel"
+             x:Class="AutoOrganize.Views.SettingsViews.FileTransferSettingsView">
+
+    <Border Padding="20">
+        <StackPanel Spacing="20">
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="传输模式" FontWeight="Bold" FontSize="16" />
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel Spacing="1">
+                        <RadioButton Name="CopyRadio" GroupName="TransferMode"
+                                     Theme="{DynamicResource PureCardRadioButton}"
+                                     Tag="{x:Static mf:FileTransferMode.Copy}"
+                                     IsCheckedChanged="ToggleButton_OnIsCheckedChanged">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="16">
+                                    <Run Text="复制" /><Run FontSize="12" Foreground="#8C8C8C" Text="(默认)" />
+                                </TextBlock>
+                                <TextBlock FontSize="12" Text="复制文件到目标目录，保留原始文件" />
+                            </StackPanel>
+                        </RadioButton>
+                        <Separator Height="1" />
+                        <RadioButton Name="ClippingRadio" GroupName="TransferMode"
+                                     Theme="{DynamicResource PureCardRadioButton}"
+                                     Tag="{x:Static mf:FileTransferMode.Clipping}"
+                                     IsCheckedChanged="ToggleButton_OnIsCheckedChanged">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="16" Text="剪切" />
+                                <TextBlock FontSize="12" Text="移动文件到目标目录，删除原始文件" />
+                            </StackPanel>
+                        </RadioButton>
+                        <Separator Height="1" />
+                        <RadioButton Name="SymbolicRadio" GroupName="TransferMode"
+                                     Theme="{DynamicResource PureCardRadioButton}"
+                                     Tag="{x:Static mf:FileTransferMode.SymbolicLink}"
+                                     IsCheckedChanged="ToggleButton_OnIsCheckedChanged">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="16" Text="软连接" />
+                                <TextBlock FontSize="12" Text="创建软链接（符号链接），支持跨磁盘操作" />
+                            </StackPanel>
+                        </RadioButton>
+                        <Separator Height="1" />
+                        <RadioButton Name="HardRadio" GroupName="TransferMode"
+                                     Theme="{DynamicResource PureCardRadioButton}"
+                                     Tag="{x:Static mf:FileTransferMode.HardLink}"
+                                     IsCheckedChanged="ToggleButton_OnIsCheckedChanged">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="16" Text="硬链接" />
+                                <TextBlock FontSize="12" Text="创建硬链接，不占用额外磁盘空间" />
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="文件位置" FontWeight="Bold" FontSize="16" />
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBox Name="OutputDirectoryTextBox" Grid.Column="0" Margin="0,0,8,0" Text="{Binding NewConfig.OutputDirectory}"
+                                 DataValidationErrors.Errors="{Binding}"/>
+                        <Button Grid.Column="1" Padding="6,0" Command="{Binding BrowseFolderCommand}">
+                            <PathIcon Data="{StaticResource SemiIconFolderOpen}" />
+                        </Button>
+                    </Grid>
+                </Border>
+            </u:UrsaGroupBox>
+
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="传输选项" FontWeight="Bold" FontSize="16" />
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel Spacing="2">
+                        <Panel Margin="0, 6">
+                            <TextBlock Text="是否单独创建电影文件夹: " VerticalAlignment="Center" />
+                            <CheckBox HorizontalAlignment="Right" IsChecked="{Binding NewConfig.IsCreateMovieFolder}" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Panel Margin="0, 6">
+                            <TextBlock Text="是否允许覆盖文件: " VerticalAlignment="Center" />
+                            <CheckBox HorizontalAlignment="Right" IsChecked="{Binding NewConfig.CanOverwrite}" />
+                        </Panel>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+        </StackPanel>
+    </Border>
+</UserControl>

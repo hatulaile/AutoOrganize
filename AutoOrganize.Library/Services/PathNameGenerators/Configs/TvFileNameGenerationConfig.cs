@@ -8,11 +8,11 @@ namespace AutoOrganize.Library.Services.PathNameGenerators.Configs;
 public partial class TvFileNameGenerationConfig : ConfigBase<TvFileNameGenerationConfig>
 {
     [ObservableProperty]
-    public partial string SeriesMetadataFolderPattern { get; set; } = PathNameGenerator.TV_SERIES_PATTERN;
+    public partial string SeriesMetadataFolderPattern { get; set; } = FileNameGenerator.TV_SERIES_PATTERN;
 
     [ObservableProperty]
-    public partial string SeasonMetadataFolderPattern { get; set; } = PathNameGenerator.TV_SEASON_PATTERN;
+    public partial string SeasonMetadataFolderPattern { get; set; } = FileNameGenerator.TV_SEASON_PATTERN;
 
     [ObservableProperty]
-    public partial string EpisodeNamePattern { get; set; } = PathNameGenerator.TV_EPISODE_PATTERN;
+    public partial string EpisodeNamePattern { get; set; } = FileNameGenerator.TV_EPISODE_PATTERN;
 }

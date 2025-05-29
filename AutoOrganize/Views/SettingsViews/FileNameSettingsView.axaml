@@ -1,0 +1,174 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:v="using:AutoOrganize.Views.SettingsViews"
+             xmlns:vm="using:AutoOrganize.ViewModels.SettingsViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:FileNameSettingsViewModel"
+             x:Class="AutoOrganize.Views.SettingsViews.FileNameSettingsView">
+
+    <Border Padding="20">
+        <StackPanel Spacing="24">
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="剧集" FontWeight="Bold" FontSize="16" />
+                </u:UrsaGroupBox.Header>
+
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="6">
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" Text="剧集文件夹" FontSize="15" />
+                            <Panel>
+                                <TextBox
+                                    Text="{Binding NewConfig.TvFileNameGenerationConfig.SeriesMetadataFolderPattern, Mode=TwoWay}" />
+                                <Border HorizontalAlignment="Right" Height="16" Width="16" CornerRadius="8" Margin="0,0,8,0">
+                                    <ToolTip.Tip>
+                                        <TextBlock>
+                                            <Run Text="可用占位符:"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{sn}: 剧集名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{son}: 剧集原名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{year}: 剧集年份"/>
+                                        </TextBlock>
+                                    </ToolTip.Tip>
+                                    <PathIcon Data="{DynamicResource SemiIconInfoCircle}"/>
+                                </Border>
+                            </Panel>
+                            <SelectableTextBlock>
+                                <Run Text="预览:"/> <Run Text="{Binding TvSeriesGeneratorPatternPreview}"/>
+                            </SelectableTextBlock>
+                        </StackPanel>
+                        <Separator Height="1"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" Text="剧集季文件夹" FontSize="15" />
+                            <Panel>
+                                <TextBox
+                                    Text="{Binding NewConfig.TvFileNameGenerationConfig.SeasonMetadataFolderPattern, Mode=TwoWay}" />
+                                <Border HorizontalAlignment="Right" Height="16" Width="16" CornerRadius="8" Margin="0,0,8,0">
+                                    <ToolTip.Tip>
+                                        <TextBlock>
+                                            <Run Text="可用占位符:"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{sn}: 剧集名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{son}: 剧集原名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{snn}: 剧集季名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{year}: 剧集季年份"/>
+                                        </TextBlock>
+                                    </ToolTip.Tip>
+                                    <PathIcon Data="{DynamicResource SemiIconInfoCircle}"/>
+                                </Border>
+                            </Panel>
+                            <SelectableTextBlock>
+                                <Run Text="预览:"/> <Run Text="{Binding TvSeasonGeneratorPatternPreview }"/>
+                            </SelectableTextBlock>
+                        </StackPanel>
+                        <Separator Height="1"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" Text="剧集集文件" FontSize="15" />
+                            <Panel>
+                                <TextBox
+                                    Text="{Binding NewConfig.TvFileNameGenerationConfig.EpisodeNamePattern, Mode=TwoWay}" />
+                                <Border HorizontalAlignment="Right" Height="16" Width="16" CornerRadius="8" Margin="0,0,8,0">
+                                    <ToolTip.Tip>
+                                        <TextBlock>
+                                            <Run Text="可用占位符:"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{sn}: 剧集名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{son}: 剧集原名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{snn}: 剧集季名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{en}: 剧集集名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{year}: 剧集集年份"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{ext}: 文件扩展名"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{fn}: 文件原名"/>
+                                        </TextBlock>
+                                    </ToolTip.Tip>
+                                    <PathIcon Data="{DynamicResource SemiIconInfoCircle}"/>
+                                </Border>
+                            </Panel>
+                            <SelectableTextBlock>
+                                <Run Text="预览:"/> <Run Text="{Binding TvEpisodeGeneratorPatternPreview}"/>
+                            </SelectableTextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+
+             <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="电影" FontWeight="Bold" FontSize="16" />
+                </u:UrsaGroupBox.Header>
+
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="6">
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" Text="电影文件夹" FontSize="15" />
+                            <Panel>
+                                <TextBox
+                                    Text="{Binding NewConfig.MovieFileNameGeneratorConfig.MovieFolderPattern, Mode=TwoWay}" />
+                                <Border HorizontalAlignment="Right" Height="16" Width="16" CornerRadius="8" Margin="0,0,8,0">
+                                    <ToolTip.Tip>
+                                        <TextBlock>
+                                            <Run Text="可用占位符:"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{name}: 电影名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{oname}: 电影原名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{year}: 电影年份"/>
+                                        </TextBlock>
+                                    </ToolTip.Tip>
+                                    <PathIcon Data="{DynamicResource SemiIconInfoCircle}"/>
+                                </Border>
+                            </Panel>
+                            <SelectableTextBlock>
+                                <Run Text="预览:"/> <Run Text="{Binding MovieFolderGeneratorPatternPreview}"/>
+                            </SelectableTextBlock>
+                        </StackPanel>
+                        <Separator Height="1"/>
+                        <StackPanel Spacing="6">
+                            <TextBlock FontWeight="Bold" HorizontalAlignment="Center" Text="电影文件" FontSize="15" />
+                            <Panel>
+                                <TextBox
+                                    Text="{Binding NewConfig.MovieFileNameGeneratorConfig.MoviePattern, Mode=TwoWay}" />
+                                <Border HorizontalAlignment="Right" Height="16" Width="16" CornerRadius="8" Margin="0,0,8,0">
+                                    <ToolTip.Tip>
+                                        <TextBlock>
+                                            <Run Text="可用占位符:"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{name}: 电影名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{oname}: 电影原名称"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{year}: 电影年份"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{ext}: 文件扩展名"/>
+                                            <LineBreak/>
+                                            <Run Text="{}{fn}: 文件原名"/>
+                                        </TextBlock>
+                                    </ToolTip.Tip>
+                                    <PathIcon Data="{DynamicResource SemiIconInfoCircle}"/>
+                                </Border>
+                            </Panel>
+                            <SelectableTextBlock>
+                                <Run Text="预览:"/> <Run Text="{Binding MovieGeneratorPatternPreview}"/>
+                            </SelectableTextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+        </StackPanel>
+    </Border>
+</UserControl>

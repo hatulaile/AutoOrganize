@@ -17,7 +17,39 @@ public partial class WindowService
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         if (ownerWindow is null)
-            MainWindow.Closed += (_, _) => hostWindow.Close();
+        {
+            EventHandler? handler = null;
+            handler = (_, _) =>
+            {
+                hostWindow.Close();
+                MainWindow.Closed -= handler;
+            };
+            MainWindow.Closed += handler;
+        }
+
+        ShowOrActiveWindow(hostWindow, ownerWindow);
+    }
+
+    public void Show(Type viewModelType, Window? ownerWindow = null)
+    {
+        if (_serviceProvider.GetRequiredService(viewModelType) is not IWindowViewModel viewModel)
+        {
+            throw new Exception("");
+        }
+
+        Window hostWindow = CreateOrGetWindow(viewModel);
+        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
+        viewModel.OnOpenWindow();
+        if (ownerWindow is null)
+        {
+            EventHandler? handler = null;
+            handler = (_, _) =>
+            {
+                hostWindow.Close();
+                MainWindow.Closed -= handler;
+            };
+            MainWindow.Closed += handler;
+        }
 
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
@@ -27,6 +59,12 @@ public partial class WindowService
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
         Show(ownerWindow, defaultViewModel);
+    }
+
+    public void Show(Type viewModelType, object ownerViewModel)
+    {
+        Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
+        Show(viewModelType, ownerWindow);
     }
 
     public void Show<TWindowViewModel, TArgs>(TArgs args, Window? ownerWindow = null,
@@ -39,7 +77,15 @@ public partial class WindowService
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         if (ownerWindow is null)
-            MainWindow.Closed += (_, _) => hostWindow.Close();
+        {
+            EventHandler? handler = null;
+            handler = (_, _) =>
+            {
+                hostWindow.Close();
+                MainWindow.Closed -= handler;
+            };
+            MainWindow.Closed += handler;
+        }
 
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
@@ -53,20 +99,20 @@ public partial class WindowService
     }
 
     private Window CreateOrGetWindow<TWindowViewModel>(TWindowViewModel viewModel)
-        where TWindowViewModel : ViewModelBase, IWindowViewModel
+        where TWindowViewModel : IWindowViewModel
     {
         if (!viewModel.AllowMultipleInstances)
         {
             Window? w = _windowByViewModel
-                .FirstOrDefault(static kvp => kvp.Key.GetType() == typeof(TWindowViewModel)).Value;
+                .FirstOrDefault(kvp => kvp.Key.GetType() == viewModel.GetType()).Value;
 
             if (w is not null) return w;
         }
 
         if (ViewLocator.DefaultViewLocator.Build(viewModel) is not Window window)
         {
-            //todo
-            throw new Exception();
+            throw new InvalidOperationException(
+                $"The view for ViewModel '{viewModel.GetType().Name}' could not be resolved ");
         }
 
         InitializeIfNeeded(window);
@@ -78,8 +124,23 @@ public partial class WindowService
 
     private void ShowOrActiveWindow(Window window, Window? ownerWindow = null)
     {
+        if (window.DataContext is ViewModelBase vm)
+        {
+            ViewModelBase? ownerViewModel;
+            if (ownerWindow is not null) ownerViewModel = ownerWindow.DataContext as ViewModelBase;
+            else ownerViewModel = window.Owner?.DataContext as ViewModelBase;
+
+            if (ownerViewModel is not null && !ReferenceEquals(ownerViewModel, vm))
+                vm.OwnerViewModel = ownerViewModel;
+        }
+
         if (window.IsVisible)
         {
+            if (window.WindowState is WindowState.Minimized)
+            {
+                window.WindowState = WindowState.Normal;
+                return;
+            }
             window.Activate();
             return;
         }
@@ -90,14 +151,18 @@ public partial class WindowService
 
     private void InitializeIfNeeded(Window window)
     {
+        if (window.IsLoaded)
+            return;
         window.Closing += (windowObj, ev) =>
         {
             var win = (Window?)windowObj ?? throw new ArgumentException("Window cannot be null", nameof(windowObj));
             var viewModel = win.DataContext as IWindowViewModel;
 
+            (win.DataContext as ViewModelBase)?.OwnerViewModel = null;
             viewModel?.OnCloseWindow();
-            if (!CanCloseWindow(win) && MainWindow.IsVisible &&
-                ev.CloseReason is not (WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown))
+            if (!ReferenceEquals(win, MainWindow) && !CanCloseWindow(win) &&
+                ev.CloseReason is not (WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown) &&
+                !_isMainClosing)
             {
                 ev.Cancel = true;
                 win.Hide();

@@ -8,7 +8,6 @@ using AutoOrganize.Library.Services.FileTransferServices;
 using AutoOrganize.Library.Services.Observers;
 using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Library.Services.PathNameGenerators.Configs;
-using AutoOrganize.Library.Services.PathNameGenerators.Options;
 using Microsoft.Extensions.Logging;
 
 namespace AutoOrganize.Library.Services.FileTransferBatchServices;
@@ -16,7 +15,7 @@ namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 public sealed class FileTransferBatchService : IFileTransferBatchService
 {
     private readonly IFileTransferService _fileTransferService;
-    private readonly IPathNameGenerator _pathNameGenerator;
+    private readonly IFileNameGenerator _fileNameGenerator;
     private readonly IFileConfigManager _fileConfigManager;
     private readonly ILogger<FileTransferBatchService> _logger;
 
@@ -37,7 +36,6 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
         int failed = 0;
 
         FileTransferOptions fileTransferOptions = FileTransferConfig.ToOption();
-        FileNameGenerationOptions fileNameGenerationOptions = FileNameGeneratorConfig.ToOptions();
         string? directoryPath = null;
 
         foreach (var fileMetadataEntry in fileMetadataEntries)
@@ -51,7 +49,7 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
             token.ThrowIfCancellationRequested();
             try
             {
-                string path = GetOutputFilePath(fileMetadataEntry, directoryPath, fileNameGenerationOptions);
+                string path = GetOutputFilePath(fileMetadataEntry, directoryPath, FileNameGeneratorConfig);
                 try
                 {
                     await _fileTransferService
@@ -98,14 +96,14 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
 
     //如果过于复杂考虑再抽成一个 Service
     private string GetOutputFilePath(FileMetadataEntry fileMetadataEntry, string directoryPath,
-        FileNameGenerationOptions options)
+        FileNameGeneratorConfig fileNameGeneratorConfig)
     {
         var path = fileMetadataEntry.Metadata switch
         {
             EpisodeMetadata episodeMetadata => GetOutputTvFilePath(episodeMetadata, fileMetadataEntry.FilePath,
-                options.TvFileNameGenerationOptions),
+                fileNameGeneratorConfig.TvFileNameGenerationConfig),
             MovieMetadata movieMetadata => GetOutputMovieFilePath(movieMetadata, fileMetadataEntry.FilePath,
-                options.MovieFileNameGenerationOptions),
+                fileNameGeneratorConfig.MovieFileNameGeneratorConfig),
             _ => throw new ArgumentException($"{fileMetadataEntry.Metadata} is not a file metadata")
         };
 
@@ -113,42 +111,42 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
         return Path.Combine(directoryPath, path);
 
         string GetOutputTvFilePath(EpisodeMetadata episodeMetadata, string filePath,
-            TvFileNameGenerationOptions tvFileNameGenerationOptions)
+            TvFileNameGenerationConfig config)
         {
             string seriesPath = episodeMetadata.Series is not null
-                ? _pathNameGenerator.GetTvSeriesFileName(episodeMetadata.Series, tvFileNameGenerationOptions)
+                ? _fileNameGenerator.GetTvSeriesFileName(episodeMetadata.Series, config.SeriesMetadataFolderPattern)
                 : "Unknown";
             string seasonPath = episodeMetadata.Season is not null
-                ? _pathNameGenerator.GetTvSeasonFileName(episodeMetadata.Season, tvFileNameGenerationOptions)
+                ? _fileNameGenerator.GetTvSeasonFileName(episodeMetadata.Season, config.SeasonMetadataFolderPattern)
                 : "Unknown";
             string episodePath =
-                _pathNameGenerator.GetTvEpisodeFileName(filePath, episodeMetadata, tvFileNameGenerationOptions);
+                _fileNameGenerator.GetTvEpisodeFileName(filePath, episodeMetadata, config.EpisodeNamePattern);
 
             return Path.Combine(directoryPath, seriesPath, seasonPath, episodePath);
         }
 
         string GetOutputMovieFilePath(MovieMetadata episodeMetadata, string filePath,
-            MovieFileNameGenerationOptions movieFileNameGenerationOptions)
+            MovieFileNameGeneratorConfig config)
         {
             string movieFileName =
-                _pathNameGenerator.GetMovieFileName(filePath, episodeMetadata, movieFileNameGenerationOptions);
+                _fileNameGenerator.GetMovieFileName(filePath, episodeMetadata, config.MoviePattern);
             if (!FileTransferConfig.IsCreateMovieFolder)
                 return movieFileName;
 
             string movieDirectory =
-                _pathNameGenerator.GetMovieFolderName(episodeMetadata, movieFileNameGenerationOptions);
+                _fileNameGenerator.GetMovieFolderName(episodeMetadata, config.MovieFolderPattern);
             return Path.Combine(movieDirectory, movieFileName);
         }
     }
 
-    public FileTransferBatchService(IFileTransferService fileTransferService, IPathNameGenerator pathNameGenerator,
+    public FileTransferBatchService(IFileTransferService fileTransferService, IFileNameGenerator fileNameGenerator,
         IFileConfigManager fileConfigManager, ILogger<FileTransferBatchService> logger)
     {
         _fileTransferService = fileTransferService;
-        _pathNameGenerator = pathNameGenerator;
+        _fileNameGenerator = fileNameGenerator;
         _fileConfigManager = fileConfigManager;
         _logger = logger;
-        fileConfigManager.LoadConfigOrNew<FileTransferConfig>();
-        fileConfigManager.LoadConfigOrNew<FileNameGeneratorConfig>();
+        fileConfigManager.GetConfigOrLoad<FileTransferConfig>();
+        fileConfigManager.GetConfigOrLoad<FileNameGeneratorConfig>();
     }
 }

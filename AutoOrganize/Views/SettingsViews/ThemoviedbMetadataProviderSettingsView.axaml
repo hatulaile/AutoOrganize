@@ -1,0 +1,43 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:v="using:AutoOrganize.Views.SettingsViews"
+             xmlns:vm="using:AutoOrganize.ViewModels.SettingsViewModels"
+             x:DataType="vm:ThemoviedbMetadataProviderSettingsViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AutoOrganize.Views.SettingsViews.ThemoviedbMetadataProviderSettingsView">
+
+    <UserControl.Styles>
+    </UserControl.Styles>
+
+    <Border Padding="20">
+        <StackPanel>
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="TMDB通用" FontWeight="Bold" FontSize="16"/>
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel>
+                        <Panel Margin="0, 6">
+                            <TextBlock Text="是否开启TMDB源: " />
+                            <CheckBox HorizontalAlignment="Right" IsChecked="{Binding NewConfig.IsEnabled}" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Panel Margin="0, 6" IsEnabled="{Binding NewConfig.IsEnabled}">
+                            <TextBlock Text="优先级: " VerticalAlignment="Center" />
+                            <u:NumericUIntUpDown Value="{Binding NewConfig.Priority}" Maximum="255"
+                                                 HorizontalAlignment="Right" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Grid Margin="0, 6" ColumnDefinitions="Auto, *" IsEnabled="{Binding NewConfig.IsEnabled}">
+                            <TextBlock Text="API Key: " VerticalAlignment="Center" />
+                            <TextBox Margin="6,0,0,0" Grid.Column="1" Text="{Binding NewConfig.ApiKey}" HorizontalAlignment="Stretch" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+        </StackPanel>
+    </Border>
+</UserControl>

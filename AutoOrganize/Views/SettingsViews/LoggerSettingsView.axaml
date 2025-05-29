@@ -1,0 +1,97 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:v="using:AutoOrganize.Views.SettingsViews"
+             xmlns:vm="using:AutoOrganize.ViewModels.SettingsViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:LoggerSettingsViewModel"
+             x:Class="AutoOrganize.Views.SettingsViews.LoggerSettingsView"
+             x:Name="LoggerSettingsControl">
+
+    <UserControl.Styles>
+        <Style Selector="ComboBox">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="MinHeight" Value="0" />
+            <Style Selector="^ ContentPresenter#ContentPresenter>TextBlock">
+                <Setter Property="Padding" Value="4,6" />
+            </Style>
+            <Style Selector="^ ComboBoxItem">
+                <Setter Property="Padding" Value="4,6" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Padding="20">
+        <StackPanel Spacing="28">
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="全局" FontWeight="Bold" FontSize="16"/>
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel>
+                        <Panel Margin="0, 6">
+                            <TextBlock Text="是否开启日志: " />
+                            <CheckBox HorizontalAlignment="Right" IsChecked="{Binding NewConfig.IsEnabledLogger}" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Panel Margin="0,6,0,6" IsEnabled="{Binding NewConfig.IsEnabledLogger}">
+                            <TextBlock Text="日志等级: " VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{x:Static v:LoggerSettingsView.LogEventLevels}"
+                                      SelectedValue="{Binding NewConfig.LogLevel}" HorizontalAlignment="Right" />
+                        </Panel>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0" IsEnabled="{Binding NewConfig.IsEnabledLogger}">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="文件日志" FontWeight="Bold" FontSize="16"/>
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel>
+                        <Panel Margin="0, 6">
+                            <TextBlock Text="是否记录到文件: " />
+                            <CheckBox HorizontalAlignment="Right" IsChecked="{Binding NewConfig.IsWriteToFile}" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Panel Margin="0,6,0,6" VerticalAlignment="Center"
+                               IsEnabled="{Binding NewConfig.IsWriteToFile}">
+                            <TextBlock Text="日志等级: " VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{x:Static v:LoggerSettingsView.LogEventLevels}"
+                                      SelectedValue="{Binding NewConfig.FileLogLevel}" HorizontalAlignment="Right" />
+                        </Panel>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+
+            <u:UrsaGroupBox BorderThickness="0" Padding="0,8,0,0" IsEnabled="{Binding NewConfig.IsEnabledLogger}">
+                <u:UrsaGroupBox.Header>
+                    <TextBlock Text="日志视图" FontWeight="Bold" FontSize="16"/>
+                </u:UrsaGroupBox.Header>
+                <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
+                    <StackPanel>
+                        <Panel Margin="0, 6">
+                            <TextBlock Text="是否记录到日志页面: " VerticalAlignment="Center" />
+                            <CheckBox HorizontalAlignment="Right" IsChecked="{Binding NewConfig.IsWriteToView}" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Panel Margin="0,6,0,6" VerticalAlignment="Center"
+                               IsEnabled="{Binding NewConfig.IsWriteToView}">
+                            <TextBlock Text="日志等级: " VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{x:Static v:LoggerSettingsView.LogEventLevels}"
+                                      SelectedValue="{Binding NewConfig.ViewLogLevel}" HorizontalAlignment="Right" />
+                        </Panel>
+                        <Separator Height="1" />
+                        <Panel Margin="0,6" IsEnabled="{Binding NewConfig.IsWriteToView}">
+                            <TextBlock Text="历史日志数量: " VerticalAlignment="Center" />
+                            <u:NumericUIntUpDown Value="{Binding NewConfig.ViewMaxLogEntries}" Maximum="100000"
+                                                 HorizontalAlignment="Right" MinWidth="60" ShowButtonSpinner="False" />
+                        </Panel>
+                    </StackPanel>
+                </Border>
+            </u:UrsaGroupBox>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -66,16 +66,10 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
 
             public ViewModelLifetime ViewModelLifetime { get; }
 
-            public ViewModelRegistrationAttribute(ViewModelLifetime lifetime = ViewModelLifetime.Transient)
+            public ViewModelRegistrationAttribute(ViewModelLifetime viewModelLifetime = ViewModelLifetime.Transient, ViewModelLifetime viewLifetime = ViewModelLifetime.Transient)
             {
-                ViewLifetime = lifetime;
-                ViewModelLifetime = lifetime;
-            }
-
-            public ViewModelRegistrationAttribute(ViewModelLifetime viewLifetime, ViewModelLifetime viewModelLifetime)
-            {
-                ViewLifetime = viewLifetime;
                 ViewModelLifetime = viewModelLifetime;
+                ViewLifetime = viewLifetime;
             }
         }
         """;
@@ -804,14 +798,8 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
             x.AttributeClass?.ToDisplayString().Equals(ATTRIBUTE_DISPLAY_STRING) ?? false);
         if (data is null) return (null, null);
 
-        if (data.ConstructorArguments.Length == 1)
-        {
-            string? lifetime = GetLifetimeForId(data.ConstructorArguments[0].Value as int?);
-            return (lifetime, lifetime);
-        }
-
-        return (GetLifetimeForId(data.ConstructorArguments[0].Value as int?),
-            GetLifetimeForId(data.ConstructorArguments[1].Value as int?));
+        return (GetLifetimeForId(data.ConstructorArguments[1].Value as int?),
+            GetLifetimeForId(data.ConstructorArguments[0].Value as int?));
 
         static string? GetLifetimeForId(int? id)
         {

@@ -3,4 +3,5 @@
 
     <StyleInclude Source="BorderlessButtonStyles.axaml" />
     <StyleInclude Source="DataGridStyles.axaml" />
+    <StyleInclude Source="NavMenuStyles.axaml" />
 </Styles>

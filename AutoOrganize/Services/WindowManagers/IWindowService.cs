@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoOrganize.ViewModels;
 using Avalonia.Controls;
 
@@ -9,8 +10,12 @@ public interface IWindowService
     void Show<TWindowViewModel>(Window? ownerWindow = null, TWindowViewModel? defaultViewModel = null)
         where TWindowViewModel : ViewModelBase, IWindowViewModel;
 
+    void Show(Type viewModelType, Window? ownerWindow = null);
+
     void Show<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = null)
         where TWindowViewModel : ViewModelBase, IWindowViewModel;
+
+    void Show(Type viewModelType, object ownerViewModel);
 
     void Show<TWindowViewModel, TArgs>(TArgs args, Window? ownerWindow = null,
         TWindowViewModel? defaultViewModel = null)
@@ -35,7 +40,8 @@ public interface IWindowService
     Task<TResult> ShowDialog<TWindowViewModel, TResult>(Window ownerWindow, TWindowViewModel? defaultViewModel = null)
         where TWindowViewModel : ViewModelBase, IResultWindowViewModel<TResult>;
 
-    Task<TResult> ShowDialog<TWindowViewModel, TResult>(object ownerViewModel, TWindowViewModel? defaultViewModel = null)
+    Task<TResult> ShowDialog<TWindowViewModel, TResult>(object ownerViewModel,
+        TWindowViewModel? defaultViewModel = null)
         where TWindowViewModel : ViewModelBase, IResultWindowViewModel<TResult>;
 
     Task<TResult> ShowDialog<TWindowViewModel, TArgs, TResult>(TArgs args, Window ownerWindow,

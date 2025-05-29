@@ -4,6 +4,7 @@ using AutoOrganize.Services.WindowManagers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
+using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 
 namespace AutoOrganize.Services.TopLevelServices;
@@ -42,16 +43,37 @@ public sealed class NotificationServices : TopLevelServicesBase<INotificationMan
     {
         (var manager, bool isNew) = _notificationManagerCache.GetOrAdd(topLevel, top =>
         {
-            top.Closed += (_, _) => _notificationManagerCache.TryRemove(top, out _);
+            EventHandler? windowOnClosed = null;
+            windowOnClosed = (sender, ev) =>
+            {
+                _notificationManagerCache.TryRemove(top, out _);
+                if (sender is Window window)
+                    window.Closed -= windowOnClosed;
+            };
+            top.Closed += windowOnClosed;
+
             var manager = new WindowNotificationManager(top) { MaxItems = 5 };
-            manager.TemplateApplied += (_, _) =>
+            EventHandler<TemplateAppliedEventArgs>? windowTemplateApplied = null;
+            windowTemplateApplied = (sender, _) =>
+            {
                 _notificationManagerCache[top] = _notificationManagerCache[top] with { IsNew = false };
+                if (sender is Window window)
+                    window.TemplateApplied -= windowTemplateApplied;
+            };
+            manager.TemplateApplied += windowTemplateApplied;
             return new WindowsNotificationState(manager, true);
         });
 
         if (isNew)
         {
-            manager.TemplateApplied += (_, _) => action(manager);
+            EventHandler<TemplateAppliedEventArgs>? windowTemplateApplied = null;
+            windowTemplateApplied = (sender, _) =>
+            {
+                action(manager);
+                if (sender is Window window)
+                    window.TemplateApplied -= windowTemplateApplied;
+            };
+            manager.TemplateApplied += windowTemplateApplied;
             return;
         }
 
@@ -68,10 +90,25 @@ public sealed class NotificationServices : TopLevelServicesBase<INotificationMan
     {
         return _notificationManagerCache.GetOrAdd(topLevel, top =>
         {
-            top.Closed += (_, _) => _notificationManagerCache.TryRemove(top, out _);
+            EventHandler? windowOnClosed = null;
+            windowOnClosed = (sender, ev) =>
+            {
+                _notificationManagerCache.TryRemove(top, out _);
+                if (sender is Window window)
+                    window.Closed -= windowOnClosed;
+            };
+            top.Closed += windowOnClosed;
+
             var manager = new WindowNotificationManager(top) { MaxItems = 5 };
-            manager.TemplateApplied += (_, _) =>
+            EventHandler<TemplateAppliedEventArgs>? windowTemplateApplied = null;
+            windowTemplateApplied = (sender, _) =>
+            {
                 _notificationManagerCache[top] = _notificationManagerCache[top] with { IsNew = false };
+                if (sender is Window window)
+                    window.TemplateApplied -= windowTemplateApplied;
+            };
+            manager.TemplateApplied += windowTemplateApplied;
+
             return new WindowsNotificationState(manager, true);
         }).Manager;
     }

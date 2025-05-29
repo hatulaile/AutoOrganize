@@ -88,7 +88,7 @@
             </Border>
 
             <Panel Grid.Row="1" HorizontalAlignment="Stretch" Margin="0,8,0,0">
-                <Button HorizontalContentAlignment="Left" Command="{Binding BackCommand}">
+                <Button HorizontalAlignment="Left" Command="{Binding BackCommand}">
                     <TextBlock Text="上一页" LetterSpacing="2" />
                 </Button>
                 <Button HorizontalAlignment="Right" Command="{Binding NextCommand}">

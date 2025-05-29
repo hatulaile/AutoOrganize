@@ -13,7 +13,7 @@ public partial class ThemoviedbMetadataProvider : ITvMetadataProvider
     public async Task<IEnumerable<SeriesMetadata>> SearchSeriesAsync(SearchQuery query, string? language = null,
         CancellationToken token = default)
     {
-        var searchContainer = await _client.SearchTvShowAsync(query.Name, firstAirDateYear: query.Year ?? 0,
+        var searchContainer = await Client.SearchTvShowAsync(query.Name, firstAirDateYear: query.Year ?? 0,
             language: language, cancellationToken: token).ConfigureAwait(false);
         if (searchContainer?.Results is null)
             return [];
@@ -26,7 +26,7 @@ public partial class ThemoviedbMetadataProvider : ITvMetadataProvider
     public async Task<SeriesMetadata?> SearchSeriesSingleAsync(SearchQuery query, string? language = null,
         CancellationToken token = default)
     {
-        var searchContainer = await _client.SearchTvShowAsync(query.Name, firstAirDateYear: query.Year ?? 0,
+        var searchContainer = await Client.SearchTvShowAsync(query.Name, firstAirDateYear: query.Year ?? 0,
             language: language, cancellationToken: token).ConfigureAwait(false);
         if (searchContainer?.Results is not { Count: > 0 })
             return null;
@@ -45,7 +45,7 @@ public partial class ThemoviedbMetadataProvider : ITvMetadataProvider
     {
         await IfNotHasConfigGet(token).ConfigureAwait(false);
         TvSeason? season =
-            await _client.GetTvSeasonAsync(int.Parse(id), seasonNumber, language: language, cancellationToken: token).ConfigureAwait(false);
+            await Client.GetTvSeasonAsync(int.Parse(id), seasonNumber, language: language, cancellationToken: token).ConfigureAwait(false);
         if (season is null)
             return null;
 
@@ -64,7 +64,7 @@ public partial class ThemoviedbMetadataProvider : ITvMetadataProvider
     {
         await IfNotHasConfigGet(token).ConfigureAwait(false);
         TvEpisode? episode =
-            await _client.GetTvEpisodeAsync(int.Parse(id), seasonNumber, episodeNumber, language: language,
+            await Client.GetTvEpisodeAsync(int.Parse(id), seasonNumber, episodeNumber, language: language,
                 cancellationToken: token).ConfigureAwait(false);
         if (episode is null)
             return null;
@@ -84,11 +84,11 @@ public partial class ThemoviedbMetadataProvider : ITvMetadataProvider
         CancellationToken token = default)
     {
         await IfNotHasConfigGet(token).ConfigureAwait(false);
-        var tv = await _client.GetTvShowAsync(id, language: language,
+        var tv = await Client.GetTvShowAsync(id, language: language,
             cancellationToken: token).ConfigureAwait(false);
         if (tv is null) return null;
 
-        var images = await _client.GetTvShowImagesAsync(tv.Id, cancellationToken: token).ConfigureAwait(false);
+        var images = await Client.GetTvShowImagesAsync(tv.Id, cancellationToken: token).ConfigureAwait(false);
 
         return new SeriesMetadata
         {

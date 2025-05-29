@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:AutoOrganize.ViewModels.AboutViewModels"
         xmlns:u="using:AutoOrganize.Utils"
+        xmlns:utils="clr-namespace:AutoOrganize.Library.Utils;assembly=AutoOrganize.Library"
         mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="260"
         Width="500" Height="270" CanResize="False" Title="关于 AutoOrganize"
         x:Class="AutoOrganize.Views.AboutViews.AboutWindow"
@@ -36,7 +37,7 @@
                             <Run Text="本项目托管于" />
                             <InlineUIContainer BaselineAlignment="TextBottom">
                                 <Button Content="Github" Classes="borderless link" Command="{Binding OpenUrlCommand}"
-                                        CommandParameter="{x:Static u:AppConstants.APP_HOME}" ClickMode="Press" />
+                                        CommandParameter="{x:Static utils:AppConstants.APP_HOME}" ClickMode="Press" />
                             </InlineUIContainer>
                         </Span>
                         <LineBreak />
@@ -63,9 +64,9 @@
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12">
                             <Button Grid.Column="0" Height="68" Classes="borderless" Cursor="Hand"
                                     Command="{Binding OpenUrlCommand}"
-                                    CommandParameter="{x:Static u:TmdbConstants.TMDB_HOME}" ClickMode="Press">
+                                    CommandParameter="{x:Static utils:TmdbConstants.TMDB_HOME}" ClickMode="Press">
                                 <Button.Content>
-                                    <Svg Stretch="UniformToFill" Path="{x:Static u:TmdbConstants.TMDB_ICO_PATH}" />
+                                    <Svg Stretch="UniformToFill" Path="{x:Static utils:TmdbConstants.TMDB_ICO_PATH}" />
                                 </Button.Content>
                             </Button>
 

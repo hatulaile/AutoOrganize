@@ -1,0 +1,59 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:u="https://irihi.tech/ursa"
+        xmlns:vm="using:AutoOrganize.ViewModels.SettingsViewModels"
+        xmlns:converters="using:AutoOrganize.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:DataType="vm:SettingsWindowViewModel"
+        x:Class="AutoOrganize.Views.SettingsViews.SettingsWindow"
+        xmlns:m="using:AutoOrganize.Models"
+        Width="800" Height="550" MinWidth="700" MinHeight="500" Title="设置"
+        WindowStartupLocation="CenterOwner"
+        Name="Settings">
+
+    <Border Padding="12">
+        <Grid RowDefinitions="*,Auto">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+                <Border
+                    Grid.Column="0"
+                    Width="160"
+                    BorderBrush="#2D2D2D"
+                    BorderThickness="1"
+                    Margin="0,0,8,0"
+                    Padding="8">
+
+                    <u:NavMenu
+                        ItemsSource="{Binding Pages}"
+                        SelectedItem="{Binding SelectedItem}"
+                        HeaderBinding="{Binding Title}"
+                        IconBinding="{Binding Icon}"
+                        SubMenuBinding="{Binding Children}"
+                        Classes="nav">
+                        <u:NavMenu.Styles>
+                            <Style Selector="u|NavMenu.nav">
+                                <Style Selector="^ u|NavMenuItem" x:DataType="m:IPageModel">
+                                    <Setter Property="Command" Value="{Binding #Settings.DataContext.NavigateCommand}"/>
+                                    <Setter Property="CommandParameter" Value="{Binding .}"/>
+                                </Style>
+                            </Style>
+                        </u:NavMenu.Styles>
+                    </u:NavMenu>
+                </Border>
+                <Border Grid.Column="1" BorderBrush="#2D2D2D" BorderThickness="1">
+                    <ScrollViewer>
+                        <ContentControl Content="{Binding RoutingState.CurrentPageViewModel}" />
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="1" Margin="0,12,0,0">
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="12">
+                    <Button Content="保存" Command="{Binding ApplyConfigCommand}" />
+                    <Button Content="取消" Command="{Binding CancelConfigCommand}" Click="Button_OnClick" IsCancel="True" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -5,6 +5,7 @@ namespace AutoOrganize.Library.Services.Config;
 public interface IFileConfigManager
 {
     TConfig? GetConfig<TConfig>() where TConfig : IConfig;
+
     TConfig GetRequiredConfig<TConfig>() where TConfig : IConfig;
 
     TConfig GetConfigOrLoad<TConfig>() where TConfig : IConfig, new();
@@ -15,13 +16,14 @@ public interface IFileConfigManager
 
     void RemoveConfig<TConfig>() where TConfig : IConfig;
 
-    void SaveConfig(FileConfigManager.ConfigInfo info);
+    void SaveConfig(IConfig config);
 
-    TConfig LoadConfigOrNew<TConfig>() where TConfig : IConfig, new();
+    void SaveConfig(FileConfigManager.ConfigInfo info);
 
     void SaveAllConfigs();
 
     Task<TConfig?> GetConfigAsync<TConfig>(CancellationToken token = default) where TConfig : IConfig;
+
     Task<TConfig> GetRequiredConfigAsync<TConfig>(CancellationToken token = default) where TConfig : IConfig;
 
     Task<TConfig> GetConfigOrLoadAsync<TConfig>(CancellationToken token = default)
@@ -31,12 +33,12 @@ public interface IFileConfigManager
         where TConfig : IConfig;
 
     Task SetConfigAsync<TConfig>(TConfig config, CancellationToken token = default) where TConfig : IConfig;
+
     Task RemoveConfigAsync<TConfig>(CancellationToken token = default) where TConfig : IConfig;
 
     Task SaveConfigAsync(FileConfigManager.ConfigInfo info, CancellationToken token = default);
 
-    Task<TConfig> LoadConfigOrNewAsync<TConfig>(CancellationToken token = default)
-        where TConfig : IConfig, new();
+    Task SaveConfigAsync(IConfig config, CancellationToken token = default);
 
     Task SaveAllConfigsAsync(CancellationToken token = default);
 }

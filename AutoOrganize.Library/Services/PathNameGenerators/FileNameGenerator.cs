@@ -1,24 +1,23 @@
 ﻿using AutoOrganize.Library.Exceptions;
 using AutoOrganize.Library.Models.Metadata.Movie;
 using AutoOrganize.Library.Models.Metadata.Tv;
-using AutoOrganize.Library.Services.PathNameGenerators.Options;
 using AutoOrganize.Library.Utils;
 using Microsoft.Extensions.Logging;
 
 namespace AutoOrganize.Library.Services.PathNameGenerators;
 
-public sealed class PathNameGenerator : IPathNameGenerator
+public sealed class FileNameGenerator : IFileNameGenerator
 {
-    private readonly ILogger<PathNameGenerator> _logger;
+    private readonly ILogger<FileNameGenerator> _logger;
     public const string TV_SERIES_PATTERN = "{sn}.{year}";
     public const string TV_SEASON_PATTERN = "Season {s00}";
     public const string TV_EPISODE_PATTERN = "{sn}.S{s00}E{e00} - {en}.{ext}";
     public const string MOVIE_PATTERN = "{name}.{year}.{ext}";
     public const string MOVIE_FOLDER_PATTERN = "{name}.{year}";
 
-    public string GetTvSeriesFileName(SeriesMetadata seriesMetadata, in TvFileNameGenerationOptions option = default)
+    public string GetTvSeriesFileName(SeriesMetadata seriesMetadata, string? pattern = null)
     {
-        string pattern = option.SeriesMetadataFolderPattern ?? TV_SERIES_PATTERN;
+        pattern ??= TV_SERIES_PATTERN;
         _logger.LogDebug("生成剧集文件夹名 模板: {Pattern}, 剧集名: {Name}, 原始名: {OriginalName}, 年份: {Year}",
             pattern, seriesMetadata.Name, seriesMetadata.OriginalName, seriesMetadata.AirDate?.Year);
 
@@ -33,9 +32,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
         return result;
     }
 
-    public string GetTvSeasonFileName(SeasonMetadata seasonMetadata, in TvFileNameGenerationOptions option = default)
+    public string GetTvSeasonFileName(SeasonMetadata seasonMetadata, string? pattern = null)
     {
-        string pattern = option.SeasonMetadataFolderPattern ?? TV_SEASON_PATTERN;
+        pattern ??= TV_SEASON_PATTERN;
         int seasonNumber = seasonMetadata.SeasonNumber
                            ?? throw new MetadataFieldNullException(nameof(SeasonMetadata),
                                nameof(seasonMetadata.SeasonNumber));
@@ -60,7 +59,7 @@ public sealed class PathNameGenerator : IPathNameGenerator
                     seasonNumber.ToString().PadLeft(endIndex - startIndex - 2, '0'));
             }
 
-            startIndex = newFileName.IndexOf('{');
+            startIndex = newFileName.IndexOf('{', startIndex + 1);
         }
 
         string result = PathUtils.GetValidFileName(newFileName);
@@ -68,10 +67,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
         return result;
     }
 
-    public string GetTvEpisodeFileName(string path, EpisodeMetadata episodeMetadata,
-        in TvFileNameGenerationOptions option = default)
+    public string GetTvEpisodeFileName(string path, EpisodeMetadata episodeMetadata, string? pattern = null)
     {
-        string pattern = option.EpisodeNamePattern ?? TV_EPISODE_PATTERN;
+        pattern ??= TV_EPISODE_PATTERN;
 
         int seasonNumber = episodeMetadata.SeasonNumber
                            ?? throw new MetadataFieldNullException(nameof(EpisodeMetadata),
@@ -110,7 +108,7 @@ public sealed class PathNameGenerator : IPathNameGenerator
                     episodeNumber.ToString().PadLeft(endIndex - startIndex - 2, '0'));
             }
 
-            startIndex = newFileName.IndexOf('{');
+            startIndex = newFileName.IndexOf('{', startIndex + 1);
         }
 
         string result = PathUtils.GetValidFileName(newFileName);
@@ -119,10 +117,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
         return result;
     }
 
-    public string GetMovieFileName(string path, MovieMetadata movieMetadata,
-        in MovieFileNameGenerationOptions option = default)
+    public string GetMovieFileName(string path, MovieMetadata movieMetadata, string? pattern = null)
     {
-        string pattern = option.MoviePattern ?? MOVIE_PATTERN;
+        pattern ??= MOVIE_PATTERN;
         _logger.LogDebug("生成电影文件名 模板: {Pattern}, 电影:{Name}, 年份={Year}",
             pattern, movieMetadata.Name, movieMetadata.AirDate?.Year);
 
@@ -138,10 +135,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
         return result;
     }
 
-    public string GetMovieFolderName(MovieMetadata movieMetadata,
-        in MovieFileNameGenerationOptions option = default)
+    public string GetMovieFolderName(MovieMetadata movieMetadata, string? pattern = null)
     {
-        string pattern = option.MoviePattern ?? MOVIE_FOLDER_PATTERN;
+        pattern ??= MOVIE_FOLDER_PATTERN;
         _logger.LogDebug("生成电影文件名 模板: {Pattern}, 电影:{Name}, 年份={Year}",
             pattern, movieMetadata.Name, movieMetadata.AirDate?.Year);
 
@@ -164,7 +160,7 @@ public sealed class PathNameGenerator : IPathNameGenerator
         return PathUtils.GetValidFileName(name, ' ');
     }
 
-    public PathNameGenerator(ILogger<PathNameGenerator> logger)
+    public FileNameGenerator(ILogger<FileNameGenerator> logger)
     {
         _logger = logger;
     }

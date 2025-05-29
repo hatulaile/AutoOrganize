@@ -11,7 +11,7 @@ using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.AboutViewModels;
 
-[ViewModelRegistration(ViewModelLifetime.Singleton)]
+[ViewModelRegistration]
 public partial class AboutWindowViewModel : ViewModelBase, IWindowViewModel
 {
     private readonly ILauncherServices _launcherServices;

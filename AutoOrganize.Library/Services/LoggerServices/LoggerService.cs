@@ -1,7 +1,6 @@
 using AutoOrganize.Library.Services.Config;
 using Serilog;
 using Serilog.Core;
-using Serilog.Events;
 
 namespace AutoOrganize.Library.Services.LoggerServices;
 
@@ -24,13 +23,6 @@ public sealed class LoggerService : ILoggerService
     public LoggingLevelSwitch FileLevelSwitch { get; } = new();
 
     public LoggingLevelSwitch ViewLevelSwitch { get; } = new();
-
-    private void SetLogLevelInternal(LogEventLevel logLevel)
-    {
-        Config.LogLevel = logLevel;
-        LevelSwitch.MinimumLevel = logLevel;
-        ILogger?.ForContext<LoggerService>().Information("Log level set to {LogLevel}", logLevel);
-    }
 
     public LoggerService(IFileConfigManager fileConfigManager)
     {

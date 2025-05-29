@@ -5,6 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="using:AutoOrganize.Views.Controls"
         xmlns:u="https://irihi.tech/ursa"
+        xmlns:abvm="using:AutoOrganize.ViewModels.AboutViewModels"
+        xmlns:sevm="using:AutoOrganize.ViewModels.SettingsViewModels"
+        xmlns:m="using:AutoOrganize.Models"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         Width="1280" Height="720"
         x:Class="AutoOrganize.Views.MainWindow"
@@ -15,7 +18,8 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
-            <MenuItem Header="关于" Command="{Binding ShowAboutCommand}" />
+            <MenuItem Header="设置" Command="{Binding ShowWindowCommand}" CommandParameter="{x:Type sevm:SettingsWindowViewModel}"/>
+            <MenuItem Header="关于" Command="{Binding ShowWindowCommand}" CommandParameter="{x:Type abvm:AboutWindowViewModel}"/>
         </Menu>
 
         <Grid ColumnDefinitions="60,*">
@@ -24,7 +28,19 @@
                     ItemsSource="{Binding NavigationItems}"
                     SelectedItem="{Binding SelectedPage}"
                     HeaderBinding="{Binding Title}"
-                    IconBinding="{Binding Icon}" />
+                    IconBinding="{Binding Icon}"
+                    SubMenuBinding="{Binding Children}"
+                    Classes="nav">
+
+                    <u:NavMenu.Styles>
+                        <Style Selector="u|NavMenu">
+                            <Style Selector="^ u|NavMenuItem" x:DataType="m:IPageModel">
+                                <Setter Property="Command" Value="{Binding #Main.DataContext.NavigateToPageCommand}"/>
+                                <Setter Property="CommandParameter" Value="{Binding .}"/>
+                            </Style>
+                        </Style>
+                    </u:NavMenu.Styles>
+                </u:NavMenu>
             </Border>
             <controls:RoutedViewHost Grid.Column="1" Router="{Binding RoutingState}" />
         </Grid>

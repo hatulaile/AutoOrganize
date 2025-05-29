@@ -1,14 +1,13 @@
 ﻿using AutoOrganize.Library.Services.PathNameGenerators;
-using AutoOrganize.Library.Services.PathNameGenerators.Options;
 using AutoOrganize.Test.Utils;
 
 namespace AutoOrganize.Test.Library.Services.FileNameGenerators;
 
-public class PathNameGeneratorTest
+public class FileNameGeneratorTest
 {
-    private readonly PathNameGenerator _generator;
+    private readonly FileNameGenerator _generator;
 
-    public PathNameGeneratorTest()
+    public FileNameGeneratorTest()
     {
     }
 
@@ -17,10 +16,7 @@ public class PathNameGeneratorTest
     {
         var metadata = MetadataUtils.CreateSeriesMetadataExample();
 
-        string name = _generator.GetTvSeriesFileName(metadata, new TvFileNameGenerationOptions
-        {
-            SeriesMetadataFolderPattern = "{sn}.{son}.{year}"
-        });
+        string name = _generator.GetTvSeriesFileName(metadata, "{sn}.{son}.{year}");
 
         Assert.Equal("轻音少女.けいおん!.2009", name);
     }
@@ -40,10 +36,7 @@ public class PathNameGeneratorTest
     {
         var metadata = MetadataUtils.CreateSeasonMetadataExample();
 
-        string name = _generator.GetTvSeasonFileName(metadata, new TvFileNameGenerationOptions
-        {
-            SeasonMetadataFolderPattern = "{sn}.{son}.{snn}.{year}.{s0}"
-        });
+        string name = _generator.GetTvSeasonFileName(metadata, "{sn}.{son}.{snn}.{year}.{s0}");
 
         Assert.Equal("轻音少女.けいおん!.轻音少女！.2009.1", name);
     }
@@ -67,10 +60,7 @@ public class PathNameGeneratorTest
         string expected)
     {
         var metadata = MetadataUtils.CreateSeasonMetadataExample();
-        string name = _generator.GetTvSeasonFileName(metadata, new TvFileNameGenerationOptions
-        {
-            SeasonMetadataFolderPattern = input
-        });
+        string name = _generator.GetTvSeasonFileName(metadata, input);
         Assert.Equal(expected, name);
     }
 
@@ -79,10 +69,8 @@ public class PathNameGeneratorTest
     {
         var metadata = MetadataUtils.CreateEpisodeMetadataExample();
 
-        string name = _generator.GetTvEpisodeFileName("1.mkv", metadata, new TvFileNameGenerationOptions
-        {
-            EpisodeNamePattern = "{sn}.{son}.{snn}.{en}.{s0}.{e0}.{year}.{fn}.{ext}"
-        });
+        string name =
+            _generator.GetTvEpisodeFileName("1.mkv", metadata, "{sn}.{son}.{snn}.{en}.{s0}.{e0}.{year}.{fn}.{ext}");
 
         Assert.Equal("轻音少女.けいおん!.轻音少女！.废部！.1.1.2009.1.mkv", name);
     }
@@ -106,10 +94,7 @@ public class PathNameGeneratorTest
         string expected)
     {
         var metadata = MetadataUtils.CreateEpisodeMetadataExample();
-        string name = _generator.GetTvEpisodeFileName(string.Empty, metadata, new TvFileNameGenerationOptions
-        {
-            EpisodeNamePattern = input
-        });
+        string name = _generator.GetTvEpisodeFileName(string.Empty, metadata, input);
         Assert.Equal(expected, name);
     }
 
@@ -118,10 +103,7 @@ public class PathNameGeneratorTest
     {
         var metadata = MetadataUtils.CreateMovieMetadataExample();
 
-        string name = _generator.GetMovieFolderName(metadata, new MovieFileNameGenerationOptions
-        {
-            MovieFolderPattern = "{name}.{oname}.{year}"
-        });
+        string name = _generator.GetMovieFolderName(metadata, "{name}.{oname}.{year}");
 
         Assert.Equal("悠哉日常大王剧场版：假期活动.劇場版 のんのんびより ばけーしょん", name);
     }
@@ -141,10 +123,7 @@ public class PathNameGeneratorTest
     {
         var metadata = MetadataUtils.CreateMovieMetadataExample();
 
-        string name = _generator.GetMovieFileName("1.mkv", metadata, new MovieFileNameGenerationOptions
-        {
-            MoviePattern = "{name}.{oname}.{year}.{fn}.{ext}"
-        });
+        string name = _generator.GetMovieFileName("1.mkv", metadata, "{name}.{oname}.{year}.{fn}.{ext}");
 
         Assert.Equal("悠哉日常大王剧场版：假期活动.劇場版 のんのんびより ばけーしょん.2018.1.mkv", name);
     }

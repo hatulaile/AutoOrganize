@@ -1,0 +1,27 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:u="https://irihi.tech/ursa"
+        xmlns:m="using:AutoOrganize.Models"
+        xmlns:converters="using:AutoOrganize.Converters">
+
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+    <Style Selector="u|NavMenu.nav">
+        <Style Selector="^ u|NavMenuItem" x:DataType="m:IPageModel">
+            <Setter Property="IsSeparator" Value="{Binding IsSeparator}" />
+            <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+                <Setter Property="Padding" Value="8" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="Grid.Column"
+                        Value="{Binding $parent[u:NavMenuItem].DataContext,
+                                                Converter={x:Static converters:NavMenuConverters.HeaderPageModelToGridColumnConverter}}" />
+                <Setter Property="Grid.ColumnSpan"
+                        Value="{Binding $parent[u:NavMenuItem].DataContext,
+                                                Converter={x:Static converters:NavMenuConverters.HeaderPageModelToGridColumnSpanConverter}}" />
+            </Style>
+        </Style>
+    </Style>
+</Styles>

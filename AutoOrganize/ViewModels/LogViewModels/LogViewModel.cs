@@ -13,7 +13,7 @@ using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.LogViewModels;
 
-[ViewModelRegistration(ViewModelLifetime.Singleton)]
+[ViewModelRegistration(ViewModelLifetime.Singleton, ViewModelLifetime.Singleton)]
 public sealed partial class LogViewModel : ViewModelBase, INavigationViewModel
 {
     private readonly IClipboardServices _clipboardServices;

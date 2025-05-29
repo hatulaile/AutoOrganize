@@ -16,7 +16,7 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton)]
-public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationViewModel<IEnumerable<string>?>
+public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationViewModel<SelectFilesOptions>
 {
     private readonly INavigationService _navigationService;
     private readonly IStorageServices _storageProvider;
@@ -134,16 +134,18 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     public bool CanNext() => Source.Count > 0;
 
     [SuppressMessage("ReSharper", "PossibleMultipleEnumeration", Justification = "只有在 DEBUG 下才会调用, 所以性能损失抑制")]
-    public void OnNavigatingTo(IEnumerable<string>? strings)
+    public void OnNavigatingTo(SelectFilesOptions args)
     {
-        if (strings is null) return;
-        if (_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("导航到文件选择页, 携带 {Count} 个文件路径", strings.Count());
-        }
+        if (args.CanClearOld)
+            Source.Clear();
 
-        Source.Clear();
-        Source.AddRange(strings);
+        if (args.PickedItems is not null)
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("导航到文件选择页, 携带 {Count} 个文件路径", args.PickedItems.Count());
+
+            Source.AddRange(args.PickedItems);
+        }
     }
 
     public SelectFilesViewModel(INavigationService navigationService, IStorageServices storageProvider,
