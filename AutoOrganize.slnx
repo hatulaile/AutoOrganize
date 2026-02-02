@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AutoOrganize.Library/AutoOrganize.Library.csproj" />
+  <Project Path="AutoOrganize/AutoOrganize.csproj" />
+</Solution>
