@@ -7,24 +7,61 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
-        <Folder Include="Models\"/>
-        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.11"/>
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.11"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11"/>
-        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11">
-            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.7.0" />
+        <PackageReference Include="Avalonia" Version="11.3.13" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.13" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.13" />
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+        <PackageReference Include="IconPacks.Avalonia.PhosphorIcons" Version="1.3.1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+        <PackageReference Include="StaticViewLocator" Version="0.4.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
+        <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.5" />
+        <PackageReference Include="TreeDataGrid.Avalonia" Version="11.3.1" />
+        <PackageReference Include="Xaml.Behaviors.Avalonia" Version="11.3.9.5" />
+        <PackageReference Include="HotAvalonia" Version="3.1.0" PrivateAssets="All" Publish="True" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AutoOrganize.Library\AutoOrganize.Library.csproj" />
+        <ProjectReference Include="..\AutoOrganize.Library\AutoOrganize.Library.csproj" />
+        <ProjectReference Include="..\ViewModelRegistrationGenerator\ViewModelRegistrationGenerator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DataTemplates\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\FileMetadataViews\SuccessMetadataView.axaml.cs">
+        <DependentUpon>FileMetadataView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Controls\Loading.axaml.cs">
+        <DependentUpon>Loading.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\Controls\MetadataFields.axaml.cs">
+        <DependentUpon>MetadataFields.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Controls\Loading.axaml" />
+      <AdditionalFiles Include="Views\Controls\MetadataFields.axaml" />
     </ItemGroup>
 </Project>

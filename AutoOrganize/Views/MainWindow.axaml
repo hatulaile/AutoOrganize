@@ -3,18 +3,41 @@
         xmlns:vm="using:AutoOrganize.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:controls="using:AutoOrganize.Views.Controls"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
+        Width="1280" Height="720"
         x:Class="AutoOrganize.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        x:Name="Main"
         Icon="/Assets/avalonia-logo.ico"
         Title="AutoOrganize">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"/>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+            <!-- todo: -->
+            <TextBlock>123123</TextBlock>
+        </StackPanel>
+        <Grid ColumnDefinitions="60,*">
+            <Border Grid.Column="0" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                <StackPanel HorizontalAlignment="Stretch">
+                    <ListBox ItemsSource="{Binding NavigationItems}"
+                             SelectedItem="{Binding SelectedPage}"
+                             SelectionMode="Single">
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- todo: icon -->
+                                    <!-- <PathIcon Data="{Binding Icon}"/> -->
+                                    <TextBlock Text="{Binding Title}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+            <controls:RoutedViewHost Grid.Column="1" Router="{Binding RoutingState}" />
+        </Grid>
+    </DockPanel>
 </Window>

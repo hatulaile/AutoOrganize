@@ -1,15 +1,19 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vl="using:AutoOrganize.ViewLocators"
              x:Class="AutoOrganize.App"
-             xmlns:local="using:AutoOrganize"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <vl:ViewLocator />
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://IconPacks.Avalonia.PhosphorIcons/PhosphorIcons.axaml" />
+        <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
+        <StyleInclude Source="Views/Controls/ControlsStyles.axaml"/>
+        <StyleInclude Source="Views/Stytes/Stytes.axaml"/>
     </Application.Styles>
 </Application>

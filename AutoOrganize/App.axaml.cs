@@ -1,16 +1,23 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Avalonia.Markup.Xaml;
+using AutoOrganize.Extensions;
 using AutoOrganize.ViewModels;
 using AutoOrganize.Views;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
+using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoOrganize;
 
 public partial class App : Application
 {
+    [AllowNull] public IServiceProvider ServiceProvider;
+
+    public new static App Current => (App)Application.Current!;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -20,13 +27,16 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            var services = new ServiceCollection();
+            services.AddAutoOrganize();
+            services.AddSingleton<MainWindow>()
+                .AddSingleton<MainWindowViewModel>();
+            ServiceProvider = services.BuildServiceProvider();
+
+            desktop.MainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            desktop.MainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            desktop.MainWindow.Show();
         }
 
         base.OnFrameworkInitializationCompleted();

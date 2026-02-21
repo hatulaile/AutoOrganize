@@ -1,0 +1,59 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels"
+             xmlns:converter="using:AutoOrganize.Converters"
+             xmlns:controls="using:AutoOrganize.Views.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:FileMetadataProgressViewModel"
+             x:Class="AutoOrganize.Views.FileMetadataProgressView">
+
+    <UserControl.Resources>
+        <converter:BoolToProgressTextFormatConverter x:Key="BoolToProgressTextFormatConverter" />
+    </UserControl.Resources>
+
+    <Panel>
+        <Grid RowDefinitions="*,Auto,*">
+            <controls:Loading Grid.Row="1" Classes="big" VerticalAlignment="Bottom">
+                <controls:Loading.Styles>
+                    <Style Selector="controls|Loading.big">
+                        <Style Selector="^ /template/ Arc#PART_Arc">
+                            <Setter Property="Height" Value="64" />
+                            <Setter Property="Width" Value="64" />
+                            <Setter Property="StrokeThickness" Value="8"></Setter>
+                        </Style>
+                    </Style>
+                </controls:Loading.Styles>
+            </controls:Loading>
+
+            <StackPanel Grid.Row="2" VerticalAlignment="Bottom" Margin="60,0,60,60">
+                <Panel>
+                    <TextBlock HorizontalAlignment="Center">
+                        <Run Foreground="LawnGreen" Text="{Binding SuccessCount}" /> /
+                        <Run Foreground="PaleVioletRed" Text="{Binding FailedCound}" />
+                    </TextBlock>
+                    <TextBlock HorizontalAlignment="Right">
+                        <Run Foreground="Cyan" Text="{Binding CurrentProgress}" /> /
+                        <Run Foreground="Gray" Text="{x:Static vm:FileMetadataProgressViewModel.ProgressMax}" />
+                    </TextBlock>
+                </Panel>
+                <ProgressBar Height="32"
+                             ShowProgressText="True"
+                             IsIndeterminate="{Binding !IsFileEnumerationCompleted}"
+                             Minimum="0"
+                             Value="{Binding TotalProgress}"
+                             Maximum="{Binding TotalCount}"
+                             ProgressTextFormat="{Binding IsFileEnumerationCompleted, Converter={StaticResource BoolToProgressTextFormatConverter}}" />
+            </StackPanel>
+        </Grid>
+
+        <Button HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="8,0,0,8"
+                Content="上一步"
+                Command="{Binding GoBackCommand}" />
+    </Panel>
+
+
+</UserControl>
