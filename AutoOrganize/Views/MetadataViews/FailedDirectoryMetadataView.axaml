@@ -1,0 +1,57 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels.MetadataViewModels"
+             xmlns:controls="using:AutoOrganize.Views.Controls"
+             xmlns:converters="using:AutoOrganize.Converters"
+             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:FailedDirectoryMetadataViewModel"
+             x:Class="AutoOrganize.Views.MetadataViews.FailedDirectoryMetadataView">
+
+    <Border Padding="12">
+        <StackPanel Spacing="12">
+            <Border>
+                <StackPanel>
+                    <TextBlock
+                        Text="{Binding DirectoryInfo.Name}"
+                        FontSize="18"
+                        TextWrapping="WrapWithOverflow" />
+                </StackPanel>
+            </Border>
+
+            <Border>
+                <WrapPanel Orientation="Horizontal" LineSpacing="8" ItemSpacing="16">
+                    <controls:MetadataFields Title="创建时间" Value="{Binding DirectoryInfo.CreationTime, Mode=OneWay}" />
+                    <controls:MetadataFields Title="读取时间"
+                                             Value="{Binding DirectoryInfo.LastAccessTime, Mode=OneWay}" />
+                    <controls:MetadataFields Title="写入时间" Value="{Binding DirectoryInfo.LastWriteTime, Mode=OneWay}" />
+                </WrapPanel>
+            </Border>
+
+            <Border>
+                <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
+                    <Border
+                        BorderThickness="2"
+                        BorderBrush="{DynamicResource ButtonBackground}"
+                        Padding="6,2"
+                        Margin="0,0,4,0">
+                        <SelectableTextBlock
+                            Name="PathTextBlock"
+                            Text="{Binding DirectoryInfo.FullName}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Border>
+                    <Button Command="{Binding CopyStringCommand}"
+                            CommandParameter="{Binding DirectoryInfo.FullName}">
+                        <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                    </Button>
+                    <Button Command="{Binding OpenContainingFolderCommand}">
+                        <iconPacks:PackIconPhosphorIcons Kind="FolderOpen" />
+                    </Button>
+                </WrapPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

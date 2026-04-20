@@ -5,12 +5,12 @@ using AutoOrganize.Exceptions.NavigationExceptions;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Models;
-using AutoOrganize.Models.FileMetadataModels;
-using AutoOrganize.Models.FileMetadataModels.FailedMetadata;
-using AutoOrganize.Models.FileMetadataModels.SuccessMetadata;
+using AutoOrganize.Models.MetadataViewModels;
+using AutoOrganize.Models.MetadataViewModels.FileSystem;
+using AutoOrganize.Models.MetadataViewModels.Metadata;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Utils;
-using AutoOrganize.ViewModels.FileMetadataViewModels;
+using AutoOrganize.ViewModels.MetadataViewModels;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -29,9 +29,9 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     private readonly INavigationService _navigationService;
     public MetadataEditOption? NavigationParameter { get; set; }
 
-    private FileMetadataRoot _fileMetadataRoot = new();
+    private MetadataRoot _metadataRoot = new();
 
-    private FailedFileMetadataRoot _failedFileMetadataSystemRoot = new();
+    private FailedMetadataRoot _failedMetadataSystemRoot = new();
 
     [ObservableProperty] private FileMetadataBase? _selectedMetadata;
 
@@ -45,7 +45,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     public void Next()
     {
         _navigationService.NavigateTo<FileTransferProcessedViewModel, FileTransferProcessedOption>(HostScreens.Home,
-            new FileTransferProcessedOption(GetAllFileMetadataEntries(_fileMetadataRoot)));
+            new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataRoot)));
     }
 
     [RelayCommand]
@@ -56,7 +56,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     public bool CanNext()
     {
-        return _source.Any(x => x is not FailedFileMetadataRoot);
+        return _source.Any(x => x is not FailedMetadataRoot);
     }
 
     partial void OnSelectedMetadataChanged(FileMetadataBase? value)
@@ -64,23 +64,23 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         switch (value)
         {
             case IFileMetadata<MetadataBase> metadata:
-                _navigationService.NavigateTo<SuccessMetadataViewModel, MetadataBase>
+                _navigationService.NavigateTo<MetadataViewModel, MetadataBase>
                     (HostScreens.MetadataEdit, metadata.Metadata);
                 break;
-            case FileMetadata fileMetadata:
-                _navigationService.NavigateTo<FileMetadataViewModel, FileMetadata>
+            case FileModel fileMetadata:
+                _navigationService.NavigateTo<FileMetadataViewModel, FileModel>
                     (HostScreens.MetadataEdit, fileMetadata);
                 break;
-            case FailedDirectoryMetadata failedDirectoryMetadata:
-                _navigationService.NavigateTo<FailedDirectoryMetadataViewModel, FailedDirectoryMetadata>(
+            case FailedDirectoryModel failedDirectoryMetadata:
+                _navigationService.NavigateTo<FailedDirectoryMetadataViewModel, FailedDirectoryModel>(
                     HostScreens.MetadataEdit, failedDirectoryMetadata);
                 break;
-            case FailedFileMetadataRoot failedFileMetadataRoot:
-                _navigationService.NavigateTo<FailedFileMetadataRootViewModel, FailedFileMetadataRoot>(
+            case FailedMetadataRoot failedFileMetadataRoot:
+                _navigationService.NavigateTo<FailedFileMetadataRootViewModel, FailedMetadataRoot>(
                     HostScreens.MetadataEdit, failedFileMetadataRoot);
                 break;
-            case FailedFileMetadata failedMetadata:
-                _navigationService.NavigateTo<FailedMetadataViewModel, FailedFileMetadata>
+            case FailedFileModel failedMetadata:
+                _navigationService.NavigateTo<FailedMetadataViewModel, FailedFileModel>
                     (HostScreens.MetadataEdit, failedMetadata);
                 break;
             default:
@@ -100,8 +100,8 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     {
         if (options.IsClear)
         {
-            _fileMetadataRoot = new FileMetadataRoot();
-            _failedFileMetadataSystemRoot = new FailedFileMetadataRoot();
+            _metadataRoot = new MetadataRoot();
+            _failedMetadataSystemRoot = new FailedMetadataRoot();
             _source.Clear();
         }
 
@@ -114,23 +114,24 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
             {
                 try
                 {
-                    _fileMetadataRoot.AddFile(result);
+                    _metadataRoot.AddFile(result.Metadata, result.FilePath);
                 }
                 catch (Exception e)
                 {
-                    _failedFileMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, e);
+                    _failedMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, e);
                 }
             }
             else
             {
-                _failedFileMetadataSystemRoot.AddOrGetFailedMetadata(result, options.FileProcessOptions.Value);
+                _failedMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, result.Error,
+                    options.FileProcessOptions.Value);
             }
         }
 
-        if (_failedFileMetadataSystemRoot.Children.Count > 0)
-            _source.Add(_failedFileMetadataSystemRoot);
+        if (_failedMetadataSystemRoot.Children.Count > 0)
+            _source.Add(_failedMetadataSystemRoot);
 
-        _source.AddRange(_fileMetadataRoot.Children);
+        _source.AddRange(_metadataRoot.Children);
 
         Source = new HierarchicalTreeDataGridSource<FileMetadataBase>(_source)
         {
@@ -183,7 +184,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         {
             foreach (FileMetadataBase episodeMetadataChild in episodeMetadata.Children)
             {
-                if (episodeMetadataChild is not FileMetadata metadataChild)
+                if (episodeMetadataChild is not FileModel metadataChild)
                     continue;
                 yield return new FileMetadataEntry(metadataChild.FullPath, episodeMetadata.Metadata);
             }

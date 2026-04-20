@@ -1,6 +1,6 @@
 using System;
-using AutoOrganize.Models.FileMetadataModels;
-using AutoOrganize.Models.FileMetadataModels.FailedMetadata;
+using AutoOrganize.Models.MetadataViewModels;
+using AutoOrganize.Models.MetadataViewModels.FileSystem;
 
 namespace AutoOrganize.Utils;
 
@@ -15,7 +15,7 @@ public static class FileMetadataTreeUtils
 
     public static string? IfHasExceptionGetMessage(FileMetadataBase metadataBase)
     {
-        if (metadataBase is IFailedFileSystemMetadata failedFileSystemMetadataTree)
+        if (metadataBase is IFailedFileSystemModel failedFileSystemMetadataTree)
             return failedFileSystemMetadataTree.Exception.Message;
         return null;
     }
