@@ -33,7 +33,8 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     private FailedMetadataRoot _failedMetadataSystemRoot = new();
 
-    [ObservableProperty] private FileMetadataBase? _selectedMetadata;
+    [ObservableProperty]
+    public partial FileMetadataBase? SelectedMetadata { get; set; }
 
     private readonly AvaloniaList<FileMetadataBase> _source = [];
 

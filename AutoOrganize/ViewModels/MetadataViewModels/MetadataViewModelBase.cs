@@ -32,7 +32,8 @@ public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMeta
         Metadata = NavigationParameter;
     }
 
-    [ObservableProperty] private TFileMetadata? _metadata;
+    [ObservableProperty]
+    public partial TFileMetadata? Metadata { get; set; }
 
     partial void OnMetadataChanging(TFileMetadata? value)
     {

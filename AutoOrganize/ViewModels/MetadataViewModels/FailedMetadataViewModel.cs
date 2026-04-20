@@ -13,7 +13,7 @@ public sealed partial class FailedMetadataViewModel : MetadataViewModelBase<Fail
 {
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
-    [ObservableProperty] private FileInfo? _fileInfo;
+    [ObservableProperty] private partial FileInfo? FileInfo { get; set; }
 
     [RelayCommand]
     private async Task OpenFile()

@@ -15,7 +15,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public RoutingState? RoutingState { get; }
 
-    [ObservableProperty] private PageModel _selectedPage;
+    [ObservableProperty]
+    public partial PageModel SelectedPage { get; set; }
 
     partial void OnSelectedPageChanged(PageModel value)
     {

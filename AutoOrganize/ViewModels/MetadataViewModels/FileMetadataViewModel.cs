@@ -14,7 +14,8 @@ public sealed partial class FileMetadataViewModel : MetadataViewModelBase<FileMo
 {
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
-    [ObservableProperty] private FileInfo? _fileInfo;
+    [ObservableProperty]
+    public partial FileInfo? FileInfo { get; set; }
 
     [RelayCommand]
     private async Task OpenFile()

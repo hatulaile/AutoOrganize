@@ -24,7 +24,7 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     private readonly IStorageServices _storageProvider;
 
     [ObservableProperty]
-    private MetadataType _selectedMetadataType = MetadataType.Tv;
+    public partial MetadataType SelectedMetadataType { get; set; }= MetadataType.Tv;
 
     private readonly AvaloniaList<string> _origin = [];
 

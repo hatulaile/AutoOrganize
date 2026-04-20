@@ -29,7 +29,8 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     private readonly INotificationServices _notificationServices;
     private CancellationTokenSource _cancellationTokenSource = new();
 
-    [ObservableProperty] public partial AvaloniaList<FileMetadataEntry>? Entries { get; set; }
+    [ObservableProperty]
+    public partial AvaloniaList<FileMetadataEntry>? Entries { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalProcessedCount))]

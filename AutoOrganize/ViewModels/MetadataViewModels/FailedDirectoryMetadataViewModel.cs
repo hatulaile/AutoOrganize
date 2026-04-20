@@ -14,7 +14,8 @@ public sealed partial class FailedDirectoryMetadataViewModel : MetadataViewModel
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
 
-    [ObservableProperty] private DirectoryInfo? _directoryInfo;
+    [ObservableProperty]
+    public partial DirectoryInfo? DirectoryInfo { get; set; }
 
     [RelayCommand]
     private async Task OpenContainingFolder()

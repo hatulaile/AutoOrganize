@@ -32,20 +32,22 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     private readonly SemaphoreSlim _progressSemaphore = new(PROGRESS_MAX, PROGRESS_MAX);
     public FileProcessOptions? NavigationParameter { get; set; }
 
-    [ObservableProperty] private bool _isFileEnumerationCompleted;
+    [ObservableProperty]
+    public partial bool IsFileEnumerationCompleted { get; set; }
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(TotalCount))]
-    private int _currentProgress;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalCount))]
+    public partial int CurrentProgress { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalCount))]
     [NotifyPropertyChangedFor(nameof(TotalProgress))]
-    private int _successCount;
+    public partial int SuccessCount  { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalCount))]
     [NotifyPropertyChangedFor(nameof(TotalProgress))]
-    private int _failedCound;
+    public partial int FailedCound { get; set; }
 
     public int TotalProgress => SuccessCount + FailedCound;
     public int TotalCount => SuccessCount + FailedCound + CurrentProgress;

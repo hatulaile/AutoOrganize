@@ -11,7 +11,8 @@ namespace AutoOrganize.ViewModels.MetadataViewModels;
 [ViewModelRegistration]
 public sealed partial class FailedFileMetadataRootViewModel : MetadataViewModelBase<FailedMetadataRoot>
 {
-    [ObservableProperty] private long? _errorCount;
+    [ObservableProperty]
+    public partial long? ErrorCount { get; set; }
 
     protected override void MetadataChanging(FailedMetadataRoot? value)
     {
