@@ -6,8 +6,6 @@ using AutoOrganize.Models;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using Avalonia.Collections;
-using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,26 +22,27 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     private readonly IStorageServices _storageProvider;
 
     [ObservableProperty]
-    public partial MetadataType SelectedMetadataType { get; set; }= MetadataType.Tv;
+    public partial MetadataType SelectedMetadataType { get; set; } = MetadataType.Tv;
 
-    private readonly AvaloniaList<string> _origin = [];
+    public AvaloniaList<string> Source { get; } = [];
 
-    public FlatTreeDataGridSource<string> Source { get; }
+    [ObservableProperty]
+    public partial AvaloniaList<string> SelectionItems { get; set; }
 
     [RelayCommand]
     public async Task AddFiles()
     {
         foreach (IStorageFile storageFile in await _storageProvider.GetSelectFilesAsync(new FilePickerOpenOptions()
-        {
-            AllowMultiple = true,
-            FileTypeFilter = [FilePickerFileTypes.All],
-            Title = "选择添加的文件"
-        }))
+                 {
+                     AllowMultiple = true,
+                     FileTypeFilter = [FilePickerFileTypes.All],
+                     Title = "选择添加的文件"
+                 }))
         {
             string? localPath = storageFile.TryGetLocalPath();
             if (localPath is null)
                 continue;
-            _origin.Add(localPath);
+            Source.Add(localPath);
         }
     }
 
@@ -60,25 +59,21 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
             string? localPath = storageFolder.TryGetLocalPath();
             if (localPath is null)
                 continue;
-            _origin.Add(localPath);
+            Source.Add(localPath);
         }
     }
 
     [RelayCommand(CanExecute = nameof(CanRemove))]
     public void Remove()
     {
-        if (Source.RowSelection is null)
-            return;
-
-        foreach (string? item in Source.RowSelection.SelectedItems.ToArray())
+        foreach (string item in SelectionItems.ToArray())
         {
-            if (item is null) continue;
-            _origin.Remove(item);
+            Source.Remove(item);
         }
     }
 
     [RelayCommand(CanExecute = nameof(CanClear))]
-    public void Clear() => _origin.Clear();
+    public void Clear() => Source.Clear();
 
     [RelayCommand]
     public void DropFiles(IEnumerable<IStorageItem> files)
@@ -87,7 +82,7 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
         {
             string? path = item.TryGetLocalPath();
             if (path is null) continue;
-            _origin.Add(path);
+            Source.Add(path);
         }
     }
 
@@ -95,42 +90,34 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     public void Next()
     {
         _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions?>(
-            HostScreens.Home, new FileProcessOptions(SelectedMetadataType, _origin.ToArray()));
+            HostScreens.Home, new FileProcessOptions(SelectedMetadataType, Source));
     }
 
-    public bool CanRemove() => Source.RowSelection is not null && Source.RowSelection.SelectedItems.Count > 0;
+    public bool CanRemove() => SelectionItems.Count > 0;
 
-    public bool CanClear() => _origin.Count > 0;
+    public bool CanClear() => Source.Count > 0;
 
-    public bool CanNext() => _origin.Count > 0;
+    public bool CanNext() => Source.Count > 0;
 
     public void OnNavigatingTo()
     {
         if (NavigationParameter is null) return;
-        _origin.Clear();
-        _origin.AddRange(NavigationParameter);
+        Source.Clear();
+        Source.AddRange(NavigationParameter);
     }
 
     public SelectFilesViewModel(INavigationService navigationService, IStorageServices storageProvider)
     {
         _navigationService = navigationService;
         _storageProvider = storageProvider;
-        Source = new FlatTreeDataGridSource<string>(_origin)
-        {
-            Columns =
-            {
-                new TextColumn<string, string>(null, x => x, GridLength.Star),
-            }
-        };
-        Source.RowSelection!.SingleSelect = false;
-
-        _origin.CollectionChanged += (_, _) =>
+        Source.CollectionChanged += (_, _) =>
         {
             ClearCommand.NotifyCanExecuteChanged();
             RemoveCommand.NotifyCanExecuteChanged();
             NextCommand.NotifyCanExecuteChanged();
         };
 
-        Source.RowSelection!.SelectionChanged += (_, _) => { RemoveCommand.NotifyCanExecuteChanged(); };
+        SelectionItems = [];
+        SelectionItems.CollectionChanged += (_, _) => RemoveCommand.NotifyCanExecuteChanged();
     }
 }

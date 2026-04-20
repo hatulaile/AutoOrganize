@@ -63,7 +63,8 @@ public static class ServiceCollectionExtension
                 .AddSingleton<INavigationService, NavigationService>()
                 .AddRoutingState(HostScreens.Main)
                 .AddRoutingState(HostScreens.Home)
-                .AddRoutingState(HostScreens.MetadataEdit);
+                .AddRoutingState(HostScreens.MetadataEdit)
+                .AddRoutingState(HostScreens.TransferResult);
             return services;
         }
 

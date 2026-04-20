@@ -9,13 +9,9 @@ using AutoOrganize.Models.MetadataViewModels;
 using AutoOrganize.Models.MetadataViewModels.FileSystem;
 using AutoOrganize.Models.MetadataViewModels.Metadata;
 using AutoOrganize.Services.NavigationServices;
-using AutoOrganize.Utils;
 using AutoOrganize.ViewModels.MetadataViewModels;
 using Avalonia.Collections;
-using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
-using Avalonia.Controls.Selection;
-using Avalonia.Media;
+using Avalonia.Controls.DataGridHierarchical;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,9 +32,11 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     [ObservableProperty]
     public partial FileMetadataBase? SelectedMetadata { get; set; }
 
-    private readonly AvaloniaList<FileMetadataBase> _source = [];
+    public IReadOnlyList<HierarchicalNode<FileMetadataBase>>? Rows => Model?.Flattened;
 
-    public HierarchicalTreeDataGridSource<FileMetadataBase>? Source { get; private set; }
+    public AvaloniaList<FileMetadataBase> Source { get; } = [];
+
+    public HierarchicalModel<FileMetadataBase>? Model { get; private set; }
 
     public RoutingState RoutingState { get; }
 
@@ -57,7 +55,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     public bool CanNext()
     {
-        return _source.Any(x => x is not FailedMetadataRoot);
+        return Source.Any(x => x is not FailedMetadataRoot);
     }
 
     partial void OnSelectedMetadataChanged(FileMetadataBase? value)
@@ -80,8 +78,8 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
                 _navigationService.NavigateTo<FailedFileMetadataRootViewModel, FailedMetadataRoot>(
                     HostScreens.MetadataEdit, failedFileMetadataRoot);
                 break;
-            case FailedFileModel failedMetadata:
-                _navigationService.NavigateTo<FailedMetadataViewModel, FailedFileModel>
+            case FailedFile failedMetadata:
+                _navigationService.NavigateTo<FailedFileMetadataViewModel, FailedFile>
                     (HostScreens.MetadataEdit, failedMetadata);
                 break;
             default:
@@ -103,7 +101,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         {
             _metadataRoot = new MetadataRoot();
             _failedMetadataSystemRoot = new FailedMetadataRoot();
-            _source.Clear();
+            Source.Clear();
         }
 
         if (options.FileProcessResultInfos is null || options.FileProcessOptions is null)
@@ -129,54 +127,24 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
             }
         }
 
-        if (_failedMetadataSystemRoot.Children.Count > 0)
-            _source.Add(_failedMetadataSystemRoot);
-
-        _source.AddRange(_metadataRoot.Children);
-
-        Source = new HierarchicalTreeDataGridSource<FileMetadataBase>(_source)
+        if (options.IsClear)
         {
-            Columns =
-            {
-                new HierarchicalExpanderColumn<FileMetadataBase>(
-                    new TextColumn<FileMetadataBase, string?>("Name", x => x.Title,
-                        options: new TextColumnOptions<FileMetadataBase>
-                            { TextAlignment = TextAlignment.Center }),
-                    x => x.Children, x => x.HasChildren),
+            if (_failedMetadataSystemRoot.Children.Count > 0)
+                Source.Add(_failedMetadataSystemRoot);
+            Source.AddRange(_metadataRoot.Children);
+        }
 
-                new TextColumn<FileMetadataBase, string?>("Subtitle",
-                    x => FileMetadataTreeUtils.IfHasSubtitleGetSubtitle(x),
-                    options: new TextColumnOptions<FileMetadataBase>
-                        { TextAlignment = TextAlignment.Center }),
-
-                new TextColumn<FileMetadataBase, string?>("Full Path",
-                    x => FileMetadataTreeUtils.IfHasFullPathGetFullPath(x),
-                    options: new TextColumnOptions<FileMetadataBase>
-                        { TextAlignment = TextAlignment.Center }),
-
-                new TextColumn<FileMetadataBase, string>("Type",
-                    x => FileMetadataTreeUtils.GetTypeDisplayName(x.Type),
-                    options: new TextColumnOptions<FileMetadataBase>
-                        { TextAlignment = TextAlignment.Center }),
-
-                new TextColumn<FileMetadataBase, string?>("Error",
-                    x => FileMetadataTreeUtils.IfHasExceptionGetMessage(x),
-                    options: new TextColumnOptions<FileMetadataBase>
-                        { TextAlignment = TextAlignment.Center, }),
-            }
-        };
-
-
-        ((TreeDataGridRowSelectionModel<FileMetadataBase>)Source.Selection!).SelectionChanged += (_, args) =>
+        if (Model is null)
         {
-            if (args.SelectedItems.Count > 0)
+            Model = new HierarchicalModel<FileMetadataBase>(new HierarchicalOptions<FileMetadataBase>
             {
-                SelectedMetadata = args.SelectedItems[0];
-                return;
-            }
+                ChildrenSelector = x => x.Children,
+                IsLeafSelector = x => !x.HasChildren,
+                VirtualizeChildren = true,
+            });
 
-            SelectedMetadata = null;
-        };
+            Model.SetRoots(Source);
+        }
     }
 
     private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(FileMetadataBase fileMetadata)

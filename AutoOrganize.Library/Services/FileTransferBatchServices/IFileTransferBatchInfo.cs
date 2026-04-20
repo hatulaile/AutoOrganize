@@ -1,0 +1,3 @@
+﻿namespace AutoOrganize.Library.Services.FileTransferBatchServices;
+
+public interface IFileTransferBatchInfo;

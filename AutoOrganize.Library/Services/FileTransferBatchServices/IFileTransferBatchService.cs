@@ -6,6 +6,6 @@ namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 public interface IFileTransferBatchService
 {
     Task<FileTransferBatchResult> ProcessFilesAsync(IEnumerable<FileMetadataEntry> fileMetadataEntries,
-        IProcessObserver<FileTransferBatchInfo, FileTransferBatchResult>? progress = null,
+        IProcessObserver<FileTransferBatchInfo, FileTransferBatchResult, FileTransferBatchErrorInfo>? progress = null,
         CancellationToken token = default);
 }

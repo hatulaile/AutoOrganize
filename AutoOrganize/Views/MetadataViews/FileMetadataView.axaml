@@ -10,7 +10,6 @@
              x:DataType="vm:FileMetadataViewModel"
              x:Class="AutoOrganize.Views.MetadataViews.FileMetadataView">
 
-
     <Border Padding="12">
         <StackPanel Spacing="12">
             <Border>

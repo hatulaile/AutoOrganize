@@ -1,6 +1,5 @@
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Models.Metadata.Images;
-using AutoOrganize.Library.Services.RateLimiting;
 using AutoOrganize.Library.Utils;
 using Nito.Disposables.Internals;
 using TMDbLib.Client;

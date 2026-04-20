@@ -7,8 +7,8 @@
              xmlns:converters="using:AutoOrganize.Converters"
              xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="vm:FailedMetadataViewModel"
-             x:Class="AutoOrganize.Views.MetadataViews.FailedMetadataView">
+             x:DataType="vm:FailedFileMetadataViewModel"
+             x:Class="AutoOrganize.Views.MetadataViews.FailedFileMetadataView">
 
     <Border Padding="16">
         <StackPanel>
@@ -31,10 +31,12 @@
                                                      Value="{Binding FileInfo.Name, Converter={x:Static converters:FileConverters.FileNameToExtensionConverter}}" />
                             <controls:MetadataFields Title="文件大小"
                                                      Value="{Binding FileInfo.Length, Converter={x:Static converters:FileConverters.FileLengthToReadableConverter}}" />
-                            <controls:MetadataFields Title="创建时间" Value="{Binding FileInfo.CreationTime, Mode=OneWay}" />
+                            <controls:MetadataFields Title="创建时间"
+                                                     Value="{Binding FileInfo.CreationTime, Mode=OneWay}" />
                             <controls:MetadataFields Title="读取时间"
                                                      Value="{Binding FileInfo.LastAccessTime, Mode=OneWay}" />
-                            <controls:MetadataFields Title="写入时间" Value="{Binding FileInfo.LastWriteTime, Mode=OneWay}" />
+                            <controls:MetadataFields Title="写入时间"
+                                                     Value="{Binding FileInfo.LastWriteTime, Mode=OneWay}" />
                         </WrapPanel>
                     </Border>
 
@@ -90,33 +92,35 @@
                     </Border>
 
                     <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
-                        <Panel>
-                            <SelectableTextBlock
-                                Text="{Binding Metadata.Exception.Message, StringFormat='错误信息: {0}', Mode=OneWay}"
-                                FontSize="14" TextWrapping="WrapWithOverflow" VerticalAlignment="Center">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <SelectableTextBlock Grid.Column="0"
+                                                 Text="{Binding Metadata.Exception.Message, Mode=OneWay}"
+                                                 FontSize="14" TextWrapping="Wrap"
+                                                 VerticalAlignment="Center">
                             </SelectableTextBlock>
-                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                            <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Command="{Binding CopyStringCommand}"
                                     CommandParameter="{Binding Metadata.Exception.Message}">
                                 <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
                             </Button>
-                        </Panel>
+                        </Grid>
                     </Border>
 
                     <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
-                        <Panel>
-                            <SelectableTextBlock Text="{Binding Metadata.Exception, Mode=OneWay}" FontSize="14"
-                                                 TextWrapping="WrapWithOverflow" VerticalAlignment="Center" />
-                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                        <Grid ColumnDefinitions="*, Auto">
+                            <SelectableTextBlock Grid.Column="0" Text="{Binding Metadata.Exception, Mode=OneWay}"
+                                                 FontSize="14" TextWrapping="Wrap"
+                                                 VerticalAlignment="Center" />
+
+                            <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Command="{Binding CopyStringCommand}"
                                     CommandParameter="{Binding Metadata.Exception, StringFormat='{}{0}'}">
                                 <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
                             </Button>
-                        </Panel>
+                        </Grid>
                     </Border>
                 </StackPanel>
             </Border>
         </StackPanel>
     </Border>
-
 </UserControl>

@@ -1,5 +1,5 @@
-﻿using AutoOrganize.Library.Models;
+﻿using AutoOrganize.Library.Models.Metadata;
 
 namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 
-public record struct FileTransferBatchInfo(FileMetadataEntry Entry);
+public record FileTransferBatchInfo(string FilePath, string OutputPath, MetadataBase Metadata) : IFileTransferBatchInfo;

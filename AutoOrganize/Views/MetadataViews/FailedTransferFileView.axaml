@@ -1,0 +1,153 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels.MetadataViewModels"
+             xmlns:controls="using:AutoOrganize.Views.Controls"
+             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
+             xmlns:converters="using:AutoOrganize.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:FailedTransferFileViewModel"
+             x:Class="AutoOrganize.Views.MetadataViews.FailedTransferFileView">
+
+    <Border Padding="16">
+        <StackPanel>
+            <!-- 这里是从复制过来的, 可能会有点复杂 -->
+            <!-- 文件信息部分 -->
+            <Border>
+                <StackPanel Spacing="12">
+                    <Border>
+                        <StackPanel>
+                            <TextBlock
+                                Text="{Binding FileInfo.Name, Converter={x:Static converters:FileConverters.FileNameToNameWithoutExtensionConverter}}"
+                                FontSize="18"
+                                TextWrapping="WrapWithOverflow" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border>
+                        <WrapPanel Orientation="Horizontal" LineSpacing="8" ItemSpacing="16">
+                            <controls:MetadataFields Title="文件扩展名"
+                                                     Value="{Binding FileInfo.Name, Converter={x:Static converters:FileConverters.FileNameToExtensionConverter}}" />
+                            <controls:MetadataFields Title="文件大小"
+                                                     Value="{Binding FileInfo.Length, Converter={x:Static converters:FileConverters.FileLengthToReadableConverter}}" />
+                            <controls:MetadataFields Title="创建时间"
+                                                     Value="{Binding FileInfo.CreationTime, Mode=OneWay}" />
+                            <controls:MetadataFields Title="读取时间"
+                                                     Value="{Binding FileInfo.LastAccessTime, Mode=OneWay}" />
+                            <controls:MetadataFields Title="写入时间"
+                                                     Value="{Binding FileInfo.LastWriteTime, Mode=OneWay}" />
+                        </WrapPanel>
+                    </Border>
+
+                    <Border Margin="0,8,0,4">
+                        <StackPanel Spacing="12">
+                            <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
+                                <TextBlock Text="输入路径:" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                        Padding="6,2">
+                                    <SelectableTextBlock
+                                        Text="{Binding FileInfo.FullName}"
+                                        TextWrapping="WrapWithOverflow"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center" />
+                                </Border>
+                                <Button Command="{Binding CopyStringCommand}"
+                                        CommandParameter="{Binding FileInfo.FullName}">
+                                    <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                </Button>
+                                <Button Command="{Binding OpenFileCommand}">
+                                    <iconPacks:PackIconPhosphorIcons Kind="File" />
+                                </Button>
+                                <Button Command="{Binding OpenContainingFolderCommand}">
+                                    <iconPacks:PackIconPhosphorIcons Kind="FolderOpen" />
+                                </Button>
+                            </WrapPanel>
+
+                            <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
+                                <TextBlock Text="原定输出路径:" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                        Padding="6,2">
+                                    <SelectableTextBlock
+                                        Text="{Binding Metadata.OutputPath}"
+                                        TextWrapping="WrapWithOverflow"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center" />
+                                </Border>
+                                <Button Command="{Binding CopyStringCommand}"
+                                        CommandParameter="{Binding Metadata.OutputPath}"
+                                        IsVisible="{Binding Metadata.OutputPath, Converter={x:Static converters:FileConverters.FileNameToExistsConverter}}">
+                                    <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                </Button>
+                                <Button Command="{Binding OpenFileCommand}">
+                                    <iconPacks:PackIconPhosphorIcons Kind="File" />
+                                </Button>
+                                <Button Command="{Binding OpenContainingFolderCommand}"
+                                        IsVisible="{Binding Metadata.OutputPath, Converter={x:Static converters:FileConverters.FileNameToNameWithoutExtensionConverter}}">
+                                    <iconPacks:PackIconPhosphorIcons Kind="FolderOpen" />
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <Separator Margin="0,12,0,12" />
+
+            <!-- 错误信息部分 -->
+            <Border>
+                <StackPanel Spacing="8">
+                    <Border>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="ERROR" FontSize="20" />
+                            <Border MinWidth="18" Height="18" Background="{DynamicResource ButtonBackground}"
+                                    CornerRadius="40">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock Text="错误信息是中文的就是获取错误" />
+                                        <TextBlock Text="错误信息是英文的则是内部报错(可以翻译一下)" />
+                                        <TextBlock Text="需要反馈请复制完整的报错(也就是最下面那一行)" />
+                                    </StackPanel>
+                                </ToolTip.Tip>
+
+                                <TextBlock Text="!"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <SelectableTextBlock Grid.Column="0"
+                                                 Text="{Binding Metadata.Exception.Message, Mode=OneWay}"
+                                                 FontSize="14" TextWrapping="Wrap"
+                                                 VerticalAlignment="Center">
+                            </SelectableTextBlock>
+                            <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Command="{Binding CopyStringCommand}"
+                                    CommandParameter="{Binding Metadata.Exception.Message}">
+                                <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <SelectableTextBlock Grid.Column="0" Text="{Binding Metadata.Exception, Mode=OneWay}"
+                                                 FontSize="14" TextWrapping="Wrap"
+                                                 VerticalAlignment="Center" />
+
+                            <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Command="{Binding CopyStringCommand}"
+                                    CommandParameter="{Binding Metadata.Exception, StringFormat='{}{0}'}">
+                                <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

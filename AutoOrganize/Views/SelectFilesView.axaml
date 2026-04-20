@@ -17,23 +17,29 @@
     <Border Padding="8,8,8,0">
         <Grid RowDefinitions="*,Auto">
             <Panel Grid.Row="0">
-                <TreeDataGrid BorderThickness="2"
-                              BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
-                              Source="{Binding Source}"
-                              CanUserResizeColumns="False"
-                              CanUserSortColumns="False"
-                              ShowColumnHeaders="False">
+                <DataGrid BorderThickness="2"
+                          BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
+                          ItemsSource="{Binding Source}"
+                          SelectedItems="{Binding SelectionItems}"
+                          SelectionMode="Extended"
+                          CanUserResizeColumns="False"
+                          CanUserSortColumns="False"
+                          HeadersVisibility="None">
 
-                    <TreeDataGrid.ContextFlyout>
+                    <DataGrid.ContextFlyout>
                         <MenuFlyout>
                             <MenuItem Header="删除" Command="{Binding RemoveCommand}" />
                         </MenuFlyout>
-                    </TreeDataGrid.ContextFlyout>
+                    </DataGrid.ContextFlyout>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="" Binding="{Binding .}" Width="*" />
+                    </DataGrid.Columns>
 
                     <Interaction.Behaviors>
                         <FilesDropBehavior Command="{Binding DropFilesCommand}" />
                     </Interaction.Behaviors>
-                </TreeDataGrid>
+                </DataGrid>
 
                 <ComboBox
                     Width="100"

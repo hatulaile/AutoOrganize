@@ -14,38 +14,43 @@ public sealed class MetadataRoot : FileMetadataBase, IMetadataTreeRoot
 
     public override bool HasChildren => true;
 
+    public void AddTransferFile(string filePath, string outputPath, MetadataBase metadata)
+    {
+        var model = new TransferFileModel(filePath, outputPath);
+        AddOrGetMetadata(metadata).AddChild(model);
+    }
+
+    public void AddFailedTransferFile(string filePath, string? outputPath, MetadataBase metadata, Exception exception)
+    {
+        var model = new FailedTransferFileModel(filePath, outputPath, exception);
+        AddOrGetMetadata(metadata).AddChild(model);
+    }
+
     public void AddFile(MetadataBase metadata, string filePath)
     {
-        ArgumentNullException.ThrowIfNull(metadata);
-
         var fileModel = new FileModel(filePath);
-        if (metadata is MovieMetadata movieMetadata)
-        {
-            AddOrGetMovie(movieMetadata).AddChild(fileModel);
-            return;
-        }
+        AddOrGetMetadata(metadata).AddChild(fileModel);
+    }
 
-        if (metadata is EpisodeMetadata episodeMetadata)
+    public  FileMetadataBase AddOrGetMetadata(MetadataBase metadata)
+    {
+        return metadata switch
         {
-            AddOrGetEpisode(episodeMetadata).AddChild(fileModel);
-            return;
-        }
-
-        throw new Exception($"Unknown metadata type: {metadata.GetType()}");
+            MovieMetadata movieMetadata => AddOrGetMovie(movieMetadata),
+            EpisodeMetadata episodeMetadata => AddOrGetEpisode(episodeMetadata),
+            _ => throw new Exception($"Unknown metadata type: {metadata.GetType()}")
+        };
     }
 
     public FileEpisodeMetadata AddOrGetEpisode(EpisodeMetadata episodeMetadata)
     {
-        ArgumentNullException.ThrowIfNull(episodeMetadata.Season);
-        ArgumentNullException.ThrowIfNull(episodeMetadata.Series);
-
         var fileEpisodeMetadata = GetChildren<FileEpisodeMetadata, IFileMetadata<MetadataBase>>
         (x => x.Metadata == episodeMetadata,
             x => x.Metadata == episodeMetadata.Season || x.Metadata == episodeMetadata.Series);
         if (fileEpisodeMetadata != null)
             return fileEpisodeMetadata;
 
-        FileSeasonMetadata fileSeasonMetadata = AddOrGetSeason(episodeMetadata.Season);
+        FileSeasonMetadata fileSeasonMetadata = AddOrGetSeason(episodeMetadata.Season ?? throw new Exception("Season is null"));
         var newEpisode = new FileEpisodeMetadata(episodeMetadata);
         int index = fileSeasonMetadata.IndexOfChild(x =>
         {
@@ -63,13 +68,12 @@ public sealed class MetadataRoot : FileMetadataBase, IMetadataTreeRoot
 
     public FileSeasonMetadata AddOrGetSeason(SeasonMetadata seasonMetadata)
     {
-        ArgumentNullException.ThrowIfNull(seasonMetadata.Series);
         var fileSeasonMetadata = GetChildren<FileSeasonMetadata, IFileMetadata<MetadataBase>>
             (x => x.Metadata == seasonMetadata, x => x.Metadata == seasonMetadata.Series);
         if (fileSeasonMetadata != null)
             return fileSeasonMetadata;
 
-        var fileSeriesMetadata = AddOrGetSeries(seasonMetadata.Series);
+        var fileSeriesMetadata = AddOrGetSeries(seasonMetadata.Series ?? throw new Exception("Series is null"));
         var newSeason = new FileSeasonMetadata(seasonMetadata);
         int index = fileSeriesMetadata.IndexOfChild(x =>
         {

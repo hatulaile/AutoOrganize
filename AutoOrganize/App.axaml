@@ -12,8 +12,8 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://IconPacks.Avalonia.PhosphorIcons/PhosphorIcons.axaml" />
-        <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
         <StyleInclude Source="Views/Controls/ControlsStyles.axaml"/>
         <StyleInclude Source="Views/Stytes/Stytes.axaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.v2.xaml" />
     </Application.Styles>
 </Application>

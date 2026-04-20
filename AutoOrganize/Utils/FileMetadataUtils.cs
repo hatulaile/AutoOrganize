@@ -1,26 +1,25 @@
 using System;
 using AutoOrganize.Models.MetadataViewModels;
-using AutoOrganize.Models.MetadataViewModels.FileSystem;
 
 namespace AutoOrganize.Utils;
 
-public static class FileMetadataTreeUtils
+public static class FileMetadataUtils
 {
-    public static string? IfHasSubtitleGetSubtitle(FileMetadataBase metadataBase)
+    public static string? IfHasSubtitleGetSubtitle(FileMetadataBase? metadataBase)
     {
         if (metadataBase is ISubheading subheadingMetadataTree)
             return subheadingMetadataTree.Subheading;
         return null;
     }
 
-    public static string? IfHasExceptionGetMessage(FileMetadataBase metadataBase)
+    public static string? IfHasExceptionGetMessage(FileMetadataBase? metadataBase)
     {
-        if (metadataBase is IFailedFileSystemModel failedFileSystemMetadataTree)
+        if (metadataBase is IFailedFile failedFileSystemMetadataTree)
             return failedFileSystemMetadataTree.Exception.Message;
         return null;
     }
 
-    public static string? IfHasFullPathGetFullPath(FileMetadataBase metadataBase)
+    public static string? IfHasFullPathGetFullPath(FileMetadataBase? metadataBase)
     {
         if (metadataBase is IFullPath fullPathMetadataTree)
             return fullPathMetadataTree.FullPath;

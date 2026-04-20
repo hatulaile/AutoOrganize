@@ -3,7 +3,7 @@ using System.IO;
 
 namespace AutoOrganize.Models.MetadataViewModels.FileSystem;
 
-public sealed class FailedFileModel : FileMetadataBase, IFullPath, IFailedFileSystemModel
+public sealed class FailedFile : FileMetadataBase, IFullPath, IFailedFile
 {
     public string FullPath { get; }
 
@@ -13,7 +13,7 @@ public sealed class FailedFileModel : FileMetadataBase, IFullPath, IFailedFileSy
 
     public Exception Exception { get; }
 
-    public FailedFileModel(string filePath, Exception exception)
+    public FailedFile(string filePath, Exception exception)
     {
         FullPath = filePath;
         Title = Path.GetFileName(filePath);

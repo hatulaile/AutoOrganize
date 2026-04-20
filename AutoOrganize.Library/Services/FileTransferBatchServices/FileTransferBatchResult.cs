@@ -1,6 +1,6 @@
 ﻿namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 
-public class FileTransferBatchResult
+public class FileTransferBatchResult : IFileTransferBatchInfo
 {
     public int Succeed { get; internal set; }
 

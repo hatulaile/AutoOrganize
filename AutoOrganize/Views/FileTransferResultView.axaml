@@ -3,16 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AutoOrganize.ViewModels"
-             xmlns:mvm="using:AutoOrganize.Models.MetadataViewModels"
-             xmlns:control="using:AutoOrganize.Views.Controls"
-             xmlns:converters="using:AutoOrganize.Converters"
              xmlns:dgh="using:Avalonia.Controls.DataGridHierarchical"
+             xmlns:converters="using:AutoOrganize.Converters"
+             xmlns:controls="using:AutoOrganize.Views.Controls"
+             xmlns:m="using:AutoOrganize.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="AutoOrganize.Views.MetadataEditView"
-             x:DataType="vm:MetadataEditViewModel">
-
-    <UserControl.Resources>
-    </UserControl.Resources>
+             x:Class="AutoOrganize.Views.FileTransferResultView"
+             x:DataType="vm:FileTransferResultViewModel"
+             x:Name="FileTransferResult">
 
     <Border Padding="18,18,18,8">
         <Grid RowDefinitions="*,Auto">
@@ -55,6 +53,19 @@
                                                 Binding="{Binding Item,
                                                 Converter={x:Static converters:MetadataViewConverters.SubtitleConverter}}" />
 
+                            <DataGridTemplateColumn Header="State">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="dgh:HierarchicalNode">
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Item, Converter={x:Static converters:MetadataViewConverters.StateTextConverter}}"
+                                            Foreground="{Binding Item, Converter={x:Static converters:MetadataViewConverters.StateBrushConverter}}"
+                                            IsVisible="{Binding Item, Converter={x:Static converters:MetadataViewConverters.StateVisibleConverter}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
                             <DataGridTextColumn SummaryCellHorizontalContentAlignment="Center"
                                                 x:DataType="dgh:HierarchicalNode"
                                                 Header="Type"
@@ -79,25 +90,39 @@
                             BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
                             BorderThickness="2">
                         <ScrollViewer>
-                            <control:RoutedViewHost Router="{Binding RoutingState}"
-                                                    IsVisible="{Binding RoutingState.CurrentPageViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <controls:RoutedViewHost Router="{Binding RoutingState}"
+                                                     IsVisible="{Binding RoutingState.CurrentPageViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
 
-                                <control:RoutedViewHost.PageTransition>
+                                <controls:RoutedViewHost.PageTransition>
                                     <x:Null />
-                                </control:RoutedViewHost.PageTransition>
-                            </control:RoutedViewHost>
+                                </controls:RoutedViewHost.PageTransition>
+                            </controls:RoutedViewHost>
                         </ScrollViewer>
                     </Border>
                 </Grid>
             </Border>
 
-            <Panel Grid.Row="1" HorizontalAlignment="Stretch" Margin="0,8,0,0">
-                <Button HorizontalContentAlignment="Left" Command="{Binding BackCommand}">
-                    <TextBlock Text="上一页" LetterSpacing="2" />
-                </Button>
-                <Button HorizontalAlignment="Right" Command="{Binding NextCommand}">
-                    <TextBlock Text="继续" LetterSpacing="4" />
-                </Button>
+            <Panel Grid.Row="1" Margin="0,8,0,0">
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="8">
+                    <Button HorizontalContentAlignment="Left" Command="{Binding NavigateToSelectFilesViewModelCommand}"
+                            Content="前往首页" />
+                    <Button HorizontalAlignment="Right" Command="{Binding NavigateToMetadataEditViewModelCommand}"
+                            Content="前往元数据编辑页" />
+                </StackPanel>
+
+                <ComboBox
+                    HorizontalAlignment="Right"
+                    SelectedItem="{Binding FileTransferFilterType}"
+                    ItemsSource="{Binding #FileTransferResult.FileTransferFilterTypes}">
+
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="m:FileTransferFilterType">
+                            <TextBlock
+                                Text="{Binding ., Converter={x:Static converters:FileTransferFilterTypeConverters.FileTransferFilterTypeToStringConverter}}"
+                                Foreground="{Binding ., Converter={x:Static converters:FileTransferFilterTypeConverters.FileTransferFilterTypeToBrushConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </Panel>
         </Grid>
     </Border>

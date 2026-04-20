@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     private readonly IFileTransferBatchService _fileTransferBatchService;
     private readonly INotificationServices _notificationServices;
     private CancellationTokenSource _cancellationTokenSource = new();
+    private ConcurrentBag<IFileTransferBatchInfo>? _transferBatchInfos;
 
     [ObservableProperty]
     public partial AvaloniaList<FileMetadataEntry>? Entries { get; set; }
@@ -53,7 +55,9 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     [MemberNotNull(nameof(Entries))]
     public void OnNavigatedTo()
     {
-        if (NavigationParameter is null) throw new NavigationParameterNullException(nameof(FileTransferProcessedViewModel), nameof(FileTransferProcessedOption));
+        if (NavigationParameter is null)
+            throw new NavigationParameterNullException(nameof(FileTransferProcessedViewModel),
+                nameof(FileTransferProcessedOption));
         Entries = new AvaloniaList<FileMetadataEntry>(NavigationParameter.FileMetadataEntries);
         SuccessProcessedCount = 0;
         FailedProcessedCount = 0;
@@ -68,16 +72,24 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
             return;
         }
 
-        ProcessObserver<FileTransferBatchInfo, FileTransferBatchResult> observer = new();
-        observer.Failure += exception =>
+        _transferBatchInfos = [];
+        ProcessObserver<FileTransferBatchInfo, FileTransferBatchResult, FileTransferBatchErrorInfo> observer = new();
+        observer.Failure += info =>
         {
             //todo: logger
+            _transferBatchInfos.Add(info);
             Dispatcher.UIThread.Post(() => FailedProcessedCount++);
         };
 
-        observer.Success += _ => Dispatcher.UIThread.Post(() => SuccessProcessedCount++);
+        observer.Success += info =>
+        {
+            _transferBatchInfos.Add(info);
+            Dispatcher.UIThread.Post(() => SuccessProcessedCount++);
+        };
 
         observer.Completed += result =>
+        {
+            _transferBatchInfos.Add(result);
             Dispatcher.UIThread.Post(() =>
             {
                 if (result.Total <= 0)
@@ -85,57 +97,52 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
                     _notificationServices.Show(
                         new Notification("没有文件需要处理", "没有任何文件需要处理, 很奇怪的错误!", NotificationType.Error), this);
                     _notificationServices.Show(new Notification("前往", "前往元数据编辑页"), this);
-                    _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
-                        new MetadataEditOption(null, null)
-                        {
-                            IsClear = false
-                        });
+                    GoBack();
                     return;
                 }
 
                 if (result.Succeed <= 0)
                 {
                     _notificationServices.Show(
-                        new Notification("没有成功的文件", $"没有任何成功的文件, 失败了 {result.Failed}, 请查看日志!", NotificationType.Error),
+                        new Notification("没有成功的文件", $"没有任何成功的文件, 失败了 {result.Failed} 个, 请查看日志!",
+                            NotificationType.Error),
                         this);
-                    _notificationServices.Show(new Notification("前往", "前往元数据编辑页"), this);
-                    _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
-                        new MetadataEditOption(null, null)
-                        {
-                            IsClear = false
-                        });
-                    return;
                 }
-
-                if (result.Failed > 0)
+                else if (result.Failed > 0)
                 {
                     _notificationServices.Show(
                         new Notification("出现错误",
                             $"总共 {result.Total} 个, {result.Succeed} 个成功, {result.Failed} 个错误. 错误请查看日志!",
                             NotificationType.Warning), this);
-                    _notificationServices.Show(new Notification("前往", "前往元数据编辑页"), this);
-                    _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
-                        new MetadataEditOption(null, null)
-                        {
-                            IsClear = false
-                        });
-                    return;
+                }
+                else
+                {
+                    _notificationServices.Show(
+                        new Notification("成功", $"一共处理了 {result.Succeed} 个", NotificationType.Success),
+                        this);
                 }
 
-                _notificationServices.Show(
-                    new Notification("成功", $"一共处理了 {result.Succeed} 个", NotificationType.Success),
-                    this);
-                _notificationServices.Show(new Notification("前往", "前往首页"), this);
-                _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
+                _navigationService.NavigateTo<FileTransferResultViewModel, FileTransferResultOptions>(HostScreens.Home,
+                    new FileTransferResultOptions
+                    {
+                        BatchInfos = _transferBatchInfos
+                    });
             });
+        };
 
         await _fileTransferBatchService.ProcessFilesAsync(Entries, observer, _cancellationTokenSource.Token);
+        Dispose();
     }
 
     [RelayCommand]
     private void GoBack()
     {
-        _navigationService.NavigateTo<MetadataEditViewModel>(HostScreens.Home);
+        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
+            new MetadataEditOption
+            {
+                IsClear = false
+            });
+        Dispose();
     }
 
     public FileTransferProcessedViewModel(INavigationService navigationService,

@@ -4,16 +4,9 @@ namespace AutoOrganize.Models;
 
 public sealed class MetadataEditOption
 {
-    public FileProcessOptions? FileProcessOptions { get; }
+    public FileProcessOptions? FileProcessOptions { get; init; }
 
-    public IEnumerable<FileMetadataProcessingResult>? FileProcessResultInfos { get; }
+    public IEnumerable<FileMetadataProcessingResult>? FileProcessResultInfos { get; init; }
 
-    public bool IsClear { get; set; } = true;
-
-    public MetadataEditOption(FileProcessOptions? fileProcessOptions,
-        IEnumerable<FileMetadataProcessingResult>? fileProcessResultInfos)
-    {
-        FileProcessOptions = fileProcessOptions;
-        FileProcessResultInfos = fileProcessResultInfos;
-    }
+    public bool IsClear { get; init; } = true;
 }

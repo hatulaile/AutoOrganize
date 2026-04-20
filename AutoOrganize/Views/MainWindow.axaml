@@ -14,10 +14,6 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"/>
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
-            <!-- todo: -->
-            <TextBlock>123123</TextBlock>
-        </StackPanel>
         <Grid ColumnDefinitions="60,*">
             <Border Grid.Column="0" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
                 <StackPanel HorizontalAlignment="Stretch">

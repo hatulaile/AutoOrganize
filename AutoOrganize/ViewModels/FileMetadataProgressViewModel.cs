@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.Library.Exceptions;
@@ -42,7 +41,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalCount))]
     [NotifyPropertyChangedFor(nameof(TotalProgress))]
-    public partial int SuccessCount  { get; set; }
+    public partial int SuccessCount { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalCount))]
@@ -76,13 +75,15 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             hasFiles = true;
             _ = ProgressAndAddFileAsync(file, options.Type, token)
                 .ContinueWith(_ =>
+                {
+                    _progressSemaphore.Release();
                     Dispatcher.UIThread.Invoke(() =>
                     {
                         CurrentProgress--;
                         if (CurrentProgress == 0 && IsFileEnumerationCompleted)
                             tcs.SetResult();
-                        _progressSemaphore.Release();
-                    }), token);
+                    });
+                }, token);
         }
 
         IsFileEnumerationCompleted = true;
@@ -92,8 +93,12 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
         if (Results.Count > 0)
         {
-            _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>
-                (HostScreens.Home, new MetadataEditOption(options, Results.ToArray()));
+            _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
+                new MetadataEditOption
+                {
+                    FileProcessResultInfos = Results,
+                    FileProcessOptions = options
+                });
             return;
         }
 

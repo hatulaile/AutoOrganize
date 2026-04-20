@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using AutoOrganize.Models.MetadataViewModels.FileSystem;
 using AutoOrganize.Services.TopLevelServices;
@@ -9,10 +9,11 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.MetadataViewModels;
 
 [ViewModelRegistration]
-public sealed partial class FileMetadataViewModel : MetadataViewModelBase<FileModel>
+public sealed partial class FailedTransferFileViewModel : MetadataViewModelBase<FailedTransferFileModel>
 {
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
+
     [ObservableProperty]
     public partial FileInfo? FileInfo { get; set; }
 
@@ -37,7 +38,7 @@ public sealed partial class FileMetadataViewModel : MetadataViewModelBase<FileMo
         await _clipboardServices.SetTextAsync(str);
     }
 
-    protected override void MetadataChanging(FileModel? value)
+    protected override void MetadataChanging(FailedTransferFileModel? value)
     {
         base.MetadataChanging(value);
         if (value is not null)
@@ -46,7 +47,7 @@ public sealed partial class FileMetadataViewModel : MetadataViewModelBase<FileMo
         }
     }
 
-    public FileMetadataViewModel(ILauncherServices launcherServices, IClipboardServices clipboardServices)
+    public FailedTransferFileViewModel(ILauncherServices launcherServices, IClipboardServices clipboardServices)
     {
         _launcherServices = launcherServices;
         _clipboardServices = clipboardServices;

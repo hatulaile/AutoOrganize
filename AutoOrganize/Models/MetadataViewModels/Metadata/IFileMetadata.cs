@@ -2,10 +2,14 @@ using AutoOrganize.Library.Models.Metadata;
 
 namespace AutoOrganize.Models.MetadataViewModels.Metadata;
 
-public interface IFileMetadata;
+public interface IFileMetadata
+{
+    MetadataBase Metadata { get; }
+}
 
 public interface IFileMetadata<out TMetadata> : IFileMetadata
     where TMetadata : MetadataBase
 {
-    TMetadata Metadata { get; }
+    MetadataBase IFileMetadata.Metadata => Metadata;
+    new TMetadata Metadata { get; }
 }

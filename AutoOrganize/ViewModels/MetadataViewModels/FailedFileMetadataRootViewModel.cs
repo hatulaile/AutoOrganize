@@ -34,7 +34,7 @@ public sealed partial class FailedFileMetadataRootViewModel : MetadataViewModelB
         long count = 0;
         foreach (FileMetadataBase fileMetadataBase in metadata.Children)
         {
-            if (fileMetadataBase is FailedFileModel)
+            if (fileMetadataBase is FailedFile)
                 count++;
 
             if (!fileMetadataBase.HasChildren) continue;

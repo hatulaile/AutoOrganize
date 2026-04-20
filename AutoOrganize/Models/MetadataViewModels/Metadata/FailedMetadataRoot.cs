@@ -13,16 +13,16 @@ public sealed class FailedMetadataRoot : FileMetadataBase, IMetadataTreeRoot
 
     public override bool HasChildren => true;
 
-    public FailedFileModel AddOrGetFailedMetadata(string path, Exception exception)
+    public FailedFile AddOrGetFailedMetadata(string path, Exception exception)
     {
-        var failedFileMetadata = new FailedFileModel(path, exception);
+        var failedFileMetadata = new FailedFile(path, exception);
         AddChild(failedFileMetadata);
         return failedFileMetadata;
     }
 
-    public FailedFileModel AddOrGetFailedMetadata(string filePath, Exception exception, FileProcessOptions options)
+    public FailedFile AddOrGetFailedMetadata(string filePath, Exception exception, FileProcessOptions options)
     {
-        var failedFile = new FailedFileModel(filePath, exception);
+        var failedFile = new FailedFile(filePath, exception);
         foreach (string path in options.FilesPaths)
         {
             if (!PathUtils.IsSubPath(path, filePath))

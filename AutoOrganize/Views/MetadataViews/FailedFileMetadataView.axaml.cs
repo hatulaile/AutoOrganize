@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace AutoOrganize.Views.MetadataViews;
 
-public partial class FailedMetadataView : UserControl
+public partial class FailedFileMetadataView : UserControl
 {
-    public FailedMetadataView()
+    public FailedFileMetadataView()
     {
         InitializeComponent();
     }

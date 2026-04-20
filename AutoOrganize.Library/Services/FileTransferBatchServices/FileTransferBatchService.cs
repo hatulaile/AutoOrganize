@@ -26,7 +26,7 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
 
     // progress 不一定会在传入线程上调用
     public async Task<FileTransferBatchResult> ProcessFilesAsync(IEnumerable<FileMetadataEntry> fileMetadataEntries,
-        IProcessObserver<FileTransferBatchInfo, FileTransferBatchResult>? progress = null,
+        IProcessObserver<FileTransferBatchInfo, FileTransferBatchResult, FileTransferBatchErrorInfo>? progress = null,
         CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
@@ -48,22 +48,36 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
             try
             {
                 string path = GetOutputFilePath(fileMetadataEntry, directoryPath, fileNameGenerationOptions);
-                string directoryName = Path.GetDirectoryName(path) ?? throw new Exception("Get Directory Failed");
-                if (!Directory.Exists(directoryName))
-                    Directory.CreateDirectory(directoryName);
+                try
+                {
+                    await _fileTransferService
+                        .TransferFileAsync(new FileTransferEntry(fileMetadataEntry.FilePath, path),
+                            fileTransferOptions, token).ConfigureAwait(false);
 
-                await _fileTransferService
-                    .TransferFileAsync(
-                        new FileTransferEntry(fileMetadataEntry.FilePath, path),
-                        fileTransferOptions, token).ConfigureAwait(false);
-
-                result.Succeed++;
-                progress?.OnSuccess(new FileTransferBatchInfo(fileMetadataEntry));
+                    result.Succeed++;
+                    progress?.OnSuccess(
+                        new FileTransferBatchInfo(fileMetadataEntry.FilePath, path, fileMetadataEntry.Metadata));
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    result.Failed++;
+                    progress?.OnFailure(new FileTransferBatchErrorInfo(fileMetadataEntry.FilePath, path,
+                        fileMetadataEntry.Metadata, e));
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
                 result.Failed++;
-                progress?.OnFailure(e);
+                progress?.OnFailure(new FileTransferBatchErrorInfo(fileMetadataEntry.FilePath, null,
+                    fileMetadataEntry.Metadata, e));
             }
         }
 
