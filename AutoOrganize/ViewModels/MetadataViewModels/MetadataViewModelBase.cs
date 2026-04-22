@@ -7,15 +7,17 @@ namespace AutoOrganize.ViewModels.MetadataViewModels;
 public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMetadataViewModel<TFileMetadata>,
     INavigationViewModel<TFileMetadata>
 {
-    public TFileMetadata? NavigationParameter { get; set; }
-
-    public virtual void OnNavigatingTo()
+    public virtual void OnNavigatingTo(TFileMetadata metadata)
     {
-        Metadata = NavigationParameter;
     }
 
-    public virtual void OnNavigatedTo()
+    public virtual void OnNavigatedTo(TFileMetadata metadata)
     {
+    }
+
+    public void OnParametersChanged(TFileMetadata args)
+    {
+        Metadata = args;
     }
 
     public void OnNavigatedFrom()
@@ -25,11 +27,6 @@ public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMeta
 
     public virtual void OnNavigatingFrom()
     {
-    }
-
-    public virtual void OnParameterChanged()
-    {
-        Metadata = NavigationParameter;
     }
 
     [ObservableProperty]

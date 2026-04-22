@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AutoOrganize.Library.Models.FileTransfers;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Models;
@@ -21,7 +20,6 @@ namespace AutoOrganize.ViewModels;
 public partial class FileTransferResultViewModel : ViewModelBase, INavigationViewModel<FileTransferResultOptions>
 {
     private readonly INavigationService _navigationService;
-    public FileTransferResultOptions? NavigationParameter { get; set; }
 
     private MetadataRoot? _metadataRoot;
 
@@ -43,14 +41,12 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
         CreateHierarchicalModel();
     }
 
-    public void OnNavigatedTo()
+    public void OnParametersChanged(FileTransferResultOptions args)
     {
-        if (NavigationParameter is null) return;
+        if (args.IsClear) FileTransferBatchInfos.Clear();
 
-        if (NavigationParameter.IsClear) FileTransferBatchInfos.Clear();
-
-        if (NavigationParameter.BatchInfos is not null)
-            FileTransferBatchInfos.AddRange(NavigationParameter.BatchInfos);
+        if (args.BatchInfos is not null)
+            FileTransferBatchInfos.AddRange(args.BatchInfos);
 
         CreateHierarchicalModel();
     }
@@ -134,5 +130,6 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     {
         _navigationService = navigationService;
         RoutingState = routingState;
+        routingState.SetOwnerViewModel(this);
     }
 }

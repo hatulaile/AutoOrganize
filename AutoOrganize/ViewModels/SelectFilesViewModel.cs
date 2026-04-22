@@ -16,8 +16,6 @@ namespace AutoOrganize.ViewModels;
 [ViewModelRegistration(ViewModelLifetime.Singleton)]
 public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationViewModel<IEnumerable<string>?>
 {
-    public IEnumerable<string>? NavigationParameter { get; set; }
-
     private readonly INavigationService _navigationService;
     private readonly IStorageServices _storageProvider;
 
@@ -89,7 +87,7 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     [RelayCommand(CanExecute = nameof(CanNext))]
     public void Next()
     {
-        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions?>(
+        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions>(
             HostScreens.Home, new FileProcessOptions(SelectedMetadataType, Source));
     }
 
@@ -99,11 +97,11 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
 
     public bool CanNext() => Source.Count > 0;
 
-    public void OnNavigatingTo()
+    public void OnNavigatingTo(IEnumerable<string>? strings)
     {
-        if (NavigationParameter is null) return;
+        if (strings is null) return;
         Source.Clear();
-        Source.AddRange(NavigationParameter);
+        Source.AddRange(strings);
     }
 
     public SelectFilesViewModel(INavigationService navigationService, IStorageServices storageProvider)

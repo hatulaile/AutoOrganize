@@ -40,11 +40,6 @@ public sealed partial class FailedDirectoryMetadataViewModel : MetadataViewModel
         }
     }
 
-    protected override void MetadataChanged(FailedDirectoryModel? value)
-    {
-        base.MetadataChanged(value);
-    }
-
     public FailedDirectoryMetadataViewModel(ILauncherServices launcherServices, IClipboardServices clipboardServices)
     {
         _launcherServices = launcherServices;

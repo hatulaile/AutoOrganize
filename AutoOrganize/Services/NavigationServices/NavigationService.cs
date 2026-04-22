@@ -64,18 +64,16 @@ public class NavigationService : INavigationService
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
 
         viewModel.OwnerViewModel = routingState.OwnerViewModel;
-        viewModel.NavigationParameter = args;
-        if (ReferenceEquals(oldViewModel, viewModel))
-        {
-            viewModel.OnParameterChanged();
-            return;
-        }
+        viewModel.OnParametersChanged(args);
 
+        if (ReferenceEquals(oldViewModel, viewModel)) return;
         oldViewModel?.OnNavigatingFrom();
         viewModel.OnNavigatingTo();
+        viewModel.OnNavigatingTo(args);
         routingState.NavigateToCommand.Execute(viewModel);
-        oldViewModel?.OnNavigatedFrom();
         viewModel.OnNavigatedTo();
+        viewModel.OnNavigatedTo(args);
+        oldViewModel?.OnNavigatedFrom();
     }
 
     public void NavigateTo<TViewModel, TArgs>(HostScreens screens, TArgs args, Type viewModelType)
@@ -89,19 +87,17 @@ public class NavigationService : INavigationService
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
 
-        viewModelBase.OwnerViewModel = routingState.OwnerViewModel;
-        navigationViewModel.NavigationParameter = args;
-        if (ReferenceEquals(oldViewModel, viewModelBase))
-        {
-            navigationViewModel.OnParameterChanged();
-            return;
-        }
+        navigationViewModel.OnParametersChanged(args);
 
+        if (ReferenceEquals(oldViewModel, navigationViewModel)) return;
+        viewModelBase.OwnerViewModel = routingState.OwnerViewModel;
         oldViewModel?.OnNavigatingFrom();
+        navigationViewModel.OnNavigatingTo(args);
         navigationViewModel.OnNavigatingTo();
         routingState.NavigateToCommand.Execute(navigationViewModel);
-        oldViewModel?.OnNavigatedFrom();
         navigationViewModel.OnNavigatedTo();
+        navigationViewModel.OnNavigatedTo(args);
+        oldViewModel?.OnNavigatedFrom();
     }
 
     public void Clear(HostScreens screens)

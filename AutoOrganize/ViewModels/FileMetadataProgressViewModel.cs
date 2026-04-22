@@ -18,7 +18,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace AutoOrganize.ViewModels;
 
-public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavigationViewModel<FileProcessOptions?>,
+public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavigationViewModel<FileProcessOptions>,
     IDisposable, IAsyncDisposable
 {
     public const int PROGRESS_MAX = 128;
@@ -29,7 +29,6 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     private readonly INavigationService _navigationService;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly SemaphoreSlim _progressSemaphore = new(PROGRESS_MAX, PROGRESS_MAX);
-    public FileProcessOptions? NavigationParameter { get; set; }
 
     [ObservableProperty]
     public partial bool IsFileEnumerationCompleted { get; set; }
@@ -178,10 +177,9 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         }
     }
 
-    public void OnNavigatedTo()
+    public void OnParametersChanged(FileProcessOptions args)
     {
-        ArgumentNullException.ThrowIfNull(NavigationParameter);
-        _ = StartAsync(NavigationParameter.Value, _cancellationTokenSource.Token);
+        _ = StartAsync(args, _cancellationTokenSource.Token);
     }
 
     public void Dispose()

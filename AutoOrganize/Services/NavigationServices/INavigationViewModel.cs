@@ -19,11 +19,19 @@ public interface INavigationViewModel
     }
 }
 
-public interface INavigationViewModel<TArgs> : INavigationViewModel
+public interface INavigationViewModel<in TArgs> : INavigationViewModel
 {
-    TArgs? NavigationParameter { get; set; }
+    void OnNavigatingTo(TArgs args)
+    {
 
-    void OnParameterChanged()
+    }
+
+    void OnNavigatedTo(TArgs args)
+    {
+
+    }
+
+    void OnParametersChanged(TArgs args)
     {
     }
 }

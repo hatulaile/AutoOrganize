@@ -45,20 +45,15 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
 
     public int TotalProcessedCount => SuccessProcessedCount + FailedProcessedCount;
 
-    public FileTransferProcessedOption? NavigationParameter { get; set; }
-
     public void OnNavigatedFrom()
     {
         Entries = null;
     }
 
     [MemberNotNull(nameof(Entries))]
-    public void OnNavigatedTo()
+    public void OnParametersChanged(FileTransferProcessedOption args)
     {
-        if (NavigationParameter is null)
-            throw new NavigationParameterNullException(nameof(FileTransferProcessedViewModel),
-                nameof(FileTransferProcessedOption));
-        Entries = new AvaloniaList<FileMetadataEntry>(NavigationParameter.FileMetadataEntries);
+        Entries = new AvaloniaList<FileMetadataEntry>(args.FileMetadataEntries);
         SuccessProcessedCount = 0;
         FailedProcessedCount = 0;
         Task.Run(StartProcessFileAsync);

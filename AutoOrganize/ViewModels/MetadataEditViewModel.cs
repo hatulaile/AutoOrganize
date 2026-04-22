@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoOrganize.Exceptions.NavigationExceptions;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Models;
@@ -23,7 +22,6 @@ namespace AutoOrganize.ViewModels;
 public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationViewModel<MetadataEditOption>
 {
     private readonly INavigationService _navigationService;
-    public MetadataEditOption? NavigationParameter { get; set; }
 
     private MetadataRoot _metadataRoot = new();
 
@@ -88,11 +86,9 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         }
     }
 
-    public void OnNavigatingTo()
+    public void OnParametersChanged(MetadataEditOption option)
     {
-        if (NavigationParameter is null)
-            throw new NavigationParameterNullException(nameof(MetadataEditViewModel), nameof(MetadataEditOption));
-        CreateSource(NavigationParameter);
+        CreateSource(option);
     }
 
     private void CreateSource(MetadataEditOption options)
