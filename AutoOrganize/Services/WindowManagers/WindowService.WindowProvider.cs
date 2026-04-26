@@ -8,6 +8,9 @@ public partial class WindowService
 {
     public Window? GetWindowByViewModel(object viewModel)
     {
+        if(ReferenceEquals(viewModel, MainWindow.DataContext))
+            return MainWindow;
+
         if (_windowByViewModel.TryGetValue(viewModel, out Window? window))
             return window;
 
@@ -25,6 +28,9 @@ public partial class WindowService
 
     public Window? GetWindowByViewModel(ViewModelBase viewModel)
     {
+        if(ReferenceEquals(viewModel, MainWindow.DataContext))
+            return MainWindow;
+
         if (_windowByViewModel.TryGetValue(viewModel, out var window))
             return window;
 

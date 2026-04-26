@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using AutoOrganize.ViewLocators;
 using AutoOrganize.ViewModels;
 using AutoOrganize.Views;
 using Avalonia.Controls;
@@ -12,14 +13,14 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        var dataContext = new HostWindowViewModel(viewModel);
-        viewModel.OwnerViewModel = dataContext;
-        var hostWindow = new HostWindow
+        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
+        hostWindow.Closed += (_, _) =>
         {
-            DataContext = dataContext
+            viewModel.OnCloseWindow();
+            if (hostWindow.DataContext is not null)
+                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
         };
-
-        hostWindow.Closed += (_, _) => viewModel.OnCloseWindow();
         viewModel.OnOpenWindow();
         return hostWindow.ShowDialog(ownerWindow);
     }
@@ -36,14 +37,14 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        var dataContext = new HostWindowViewModel(viewModel);
-        viewModel.OwnerViewModel = dataContext;
-        var hostWindow = new HostWindow
+        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
+        hostWindow.Closed += (_, _) =>
         {
-            DataContext = dataContext
+            viewModel.OnCloseWindow();
+            if (hostWindow.DataContext is not null)
+                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
         };
-
-        hostWindow.Closed += (_, _) => viewModel.OnCloseWindow();
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         return hostWindow.ShowDialog(ownerWindow);
@@ -62,14 +63,14 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IResultWindowViewModel<TResult>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        var dataContext = new HostWindowViewModel(viewModel);
-        viewModel.OwnerViewModel = dataContext;
-        var hostWindow = new HostWindow
+        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
+        hostWindow.Closed += (_, _) =>
         {
-            DataContext = dataContext
+            viewModel.OnCloseWindow();
+            if (hostWindow.DataContext is not null)
+                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
         };
-
-        hostWindow.Closed += (_, _) => viewModel.OnCloseWindow();
         viewModel.OnOpenWindow();
         return hostWindow.ShowDialog<TResult>(ownerWindow);
     }
@@ -87,14 +88,14 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs, TResult>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        var dataContext = new HostWindowViewModel(viewModel);
-        viewModel.OwnerViewModel = dataContext;
-        var hostWindow = new HostWindow
+        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
+        hostWindow.Closed += (_, _) =>
         {
-            DataContext = dataContext
+            viewModel.OnCloseWindow();
+            if (hostWindow.DataContext is not null)
+                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
         };
-
-        hostWindow.Closed += (_, _) => viewModel.OnCloseWindow();
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         return hostWindow.ShowDialog<TResult>(ownerWindow);

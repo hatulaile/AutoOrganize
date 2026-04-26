@@ -8,17 +8,8 @@ namespace AutoOrganize.ViewLocators;
 [StaticViewLocator]
 public partial class ViewLocator : IViewLocator
 {
-    public static IViewLocator DefaultViewLocator
-    {
-        get
-        {
-            if (field is not null)
-                return field;
-
-            ViewLocator viewLocator = Application.Current!.DataTemplates.Cast<ViewLocator>().First();
-            return field = viewLocator;
-        }
-    }
+    public static IViewLocator DefaultViewLocator =>
+        field ??= Application.Current!.DataTemplates.Cast<ViewLocator>().First();
 
     public bool Match(object? data)
     {

@@ -2,6 +2,8 @@
 
 public interface IWindowViewModel
 {
+    bool AllowMultipleInstances => false;
+
     void OnOpenWindow()
     {
     }
