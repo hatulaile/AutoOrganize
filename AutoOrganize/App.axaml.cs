@@ -12,7 +12,8 @@ namespace AutoOrganize;
 
 public partial class App : Application
 {
-    [AllowNull] public IServiceProvider ServiceProvider;
+    [AllowNull]
+    public IServiceProvider ServiceProvider;
 
     public new static App Current => (App)Application.Current!;
 

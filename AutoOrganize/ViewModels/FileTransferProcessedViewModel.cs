@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoOrganize.Exceptions.NavigationExceptions;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.FileTransferServices;

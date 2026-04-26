@@ -1,5 +1,5 @@
 using System.Linq;
-using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.ViewModels;
 using Avalonia;
 using StaticViewLocator;
 
@@ -22,6 +22,6 @@ public partial class ViewLocator : IViewLocator
 
     public bool Match(object? data)
     {
-        return data is RoutingState;
+        return data is ViewModelBase;
     }
 }

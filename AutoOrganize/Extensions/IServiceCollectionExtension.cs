@@ -12,6 +12,7 @@ using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Library.Services.RequestCoalescers;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
+using AutoOrganize.Services.WindowManagers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using TMDbLib.Client;
@@ -40,6 +41,8 @@ public static class ServiceCollectionExtension
 
             services
                 .AddSingleton<IMetadataManager, MetadataManager>()
+                .AddSingleton<IWindowService, WindowService>()
+                .AddSingleton<IWindowProvider>(provider => (IWindowProvider)provider.GetRequiredService<IWindowService>())
                 .AddSingleton<IFlightCoordinator, FlightCoordinator>()
                 .AddSingleton<IPathNameGenerator, PathNameGenerator>()
                 .AddSingleton<IFileTransferBatchService, FileTransferBatchService>()
