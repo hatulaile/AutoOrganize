@@ -1,6 +1,6 @@
 namespace AutoOrganize.Models;
 
-public sealed class SelectSystemFilesModel
+public readonly struct SelectSystemFilesModel
 {
     public string Path { get; }
 

@@ -89,12 +89,18 @@ public class FileConfigManager : IFileConfigManager
         if (File.Exists(path)) File.Delete(path);
     }
 
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
     public void SaveConfig(ConfigInfo config)
     {
         File.WriteAllText(config.Path,
             JsonSerializer.Serialize(config.Config, config.ConfigType, _jsonSerializerOptions));
     }
 
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
     public TConfig LoadConfigOrNew<TConfig>() where TConfig : IConfig, new()
     {
         string path = GetConfigPath<TConfig>();
@@ -222,6 +228,9 @@ public class FileConfigManager : IFileConfigManager
         return Task.CompletedTask;
     }
 
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
     public async Task SaveConfigAsync(ConfigInfo info, CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
@@ -231,6 +240,9 @@ public class FileConfigManager : IFileConfigManager
             token).ConfigureAwait(false);
     }
 
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
     public async Task<TConfig> LoadConfigOrNewAsync<TConfig>(CancellationToken token = default)
         where TConfig : IConfig, new()
     {

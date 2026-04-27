@@ -2,4 +2,4 @@
 
 namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 
-public record FileTransferBatchInfo(string FilePath, string OutputPath, MetadataBase Metadata) : IFileTransferBatchInfo;
+public readonly record struct FileTransferBatchInfo(string FilePath, string OutputPath, MetadataBase Metadata) : IFileTransferBatchInfo;

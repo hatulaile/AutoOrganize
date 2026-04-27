@@ -4,9 +4,13 @@ using AutoOrganize.Library.Models.FileTransfers;
 namespace AutoOrganize.Library.Services.FileTransferServices;
 
 [StructLayout(LayoutKind.Auto)]
-public struct FileTransferOptions
+public readonly struct FileTransferOptions
 {
-    public FileTransferMode Mode { get; set; }
+    public FileTransferOptions()
+    {
+    }
 
-    public bool CanOverwrite { get; set; }
+    public FileTransferMode Mode { get; init; }
+
+    public bool CanOverwrite { get; init; }
 }

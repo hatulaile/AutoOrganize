@@ -4,13 +4,13 @@ using AutoOrganize.Library.Models.Metadata;
 
 namespace AutoOrganize.Models;
 
-public sealed class FileMetadataProcessingResult
+public readonly struct FileMetadataProcessingResult
 {
-    public string FilePath { get; set; }
+    public string FilePath { get; }
 
-    public MetadataBase? Metadata { get; set; }
+    public MetadataBase? Metadata { get; }
 
-    public Exception? Error { get; set; }
+    public Exception? Error { get; }
 
     [MemberNotNullWhen(true, nameof(Metadata))]
     [MemberNotNullWhen(false, nameof(Error))]

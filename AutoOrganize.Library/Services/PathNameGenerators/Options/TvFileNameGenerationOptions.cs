@@ -3,13 +3,17 @@ using System.Runtime.InteropServices;
 namespace AutoOrganize.Library.Services.PathNameGenerators.Options;
 
 [StructLayout(LayoutKind.Auto)]
-public struct TvFileNameGenerationOptions
+public readonly struct TvFileNameGenerationOptions
 {
-    public static TvFileNameGenerationOptions Empty { get; } = new();
+    public static TvFileNameGenerationOptions Empty { get; } = new TvFileNameGenerationOptions();
 
-    public string? SeriesMetadataFolderPattern { get; set; }
+    public string? SeriesMetadataFolderPattern { get; init; }
 
-    public string? SeasonMetadataFolderPattern { get; set; }
+    public string? SeasonMetadataFolderPattern { get; init; }
 
-    public string? EpisodeNamePattern { get; set; }
+    public string? EpisodeNamePattern { get; init; }
+
+    public TvFileNameGenerationOptions()
+    {
+    }
 }

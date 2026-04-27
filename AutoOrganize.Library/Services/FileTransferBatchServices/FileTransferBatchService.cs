@@ -31,10 +31,12 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
     {
         token.ThrowIfCancellationRequested();
 
+        int succeed = 0;
+        int failed = 0;
+
         FileTransferOptions fileTransferOptions = FileTransferConfig.ToOption();
         FileNameGenerationOptions fileNameGenerationOptions = FileNameGeneratorConfig.ToOptions();
         string? directoryPath = null;
-        var result = new FileTransferBatchResult();
 
         foreach (var fileMetadataEntry in fileMetadataEntries)
         {
@@ -54,7 +56,7 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
                         .TransferFileAsync(new FileTransferEntry(fileMetadataEntry.FilePath, path),
                             fileTransferOptions, token).ConfigureAwait(false);
 
-                    result.Succeed++;
+                    succeed++;
                     progress?.OnSuccess(
                         new FileTransferBatchInfo(fileMetadataEntry.FilePath, path, fileMetadataEntry.Metadata));
                 }
@@ -64,7 +66,7 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
                 }
                 catch (Exception e)
                 {
-                    result.Failed++;
+                    failed++;
                     progress?.OnFailure(new FileTransferBatchErrorInfo(fileMetadataEntry.FilePath, path,
                         fileMetadataEntry.Metadata, e));
                 }
@@ -75,12 +77,13 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
             }
             catch (Exception e)
             {
-                result.Failed++;
+                failed++;
                 progress?.OnFailure(new FileTransferBatchErrorInfo(fileMetadataEntry.FilePath, null,
                     fileMetadataEntry.Metadata, e));
             }
         }
 
+        var result = new FileTransferBatchResult(succeed, failed);
         progress?.OnCompleted(result);
         return result;
     }

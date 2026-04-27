@@ -2,7 +2,7 @@
 
 namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 
-public record FileTransferBatchErrorInfo(
+public readonly record struct FileTransferBatchErrorInfo(
     string FilePath,
     string? OutputPath,
     MetadataBase Metadata,

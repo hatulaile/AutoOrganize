@@ -87,8 +87,12 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     [RelayCommand(CanExecute = nameof(CanNext))]
     public void Next()
     {
-        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions>(
-            HostScreens.Home, new FileProcessOptions(SelectedMetadataType, Source));
+        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions>(HostScreens.Home,
+            new FileProcessOptions
+            {
+                Type = SelectedMetadataType,
+                FilesPaths = Source
+            });
     }
 
     public bool CanRemove() => SelectionItems.Count > 0;

@@ -1,10 +1,16 @@
 ﻿namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 
-public class FileTransferBatchResult : IFileTransferBatchInfo
+public readonly struct FileTransferBatchResult : IFileTransferBatchInfo
 {
-    public int Succeed { get; internal set; }
+    public int Succeed { get; }
 
-    public int Failed { get; internal set; }
+    public int Failed { get; }
 
     public int Total => Succeed + Failed;
+
+    public FileTransferBatchResult(int succeed, int failed)
+    {
+        Succeed = succeed;
+        Failed = failed;
+    }
 }

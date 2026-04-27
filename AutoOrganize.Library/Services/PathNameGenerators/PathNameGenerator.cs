@@ -14,9 +14,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
     public const string MOVIE_PATTERN = "{name}.{year}.{ext}";
     public const string MOVIE_FOLDER_PATTERN = "{name}.{year}";
 
-    public string GetTvSeriesFileName(SeriesMetadata seriesMetadata, TvFileNameGenerationOptions? option = null)
+    public string GetTvSeriesFileName(SeriesMetadata seriesMetadata, in TvFileNameGenerationOptions option = default)
     {
-        string pattern = option?.SeriesMetadataFolderPattern ?? TV_SERIES_PATTERN;
+        string pattern = option.SeriesMetadataFolderPattern ?? TV_SERIES_PATTERN;
 
         var newFileName = pattern
             .Replace("{sn}", GetValidName(seriesMetadata.Name), StringComparison.OrdinalIgnoreCase)
@@ -26,9 +26,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
         return PathUtils.GetValidFileName(newFileName);
     }
 
-    public string GetTvSeasonFileName(SeasonMetadata seriesMetadata, TvFileNameGenerationOptions? option = null)
+    public string GetTvSeasonFileName(SeasonMetadata seriesMetadata, in TvFileNameGenerationOptions option = default)
     {
-        string pattern = option?.SeasonMetadataFolderPattern ?? TV_SEASON_PATTERN;
+        string pattern = option.SeasonMetadataFolderPattern ?? TV_SEASON_PATTERN;
 
         int seasonNumber = seriesMetadata.SeasonNumber
                            ?? throw new MetadataFieldNullException(nameof(SeasonMetadata),
@@ -59,9 +59,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
     }
 
     public string GetTvEpisodeFileName(string path, EpisodeMetadata episodeMetadata,
-        TvFileNameGenerationOptions? option = null)
+        in TvFileNameGenerationOptions option = default)
     {
-        string pattern = option?.EpisodeNamePattern ?? TV_EPISODE_PATTERN;
+        string pattern = option.EpisodeNamePattern ?? TV_EPISODE_PATTERN;
 
         int seasonNumber = episodeMetadata.SeasonNumber
                            ?? throw new MetadataFieldNullException(nameof(EpisodeMetadata),
@@ -104,9 +104,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
     }
 
     public string GetMovieFileName(string path, MovieMetadata movieMetadata,
-        MovieFileNameGenerationOptions? option = null)
+       in MovieFileNameGenerationOptions option = default)
     {
-        string pattern = option?.MoviePattern ?? MOVIE_PATTERN;
+        string pattern = option.MoviePattern ?? MOVIE_PATTERN;
         var newFileName = pattern
             .Replace("{name}", GetValidName(movieMetadata.Name))
             .Replace("{oname}", GetValidName(movieMetadata.OriginalName))
@@ -117,9 +117,9 @@ public sealed class PathNameGenerator : IPathNameGenerator
     }
 
     public string GetMovieFolderName(MovieMetadata movieMetadata,
-        MovieFileNameGenerationOptions? option = null)
+        in MovieFileNameGenerationOptions option = default)
     {
-        string pattern = option?.MoviePattern ?? MOVIE_FOLDER_PATTERN;
+        string pattern = option.MoviePattern ?? MOVIE_FOLDER_PATTERN;
         var newFileName = pattern
             .Replace("{name}", GetValidName(movieMetadata.Name))
             .Replace("{oname}", GetValidName(movieMetadata.OriginalName))

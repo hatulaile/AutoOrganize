@@ -3,4 +3,4 @@ using AutoOrganize.Library.Models;
 
 namespace AutoOrganize.Models;
 
-public sealed record FileTransferProcessedOption(IEnumerable<FileMetadataEntry> FileMetadataEntries);
+public readonly record struct FileTransferProcessedOption(IEnumerable<FileMetadataEntry> FileMetadataEntries);

@@ -5,15 +5,13 @@ using AutoOrganize.Library.Models.Metadata;
 namespace AutoOrganize.Models;
 
 [StructLayout(LayoutKind.Auto)]
-public struct FileProcessOptions
+public readonly struct FileProcessOptions
 {
-    public MetadataType Type { get; set; }
+    public MetadataType Type { get; init; }
 
-    public IEnumerable<string> FilesPaths { get; set; }
+    public required IEnumerable<string> FilesPaths { get; init; }
 
-    public FileProcessOptions(MetadataType type, IEnumerable<string> filesPaths)
+    public FileProcessOptions()
     {
-        Type = type;
-        FilesPaths = filesPaths;
     }
 }

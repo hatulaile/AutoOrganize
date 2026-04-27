@@ -2,11 +2,15 @@ using System.Collections.Generic;
 
 namespace AutoOrganize.Models;
 
-public sealed class MetadataEditOption
+public readonly struct MetadataEditOption
 {
-    public FileProcessOptions? FileProcessOptions { get; init; }
+    public MetadataEditOption()
+    {
+    }
 
-    public IEnumerable<FileMetadataProcessingResult>? FileProcessResultInfos { get; init; }
+    public FileProcessOptions? FileProcessOptions { get; init; } = null;
+
+    public IEnumerable<FileMetadataProcessingResult>? FileProcessResultInfos { get; init; } = null;
 
     public bool IsClear { get; init; } = true;
 }

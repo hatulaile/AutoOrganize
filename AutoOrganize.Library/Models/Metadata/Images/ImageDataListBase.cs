@@ -21,6 +21,7 @@ public sealed class MetadataProviderImageDataList : ImageDataListBase
     public MetadataProviderImageDataList(MetadataProviderType type, IEnumerable<ImageData> imageData)
     {
         ProviderType = type;
-        ImageData.AddRange(imageData);
+        //不知道为什么会警告
+        ImageData!.AddRange(imageData);
     }
 }

@@ -7,17 +7,17 @@ namespace AutoOrganize.Library.Services.PathNameGenerators;
 public interface IPathNameGenerator
 {
     string GetTvSeriesFileName(SeriesMetadata seriesMetadata,
-        TvFileNameGenerationOptions? options = null);
+        in TvFileNameGenerationOptions options = default);
 
     string GetTvSeasonFileName(SeasonMetadata seasonMetadata,
-        TvFileNameGenerationOptions? options = null);
+        in TvFileNameGenerationOptions options = default);
 
     string GetTvEpisodeFileName(string path, EpisodeMetadata episodeMetadata,
-        TvFileNameGenerationOptions? options = null);
+        in TvFileNameGenerationOptions options = default);
 
     string GetMovieFileName(string path, MovieMetadata movieMetadata,
-        MovieFileNameGenerationOptions? option = null);
+        in MovieFileNameGenerationOptions option = default);
 
     string GetMovieFolderName(MovieMetadata movieMetadata,
-        MovieFileNameGenerationOptions? option = null);
+        in MovieFileNameGenerationOptions option = default);
 }
