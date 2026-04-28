@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using AutoOrganize.Services.WindowManagers;
 using AutoOrganize.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,14 +10,15 @@ namespace AutoOrganize.Services.TopLevelServices;
 
 public abstract class TopLevelServicesBase
 {
+    private readonly IWindowProvider _windowProvider;
     protected TopLevel DefaultTopLevel => field ??= GetDefaultTopLevel();
 
-    protected static TopLevel GetTopLevel(Visual visual)
+    protected TopLevel GetTopLevel(Visual visual)
     {
         return TopLevel.GetTopLevel(visual) ?? throw new NotSupportedException();
     }
 
-    protected static TopLevel GetDefaultTopLevel()
+    protected TopLevel GetDefaultTopLevel()
     {
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -26,23 +28,14 @@ public abstract class TopLevelServicesBase
         throw new NotSupportedException();
     }
 
-    protected static TopLevel? FindTopLevel(object dataContext)
+    protected TopLevel? FindTopLevel(object dataContext)
     {
-        if (App.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            Window? window;
-            object? context = dataContext;
-            do
-            {
-                window = desktop.Windows.FirstOrDefault(x => ReferenceEquals(x.DataContext, context));
-                if (context is ViewModelBase navigationViewModel) context = navigationViewModel.OwnerViewModel;
-                else context = null;
-            } while (window is null && context is not null);
+        return TopLevel.GetTopLevel(_windowProvider.GetWindowByViewModel(dataContext));
+    }
 
-            return TopLevel.GetTopLevel(window);
-        }
-
-        return null;
+    protected TopLevelServicesBase(IWindowProvider windowProvider)
+    {
+        _windowProvider = windowProvider;
     }
 }
 
@@ -67,5 +60,9 @@ public abstract class TopLevelServicesBase<TProvider> : TopLevelServicesBase
             return Default;
         TopLevel? topLevel = FindTopLevel(dataContext);
         return topLevel is null ? Default : GetProvider(topLevel);
+    }
+
+    protected TopLevelServicesBase(IWindowProvider windowProvider) : base(windowProvider)
+    {
     }
 }

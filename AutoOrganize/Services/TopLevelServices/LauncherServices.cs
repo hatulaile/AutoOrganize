@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AutoOrganize.Services.WindowManagers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -59,4 +60,8 @@ public sealed class LauncherServices : TopLevelServicesBase<ILauncher>, ILaunche
 
     protected override ILauncher GetProvider(TopLevel topLevel)
         => topLevel.Launcher;
+
+    public LauncherServices(IWindowProvider windowProvider) : base(windowProvider)
+    {
+    }
 }

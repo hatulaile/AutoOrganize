@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using AutoOrganize.Services.WindowManagers;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 
@@ -18,4 +19,8 @@ public sealed class ClipboardServices : TopLevelServicesBase<IClipboard>, IClipb
 
     protected override IClipboard GetProvider(TopLevel topLevel)
         => topLevel.Clipboard ?? throw new NotSupportedException();
+
+    public ClipboardServices(IWindowProvider windowProvider) : base(windowProvider)
+    {
+    }
 }

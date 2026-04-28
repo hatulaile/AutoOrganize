@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoOrganize.Services.WindowManagers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -60,7 +61,10 @@ public sealed class StorageServices : TopLevelServicesBase<IStorageProvider>, IS
         return await provider.OpenFolderPickerAsync(options);
     }
 
-
     protected override IStorageProvider GetProvider(TopLevel topLevel)
         => topLevel.StorageProvider;
+
+    public StorageServices(IWindowProvider windowProvider) : base(windowProvider)
+    {
+    }
 }

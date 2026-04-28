@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using AutoOrganize.Services.WindowManagers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
@@ -76,4 +77,8 @@ public sealed class NotificationServices : TopLevelServicesBase<INotificationMan
     }
 
     private sealed record WindowsNotificationState(WindowNotificationManager Manager, bool IsNew);
+
+    public NotificationServices(IWindowProvider windowProvider) : base(windowProvider)
+    {
+    }
 }
