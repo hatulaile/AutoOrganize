@@ -10,8 +10,10 @@ using AutoOrganize.Library.Services.Metadata;
 using AutoOrganize.Library.Services.NameParsers;
 using AutoOrganize.Models;
 using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.Utils;
 using Avalonia.Collections;
+using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -27,6 +29,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     private readonly INameParserManager _nameParserManager;
     private readonly IMetadataManager _metadataManager;
     private readonly INavigationService _navigationService;
+    private readonly INotificationServices _notificationServices;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly SemaphoreSlim _progressSemaphore = new(PROGRESS_MAX, PROGRESS_MAX);
 
@@ -90,8 +93,14 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         else if (!hasFiles || CurrentProgress == 0) tcs.SetResult();
         await tcs.Task.WaitAsync(token);
 
-        if (Results.Count > 0)
+        if (SuccessCount > 0)
         {
+            _notificationServices.Show(
+                FailedCound == 0
+                    ? new Notification("处理结果", $"成功 {SuccessCount} 个, 无一失败.", NotificationType.Success)
+                    : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCound} 个.", NotificationType.Warning),
+                this);
+
             _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
                 new MetadataEditOption
                 {
@@ -101,6 +110,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             return;
         }
 
+        _notificationServices.Show(new Notification("处理结果", "没有任何成功的文件", NotificationType.Error), this);
         _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
     }
 
@@ -213,11 +223,12 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     }
 
     public FileMetadataProgressViewModel(INameParserManager nameParserManager, IMetadataManager metadataManager,
-        INavigationService navigationService)
+        INavigationService navigationService, INotificationServices notificationServices)
     {
         _nameParserManager = nameParserManager;
         _metadataManager = metadataManager;
         _navigationService = navigationService;
+        _notificationServices = notificationServices;
 
         Results.CollectionChanged += (_, args) =>
         {
