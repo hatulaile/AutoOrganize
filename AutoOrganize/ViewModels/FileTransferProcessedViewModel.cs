@@ -50,7 +50,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     }
 
     [MemberNotNull(nameof(Entries))]
-    public void OnParametersChanged(FileTransferProcessedOption args)
+    public void OnNavigatedTo(FileTransferProcessedOption args)
     {
         Entries = new AvaloniaList<FileMetadataEntry>(args.FileMetadataEntries);
         SuccessProcessedCount = 0;

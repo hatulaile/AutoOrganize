@@ -177,7 +177,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         }
     }
 
-    public void OnParametersChanged(FileProcessOptions args)
+    public void OnNavigatedTo(FileProcessOptions args)
     {
         _ = StartAsync(args, _cancellationTokenSource.Token);
     }
