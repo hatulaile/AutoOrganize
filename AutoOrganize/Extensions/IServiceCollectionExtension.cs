@@ -13,6 +13,7 @@ using AutoOrganize.Library.Services.RequestCoalescers;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.Services.WindowManagers;
+using AutoOrganize.Utils;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using TMDbLib.Client;
@@ -80,7 +81,7 @@ public static class ServiceCollectionExtension
                     (provider, _) => new ThemoviedbMetadataProvider(
                         //这里的 api key 是我的, 请不要到其他地方使用, 申请自己的 api key 地址 https://www.themoviedb.org/settings/api
                         //这里使用了 api.tmdb.org, 国内访问默认的 api.themoviedb.org 会有问题
-                        new TMDbClient("a68ae3528e2875c12cca9e924c5483b5", baseUrl: "api.tmdb.org"),
+                        new TMDbClient(TmdbConstants.TMDB_API_KEY, baseUrl: "api.tmdb.org"),
                         provider.GetRequiredService<IFileConfigManager>()
                             .GetConfigOrLoad<ThemoviedbMetadataProviderConfig>()));
 

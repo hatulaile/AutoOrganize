@@ -1,0 +1,81 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AutoOrganize.ViewModels"
+        xmlns:u="using:AutoOrganize.Utils"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="260"
+        Width="500" Height="270" CanResize="False" Title="关于 AutoOrganize"
+        x:Class="AutoOrganize.Views.AboutWindow"
+        x:DataType="vm:AboutWindowViewModel">
+
+    <Border Padding="12">
+        <Grid RowDefinitions="Auto, Auto" RowSpacing="8">
+            <TextBlock Grid.Row="0" Text="AutoOrganize" HorizontalAlignment="Center" FontSize="26" FontWeight="Bold" />
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *" ColumnSpacing="12" HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+                <Border
+                    BorderThickness="2"
+                    Width="200"
+                    Padding="12"
+                    BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}">
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding VersionString, StringFormat='{}程序版本:  {0}'}" />
+                        <TextBlock Text="{Binding Configuration, StringFormat='{}发布模式:  {0}'}" />
+                        <TextBlock Text="{Binding InformationalVersion}" Margin="0,0, 0,8" />
+                        <TextBlock Text="{Binding OSArchitecture, StringFormat='{}系统架构:  {0}'}" />
+                        <TextBlock Text="{Binding RuntimeIdentifier, StringFormat='{}运行时标识:  {0}'}" />
+                        <TextBlock Text="{Binding Framework, StringFormat='{}.NET 版本:  {0}'}" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="1" Spacing="16">
+                    <TextBlock>
+                        <Span>
+                            <Run Text="本项目托管于" />
+                            <InlineUIContainer BaselineAlignment="TextBottom">
+                                <Button Content="Github" Classes="borderless link" Command="{Binding OpenUrlCommand}"
+                                        CommandParameter="{x:Static u:AppConstants.APP_HOME}" ClickMode="Press" />
+                            </InlineUIContainer>
+                        </Span>
+                        <LineBreak />
+                        <Span>
+                            <Run Text="并采用" />
+                            <InlineUIContainer BaselineAlignment="TextBottom">
+                                <Button Content="GPLv3" Classes="borderless link" Click="LicenseClick" />
+                            </InlineUIContainer>
+                            <Run Text="协议开源" />
+                        </Span>
+                    </TextBlock>
+
+                    <TextBlock TextWrapping="Wrap">
+                        <Run Text="没有" />
+                        <InlineUIContainer BaselineAlignment="TextBottom">
+                            <Button Content="开源库" Classes="borderless link" Click="ThirdPartyLicenseClick" />
+                        </InlineUIContainer>
+                        <Run Text="的支持，就不会有这个项目"/>
+                        <LineBreak />
+                        <Run Text="感谢每一位开源开发者!" />
+                    </TextBlock>
+
+                    <Border>
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                            <Button Grid.Column="0" Height="68" Classes="borderless" Cursor="Hand"
+                                    Command="{Binding OpenUrlCommand}"
+                                    CommandParameter="{x:Static u:TmdbConstants.TMDB_HOME}" ClickMode="Press">
+                                <Button.Content>
+                                    <Svg Stretch="UniformToFill" Path="{x:Static u:TmdbConstants.TMDB_ICO_PATH}" />
+                                </Button.Content>
+                            </Button>
+
+                            <TextBlock Grid.Column="1" TextWrapping="Wrap">
+                                <Run Text="This product uses the TMDB API but is not endorsed or certified by TMDB." />
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

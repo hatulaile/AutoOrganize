@@ -189,7 +189,7 @@
                                                         Content="{Binding Value}"
                                                         HorizontalAlignment="Center"
                                                         Command="{Binding #MetadataViewControl.DataContext.CopyMetadataIdCommand}"
-                                                        CommandParameter="{Binding}">
+                                                        CommandParameter="{Binding}" FontStyle="Italic">
                                                 </Button>
                                             </StackPanel>
                                         </Border>

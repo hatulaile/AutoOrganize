@@ -1,8 +1,10 @@
 using System.Linq;
 using AutoOrganize.Models;
 using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.Services.WindowManagers;
 using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using ViewModelRegistrationGenerator;
 
@@ -12,6 +14,7 @@ namespace AutoOrganize.ViewModels;
 public sealed partial class MainWindowViewModel : ViewModelBase
 {
     private readonly INavigationService _navigationService;
+    private readonly IWindowService _windowService;
 
     public RoutingState? RoutingState { get; }
 
@@ -29,11 +32,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         new("任务\n输出", string.Empty, typeof(ActivityViewModel)),
     ];
 
-    public MainWindowViewModel(INavigationService navigationService, [FromKeyedServices(HostScreens.Main)] RoutingState routingState)
+    [RelayCommand]
+    private void ShowAbout()
+    {
+        _windowService.Show<AboutWindowViewModel>(this);
+    }
+
+    public MainWindowViewModel(INavigationService navigationService, [FromKeyedServices(HostScreens.Main)] RoutingState routingState, IWindowService windowService)
     {
         RoutingState = routingState;
         RoutingState.SetOwnerViewModel(this);
         _navigationService = navigationService;
+        _windowService = windowService;
         SelectedPage = NavigationItems.First();
     }
 }
