@@ -19,6 +19,7 @@ public partial class App : Application
 
     public override void Initialize()
     {
+        BuildAppServiceProvider();
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -26,17 +27,20 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var services = new ServiceCollection();
-            services.AddAutoOrganize();
-            services.AddSingleton<MainWindow>()
-                .AddSingleton<MainWindowViewModel>();
-            ServiceProvider = services.BuildServiceProvider();
-
             desktop.MainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             desktop.MainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
             desktop.MainWindow.Show();
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void BuildAppServiceProvider()
+    {
+        var services = new ServiceCollection();
+        services.AddAutoOrganize();
+        services.AddSingleton<MainWindow>()
+            .AddSingleton<MainWindowViewModel>();
+        ServiceProvider = services.BuildServiceProvider();
     }
 }
