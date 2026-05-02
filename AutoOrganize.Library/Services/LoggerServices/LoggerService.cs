@@ -1,0 +1,49 @@
+using AutoOrganize.Library.Services.Config;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+
+namespace AutoOrganize.Library.Services.LoggerServices;
+
+public sealed class LoggerService : ILoggerService
+{
+    private readonly IFileConfigManager _fileConfigManager;
+
+    public ILogger? ILogger { get; set; }
+
+    public bool IsEnabledLogger => Config.IsEnabledLogger;
+
+    public bool IsWriteToFile => IsEnabledLogger && Config.IsWriteToFile;
+
+    public bool IsWriteToView => IsEnabledLogger && Config.IsWriteToView;
+
+    public LoggerConfig Config { get; }
+
+    public LoggingLevelSwitch LevelSwitch { get; } = new();
+
+    public void SetLogLevel(LogEventLevel logLevel)
+    {
+        SetLogLevelInternal(logLevel);
+        _fileConfigManager.SetConfig(Config);
+    }
+
+    public async Task SetLogLevelAsync(LogEventLevel logLevel)
+    {
+        SetLogLevelInternal(logLevel);
+        await _fileConfigManager.SetConfigAsync(Config).ConfigureAwait(false);
+    }
+
+    private void SetLogLevelInternal(LogEventLevel logLevel)
+    {
+        Config.LogLevel = logLevel;
+        LevelSwitch.MinimumLevel = logLevel;
+        ILogger?.ForContext<LoggerService>().Information("Log level set to {LogLevel}", logLevel);
+    }
+
+    public LoggerService(IFileConfigManager fileConfigManager)
+    {
+        _fileConfigManager = fileConfigManager;
+        Config = fileConfigManager.GetConfigOrLoad<LoggerConfig>();
+        LevelSwitch.MinimumLevel = Config.LogLevel;
+    }
+}

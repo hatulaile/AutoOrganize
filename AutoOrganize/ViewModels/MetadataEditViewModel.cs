@@ -14,6 +14,7 @@ using Avalonia.Controls.DataGridHierarchical;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels;
@@ -22,6 +23,7 @@ namespace AutoOrganize.ViewModels;
 public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationViewModel<MetadataEditOption>
 {
     private readonly INavigationService _navigationService;
+    private readonly ILogger<MetadataEditViewModel> _logger;
 
     private MetadataRoot _metadataRoot = new();
 
@@ -41,6 +43,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     [RelayCommand(CanExecute = nameof(CanNext))]
     public void Next()
     {
+        _logger.LogInformation("进入文件传输处理页面.");
         _navigationService.NavigateTo<FileTransferProcessedViewModel, FileTransferProcessedOption>(HostScreens.Home,
             new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataRoot)));
     }
@@ -48,6 +51,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     [RelayCommand]
     public void Back()
     {
+        _logger.LogDebug("返回文件选择页");
         _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
     }
 
@@ -58,6 +62,14 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     partial void OnSelectedMetadataChanged(FileMetadataBase? value)
     {
+        if (value is null)
+        {
+            _logger.LogDebug("取消选择元数据项");
+            _navigationService.Clear(HostScreens.MetadataEdit);
+            return;
+        }
+
+        _logger.LogDebug("选中元数据项: {Type} - {Name}", value.GetType().Name, value.Title);
         switch (value)
         {
             case IFileMetadata<MetadataBase> metadata:
@@ -88,6 +100,8 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     public void OnParametersChanged(MetadataEditOption option)
     {
+        _logger.LogDebug("参数变更，IsClear: {IsClear}, 处理结果数量: {Count}",
+            option.IsClear, option.FileProcessResultInfos?.Count() ?? 0);
         CreateSource(option);
     }
 
@@ -95,14 +109,19 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     {
         if (options.IsClear)
         {
+            _logger.LogDebug("清空现有源数据");
             _metadataRoot = new MetadataRoot();
             _failedMetadataSystemRoot = new FailedMetadataRoot();
             Source.Clear();
         }
 
         if (options.FileProcessResultInfos is null || options.FileProcessOptions is null)
+        {
+            _logger.LogDebug("无处理结果或处理选项，跳过构建源");
             return;
+        }
 
+        int successCount = 0, failedCount = 0;
         foreach (FileMetadataProcessingResult result in options.FileProcessResultInfos)
         {
             if (result.IsSuccess)
@@ -110,23 +129,32 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
                 try
                 {
                     _metadataRoot.AddFile(result.Metadata, result.FilePath);
+                    successCount++;
                 }
                 catch (Exception e)
                 {
+                    _logger.LogWarning(e, "添加成功元数据到树失败: {FilePath}", result.FilePath);
                     _failedMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, e);
+                    failedCount++;
                 }
             }
             else
             {
                 _failedMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, result.Error,
                     options.FileProcessOptions.Value);
+                failedCount++;
             }
         }
+
+        _logger.LogDebug("构建源数据完成: 成功 {Success}, 失败 {Failed}", successCount, failedCount);
 
         if (options.IsClear)
         {
             if (_failedMetadataSystemRoot.Children.Count > 0)
+            {
                 Source.Add(_failedMetadataSystemRoot);
+            }
+
             Source.AddRange(_metadataRoot.Children);
         }
 
@@ -140,6 +168,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
             });
 
             Model.SetRoots(Source);
+            _logger.LogDebug("分层模型已创建");
         }
     }
 
@@ -168,9 +197,10 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     public MetadataEditViewModel(
         INavigationService navigationViewModel,
         [FromKeyedServices(HostScreens.MetadataEdit)]
-        RoutingState routingState)
+        RoutingState routingState, ILogger<MetadataEditViewModel> logger)
     {
         _navigationService = navigationViewModel;
+        _logger = logger;
         RoutingState = routingState;
         RoutingState.SetOwnerViewModel(this);
     }

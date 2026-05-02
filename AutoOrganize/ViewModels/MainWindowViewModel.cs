@@ -6,6 +6,7 @@ using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels;
@@ -15,6 +16,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 {
     private readonly INavigationService _navigationService;
     private readonly IWindowService _windowService;
+    private readonly ILogger<MainWindowViewModel> _logger;
 
     public RoutingState? RoutingState { get; }
 
@@ -23,6 +25,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     partial void OnSelectedPageChanged(PageModel value)
     {
+        _logger.LogDebug("导航到页面: {PageName} ({ViewModelType})", value.Title, value.ViewModelType.Name);
         _navigationService.NavigateTo(HostScreens.Main, value.ViewModelType);
     }
 
@@ -35,15 +38,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ShowAbout()
     {
+        _logger.LogDebug("用户打开了关于窗口");
         _windowService.Show<AboutWindowViewModel>(this);
     }
 
-    public MainWindowViewModel(INavigationService navigationService, [FromKeyedServices(HostScreens.Main)] RoutingState routingState, IWindowService windowService)
+    public MainWindowViewModel(INavigationService navigationService, [FromKeyedServices(HostScreens.Main)] RoutingState routingState, IWindowService windowService, ILogger<MainWindowViewModel> logger)
     {
         RoutingState = routingState;
         RoutingState.SetOwnerViewModel(this);
         _navigationService = navigationService;
         _windowService = windowService;
+        _logger = logger;
         SelectedPage = NavigationItems.First();
+        _logger.LogDebug("MainWindowViewModel 初始化完成，默认页面: {PageName}", SelectedPage.Title);
     }
 }

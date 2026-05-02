@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using AutoOrganize.Library.Services.FileTransferServices;
+using AutoOrganize.Library.Services.LoggerServices;
 using AutoOrganize.Library.Services.Metadata.Providers.ThemoviedbMetadataProviders;
 using AutoOrganize.Library.Services.PathNameGenerators.Configs;
 
@@ -11,4 +12,5 @@ namespace AutoOrganize.Library.Services.Config;
 [JsonSerializable(typeof(MovieFileNameGeneratorConfig))]
 [JsonSerializable(typeof(ThemoviedbMetadataProviderConfig))]
 [JsonSerializable(typeof(FileTransferConfig))]
+[JsonSerializable(typeof(LoggerConfig))]
 public sealed partial class ConfigJsonSourceGenerationContext : JsonSerializerContext;

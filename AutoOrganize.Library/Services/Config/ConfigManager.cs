@@ -91,7 +91,7 @@ public class FileConfigManager : IFileConfigManager
 
     [UnconditionalSuppressMessage("Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config 一定会设置 TypeInfoResolverChain, 所以忽略")]
     public void SaveConfig(ConfigInfo config)
     {
         File.WriteAllText(config.Path,
@@ -100,7 +100,7 @@ public class FileConfigManager : IFileConfigManager
 
     [UnconditionalSuppressMessage("Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "因为这里使用了Config, 所以会警告, 但是 Config一定会设置 TypeInfoResolverChain, 所以忽略")]
+        Justification = "因为这里使用了Config, 所以会警告, 但是 Config 一定会设置 TypeInfoResolverChain, 所以忽略")]
     public TConfig LoadConfigOrNew<TConfig>() where TConfig : IConfig, new()
     {
         string path = GetConfigPath<TConfig>();
@@ -308,7 +308,7 @@ public class FileConfigManager : IFileConfigManager
         }
 
         if (string.IsNullOrWhiteSpace(configDirectory) || !Path.IsPathFullyQualified(configDirectory))
-            ConfigDirectory = Path.Combine(PathUtils.GetAppdataPath(), "hatu.AutoOrganize");
+            ConfigDirectory = Path.Join(PathUtils.GetDefaultAppdataPath(), "Config");
         else
             ConfigDirectory = configDirectory;
 

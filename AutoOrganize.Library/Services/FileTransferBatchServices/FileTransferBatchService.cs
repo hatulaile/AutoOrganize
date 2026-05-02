@@ -9,6 +9,7 @@ using AutoOrganize.Library.Services.Observers;
 using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Library.Services.PathNameGenerators.Configs;
 using AutoOrganize.Library.Services.PathNameGenerators.Options;
+using Microsoft.Extensions.Logging;
 
 namespace AutoOrganize.Library.Services.FileTransferBatchServices;
 
@@ -17,6 +18,7 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
     private readonly IFileTransferService _fileTransferService;
     private readonly IPathNameGenerator _pathNameGenerator;
     private readonly IFileConfigManager _fileConfigManager;
+    private readonly ILogger<FileTransferBatchService> _logger;
 
     private FileTransferConfig FileTransferConfig =>
         _fileConfigManager.GetRequiredConfig<FileTransferConfig>();
@@ -56,6 +58,8 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
                         .TransferFileAsync(new FileTransferEntry(fileMetadataEntry.FilePath, path),
                             fileTransferOptions, token).ConfigureAwait(false);
 
+                    _logger.LogDebug("文件 {file} 至 {output} 处理成功", fileMetadataEntry.FilePath,
+                        fileMetadataEntry.Metadata);
                     succeed++;
                     progress?.OnSuccess(
                         new FileTransferBatchInfo(fileMetadataEntry.FilePath, path, fileMetadataEntry.Metadata));
@@ -67,6 +71,8 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
                 catch (Exception e)
                 {
                     failed++;
+                    _logger.LogError(e, "文件 {file} 至 {output} 失败",
+                        fileMetadataEntry.FilePath, path);
                     progress?.OnFailure(new FileTransferBatchErrorInfo(fileMetadataEntry.FilePath, path,
                         fileMetadataEntry.Metadata, e));
                 }
@@ -78,11 +84,13 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
             catch (Exception e)
             {
                 failed++;
+                _logger.LogError(e, "文件 {file} 处理失败", fileMetadataEntry.FilePath);
                 progress?.OnFailure(new FileTransferBatchErrorInfo(fileMetadataEntry.FilePath, null,
                     fileMetadataEntry.Metadata, e));
             }
         }
 
+        _logger.LogInformation("文件传输处理完成，成功: {Succeed}, 失败: {Failed}", succeed, failed);
         var result = new FileTransferBatchResult(succeed, failed);
         progress?.OnCompleted(result);
         return result;
@@ -134,11 +142,12 @@ public sealed class FileTransferBatchService : IFileTransferBatchService
     }
 
     public FileTransferBatchService(IFileTransferService fileTransferService, IPathNameGenerator pathNameGenerator,
-        IFileConfigManager fileConfigManager)
+        IFileConfigManager fileConfigManager, ILogger<FileTransferBatchService> logger)
     {
         _fileTransferService = fileTransferService;
         _pathNameGenerator = pathNameGenerator;
         _fileConfigManager = fileConfigManager;
+        _logger = logger;
         fileConfigManager.LoadConfigOrNew<FileTransferConfig>();
         fileConfigManager.LoadConfigOrNew<FileNameGeneratorConfig>();
     }

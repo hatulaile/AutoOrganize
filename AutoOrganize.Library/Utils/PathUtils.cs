@@ -6,7 +6,9 @@ public static class PathUtils
 
     private static HashSet<char>? _invalidPath = null;
 
-    public static string GetAppdataPath() => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    public static string GetRootAppdataPath() => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+    public static string GetDefaultAppdataPath() => Path.Combine(GetRootAppdataPath(), "hatu.AutoOrganize");
 
     public static string GetValidFileName(string fileName, char replacement = '_')
     {

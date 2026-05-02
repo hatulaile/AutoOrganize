@@ -17,6 +17,7 @@ using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 
 namespace AutoOrganize.ViewModels;
 
@@ -30,6 +31,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     private readonly IMetadataManager _metadataManager;
     private readonly INavigationService _navigationService;
     private readonly INotificationServices _notificationServices;
+    private readonly ILogger<FileMetadataProgressViewModel> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly SemaphoreSlim _progressSemaphore = new(PROGRESS_MAX, PROGRESS_MAX);
 
@@ -58,19 +60,26 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     [RelayCommand]
     public void GoBack()
     {
+        _logger.LogDebug($"触发返回方法, 前往 {nameof(SelectFilesViewModel)}.");
         _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
         Dispose();
     }
 
     private async Task StartAsync(FileProcessOptions options, CancellationToken token)
     {
+        _logger.LogDebug($"触发{nameof(StartAsync)}方法.");
+
         bool hasFiles = false;
         var tcs = new TaskCompletionSource();
 
         foreach (string file in GetFiles(options.FilesPaths))
         {
             token.ThrowIfCancellationRequested();
-            if (!VideoUtils.IsVideoFile(file)) continue;
+            if (!VideoUtils.IsVideoFile(file))
+            {
+                _logger.LogTrace("{file} 不是一个视频, 跳过!", file);
+                continue;
+            }
 
             await _progressSemaphore.WaitAsync(token);
             CurrentProgress++;
@@ -95,11 +104,13 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
         if (SuccessCount > 0)
         {
+            _logger.LogInformation("源数据处理完成, 成功: {successCount}, 失败: {failedCound}", SuccessCount, FailedCound);
             _notificationServices.Show(
                 FailedCound == 0
                     ? new Notification("处理结果", $"成功 {SuccessCount} 个, 无一失败.", NotificationType.Success)
                     : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCound} 个.", NotificationType.Warning),
                 this);
+
 
             _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
                 new MetadataEditOption
@@ -110,12 +121,15 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             return;
         }
 
+        _logger.LogWarning("源数据处理全部失败: {failedCound}", FailedCound);
         _notificationServices.Show(new Notification("处理结果", "没有任何成功的文件", NotificationType.Error), this);
         _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
     }
 
     private async Task ProgressAndAddFileAsync(string filePath, MetadataType type, CancellationToken token)
     {
+        _logger.LogDebug("开始处理文件: {FilePath}, 类型: {Type}", filePath, type);
+
         try
         {
             FileMetadataProcessingResult processingResult = type switch
@@ -130,10 +144,12 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         }
         catch (OperationCanceledException)
         {
+            _logger.LogDebug("文件处理被取消: {FilePath}", filePath);
             // Ignore
         }
         catch (Exception exception)
         {
+            _logger.LogError(exception, "文件处理失败: {FilePath}, 类型: {Type}", filePath, type);
             Results.Add(new FileMetadataProcessingResult(filePath, exception));
         }
     }
@@ -142,30 +158,40 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     {
         var movieParse = _nameParserManager.ParseMovie(filePath);
         if (!movieParse.IsComplete())
-            return new FileMetadataProcessingResult(filePath,
-                new MetadataParseException(filePath, "movie", "无法解析成一个可用的电影元数据"));
+            throw new MetadataParseException(filePath, "movie", "无法解析成一个可用的电影元数据");
 
-        MetadataBase? metadata =
+        var metadata =
             await _metadataManager.SearchMovieSingleAsync(new SearchQuery(movieParse.Title, movieParse.Year), token);
 
         if (metadata is null)
             throw new MetadataNotFoundException(filePath, "movie", "未找到匹配的电影元数据");
+
+        _logger.LogDebug("电影元数据匹配成功: {FilePath} -> {Title}", filePath, metadata.Name);
         return new FileMetadataProcessingResult(filePath, metadata);
     }
 
     private async Task<FileMetadataProcessingResult> ProcessTvFileAsync(string filePath, CancellationToken token)
     {
         var tvParse = _nameParserManager.ParseTv(filePath);
-        tvParse.Season ??= 1;
+
+        if (tvParse.Season is null)
+        {
+            _logger.LogWarning("文件 {FilePath} 未解析到 Season，使用默认第一季.", filePath);
+            tvParse.Season ??= 1;
+        }
+
         if (!tvParse.IsComplete())
-            return new FileMetadataProcessingResult(filePath,
-                new MetadataParseException(filePath, "tv", "无法解析成一个可用的电视元数据"));
-        MetadataBase? metadata =
+            throw new MetadataParseException(filePath, "tv", "无法解析成一个可用的电视元数据");
+
+        var metadata =
             await _metadataManager.SearchEpisodeAsync(new SearchQuery(tvParse.Title, tvParse.Year),
                 tvParse.Season.Value, tvParse.Episode.Value, token);
 
         if (metadata is null)
             throw new MetadataNotFoundException(filePath, "tv", "未找到匹配的电视元数据");
+
+        _logger.LogDebug("电视元数据匹配成功: {SeriesName} ({Year}) - {SeasonName} - {EpisodeName}", metadata.Series?.Name, metadata.AirDate?.Year,
+            metadata.Season?.Name, metadata.Name);
         return new FileMetadataProcessingResult(filePath, metadata);
     }
 
@@ -189,6 +215,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
     public void OnNavigatedTo(FileProcessOptions args)
     {
+        _logger.LogDebug("导航到文件处理页，类型: {Type}", args.Type);
         _ = StartAsync(args, _cancellationTokenSource.Token);
     }
 
@@ -223,12 +250,14 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     }
 
     public FileMetadataProgressViewModel(INameParserManager nameParserManager, IMetadataManager metadataManager,
-        INavigationService navigationService, INotificationServices notificationServices)
+        INavigationService navigationService, INotificationServices notificationServices,
+        ILogger<FileMetadataProgressViewModel> logger)
     {
         _nameParserManager = nameParserManager;
         _metadataManager = metadataManager;
         _navigationService = navigationService;
         _notificationServices = notificationServices;
+        _logger = logger;
 
         Results.CollectionChanged += (_, args) =>
         {
