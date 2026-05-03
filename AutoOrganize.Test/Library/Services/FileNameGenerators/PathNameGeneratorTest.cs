@@ -10,7 +10,6 @@ public class PathNameGeneratorTest
 
     public PathNameGeneratorTest()
     {
-        _generator = new PathNameGenerator();
     }
 
     [Fact]

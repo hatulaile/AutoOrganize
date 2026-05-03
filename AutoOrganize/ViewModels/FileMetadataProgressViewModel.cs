@@ -18,9 +18,11 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels;
 
+[ViewModelRegistration]
 public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavigationViewModel<FileProcessOptions>,
     IDisposable, IAsyncDisposable
 {

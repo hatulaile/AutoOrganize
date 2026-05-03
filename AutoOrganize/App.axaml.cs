@@ -5,6 +5,7 @@ using AutoOrganize.Extensions;
 using AutoOrganize.Library.Services.Config;
 using AutoOrganize.Library.Services.LoggerServices;
 using AutoOrganize.Library.Utils;
+using AutoOrganize.ViewLocators;
 using AutoOrganize.ViewModels;
 using AutoOrganize.Views;
 using Avalonia;
@@ -28,6 +29,7 @@ public partial class App : Application
     public override void Initialize()
     {
         BuildAppServiceProvider();
+        AddViewLocator();
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -49,6 +51,11 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void AddViewLocator()
+    {
+        DataTemplates.Add(new ViewLocator(ServiceProvider));
     }
 
     private void BuildAppServiceProvider()

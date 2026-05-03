@@ -29,7 +29,18 @@
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
-    
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="StaticViewLocatorViewModelNamespacePrefixes" />
+        <CompilerVisibleProperty Include="StaticViewLocatorIncludeReferencedAssemblies" />
+        <CompilerVisibleProperty Include="StaticViewLocatorIncludeInternalViewModels" />
+        <CompilerVisibleProperty Include="StaticViewLocatorAdditionalViewBaseTypes" />
+        <CompilerVisibleProperty Include="StaticViewLocatorNamespaceReplacementRules" />
+        <CompilerVisibleProperty Include="StaticViewLocatorTypeNameReplacementRules" />
+        <CompilerVisibleProperty Include="StaticViewLocatorStripGenericArityFromViewName" />
+        <CompilerVisibleProperty Include="StaticViewLocatorInterfacePrefixesToStrip" />
+    </ItemGroup>
+
     <PropertyGroup>
         <StaticViewLocatorTypeNameReplacementRules>WindowViewModel=Window,ViewModel=View</StaticViewLocatorTypeNameReplacementRules>
     </PropertyGroup>
@@ -53,10 +64,6 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageReference Include="IconPacks.Avalonia.PhosphorIcons" Version="1.4.0-update-avalonia0019" />
         <PackageReference Include="ProDataGrid" Version="12.0.0" />
-        <PackageReference Include="StaticViewLocator" Version="0.4.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.5" />
         <PackageReference Include="Xaml.Behaviors.Avalonia" Version="12.0.0" />
         <PackageReference Include="HotAvalonia" Version="3.1.0" PrivateAssets="All" Publish="True" />
@@ -66,6 +73,7 @@
     <ItemGroup>
         <ProjectReference Include="..\AutoOrganize.Library\AutoOrganize.Library.csproj" />
         <ProjectReference Include="..\ViewModelRegistrationGenerator\ViewModelRegistrationGenerator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+        <ProjectReference Include="..\StaticViewLocatorGenerator\StaticViewLocatorGenerator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
     </ItemGroup>
 
     <ItemGroup>

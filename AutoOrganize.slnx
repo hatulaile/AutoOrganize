@@ -2,5 +2,6 @@
   <Project Path="AutoOrganize.Library/AutoOrganize.Library.csproj" />
   <Project Path="AutoOrganize.Test/AutoOrganize.Test.csproj" />
   <Project Path="AutoOrganize/AutoOrganize.csproj" />
+  <Project Path="StaticViewLocatorGenerator/StaticViewLocatorGenerator.csproj" />
   <Project Path="ViewModelRegistrationGenerator/ViewModelRegistrationGenerator.csproj" />
 </Solution>
