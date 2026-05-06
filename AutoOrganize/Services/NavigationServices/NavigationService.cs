@@ -14,7 +14,7 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
-        if ((defaultViewModel ?? _serviceProvider.GetService<TViewModel>()) is not { } viewModel)
+        if ((defaultViewModel ?? _serviceProvider.GetRequiredService<TViewModel>()) is not { } viewModel)
             return;
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
@@ -35,7 +35,7 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
-        object? vm = _serviceProvider.GetService(viewModelType);
+        object? vm = _serviceProvider.GetRequiredService(viewModelType);
         if (vm is not (INavigationViewModel navigationViewModel and ViewModelBase viewModelBase))
             return;
 
@@ -58,7 +58,7 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
-        if ((defaultViewModel ?? _serviceProvider.GetService<TViewModel>()) is not { } viewModel)
+        if ((defaultViewModel ?? _serviceProvider.GetRequiredService<TViewModel>()) is not { } viewModel)
             return;
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
@@ -81,7 +81,7 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
-        object? vm = _serviceProvider.GetService(viewModelType);
+        object? vm = _serviceProvider.GetRequiredService(viewModelType);
         if (vm is not (INavigationViewModel<TArgs> navigationViewModel and ViewModelBase viewModelBase))
             return;
 
