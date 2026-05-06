@@ -1,17 +1,13 @@
+using AutoConfigGenerator;
 using AutoOrganize.Library.Services.Config;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutoOrganize.Library.Services.Metadata.Providers.ThemoviedbMetadataProviders;
 
-public sealed class ThemoviedbMetadataProviderConfig :
-    IConfig<ThemoviedbMetadataProviderConfig>, IMetadataProviderConfig
+[AutoConfig]
+public sealed partial class ThemoviedbMetadataProviderConfig :
+    ConfigBase<ThemoviedbMetadataProviderConfig>, IMetadataProviderConfig
 {
-    public int Priority { get; set; }
-
-    public int RateLimitPerSecond { get; set; } = 40;
-
-    public static void Copy(ThemoviedbMetadataProviderConfig target, ThemoviedbMetadataProviderConfig source)
-    {
-        target.Priority = source.Priority;
-        target.RateLimitPerSecond = source.RateLimitPerSecond;
-    }
+    [ObservableProperty]
+    public partial int Priority { get; set; }
 }

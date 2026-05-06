@@ -1,8 +1,15 @@
-﻿namespace AutoOrganize.Library.Services.PathNameGenerators.Configs;
+﻿using AutoConfigGenerator;
+using AutoOrganize.Library.Services.Config;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-public class MovieFileNameGeneratorConfig
+namespace AutoOrganize.Library.Services.PathNameGenerators.Configs;
+
+[AutoConfig]
+public partial class MovieFileNameGeneratorConfig : ConfigBase<MovieFileNameGeneratorConfig>
 {
-    public string MoviePattern { get; set; } = PathNameGenerator.MOVIE_PATTERN;
+    [ObservableProperty]
+    public partial string MoviePattern { get; set; } = PathNameGenerator.MOVIE_PATTERN;
 
-    public string MovieFolderPattern { get; set; } = PathNameGenerator.MOVIE_FOLDER_PATTERN;
+    [ObservableProperty]
+    public partial string MovieFolderPattern { get; set; } = PathNameGenerator.MOVIE_FOLDER_PATTERN;
 }

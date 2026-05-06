@@ -1,9 +1,14 @@
-﻿namespace AutoOrganize.Library.Services.Config;
+﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-public interface IConfig
+namespace AutoOrganize.Library.Services.Config;
+
+public interface IConfig : INotifyPropertyChanged
 {
     IConfig Clone();
+
     void CopyTo(IConfig target);
+
     void CopyFrom(IConfig source);
 
     bool CanCopy(IConfig target);
@@ -12,31 +17,42 @@ public interface IConfig
 public interface IConfig<TSelf> : IConfig
     where TSelf : class, IConfig<TSelf>, new()
 {
-    static abstract void Copy(TSelf target, TSelf source);
+    void CopyTo(TSelf target);
 
-    void CopyTo(TSelf target) => TSelf.Copy(target, (TSelf)this);
+    void CopyFrom(TSelf source);
 
-    void CopyFrom(TSelf source) => TSelf.Copy((TSelf)this, source);
+    new TSelf Clone();
+}
 
-    IConfig IConfig.Clone()
+public abstract class ConfigBase<TSelf> : ObservableObject, IConfig<TSelf>
+    where TSelf : ConfigBase<TSelf>, new()
+{
+    protected abstract void CopyMembers(TSelf target, TSelf source);
+
+    public virtual void CopyTo(TSelf target)
+    {
+        CopyMembers(target, (TSelf)this);
+    }
+
+    public virtual void CopyFrom(TSelf source)
+    {
+        CopyMembers((TSelf)this, source);
+    }
+
+    public virtual TSelf Clone()
     {
         var clone = new TSelf();
-        TSelf.Copy(clone, (TSelf)this);
+        clone.CopyFrom(this);
         return clone;
     }
 
-    new TSelf Clone()
-    {
-        var clone = new TSelf();
-        TSelf.Copy(clone, (TSelf)this);
-        return clone;
-    }
+    IConfig IConfig.Clone() => Clone();
 
-    void IConfig.CopyTo(IConfig target) => CopyTo(target);
+    public void CopyTo(IConfig target) => CopyTo((TSelf)target);
 
-    void IConfig.CopyFrom(IConfig source) => CopyFrom(source);
+    public void CopyFrom(IConfig source) => CopyFrom((TSelf)source);
 
-    bool IConfig.CanCopy(IConfig target)
+    public virtual bool CanCopy(IConfig target)
     {
         return target is TSelf;
     }

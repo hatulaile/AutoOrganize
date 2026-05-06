@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="AutoConfigGenerator/AutoConfigGenerator.csproj" />
   <Project Path="AutoOrganize.Library/AutoOrganize.Library.csproj" />
   <Project Path="AutoOrganize.Test/AutoOrganize.Test.csproj" />
   <Project Path="AutoOrganize/AutoOrganize.csproj" />

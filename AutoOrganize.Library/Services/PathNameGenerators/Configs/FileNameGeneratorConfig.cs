@@ -1,16 +1,15 @@
-﻿using AutoOrganize.Library.Services.Config;
+﻿using AutoConfigGenerator;
+using AutoOrganize.Library.Services.Config;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutoOrganize.Library.Services.PathNameGenerators.Configs;
 
-public sealed class FileNameGeneratorConfig : IConfig<FileNameGeneratorConfig>
+[AutoConfig]
+public sealed partial class FileNameGeneratorConfig : ConfigBase<FileNameGeneratorConfig>
 {
-    public TvFileNameGenerationConfig TvFileNameGenerationConfig { get; set; } = new();
+    [ObservableProperty]
+    public partial TvFileNameGenerationConfig TvFileNameGenerationConfig { get; set; } = new();
 
-    public MovieFileNameGeneratorConfig MovieFileNameGeneratorConfig { get; set; } = new();
-
-    public static void Copy(FileNameGeneratorConfig target, FileNameGeneratorConfig source)
-    {
-        target.TvFileNameGenerationConfig = source.TvFileNameGenerationConfig;
-        target.MovieFileNameGeneratorConfig = source.MovieFileNameGeneratorConfig;
-    }
+    [ObservableProperty]
+    public partial MovieFileNameGeneratorConfig MovieFileNameGeneratorConfig { get; set; } = new();
 }

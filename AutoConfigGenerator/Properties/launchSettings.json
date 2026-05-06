@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "AutoConfigGenerator": {
+      "commandName": "Project"
+    },
+    "配置文件 1": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\AutoOrganize.Library\\AutoOrganize.Library.csproj"
+    }
+  }
+}
