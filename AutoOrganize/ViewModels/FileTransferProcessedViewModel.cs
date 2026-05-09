@@ -8,6 +8,7 @@ using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.FileTransferServices;
 using AutoOrganize.Library.Services.Observers;
 using AutoOrganize.Models;
+using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using Avalonia.Collections;

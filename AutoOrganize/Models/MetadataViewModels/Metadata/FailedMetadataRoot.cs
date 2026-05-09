@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using AutoOrganize.Models.MetadataViewModels.FileSystem;
+using AutoOrganize.Models.Options;
 using AutoOrganize.Utils;
 
 namespace AutoOrganize.Models.MetadataViewModels.Metadata;

@@ -18,7 +18,7 @@ using Avalonia.Controls;
 
 namespace AutoOrganize.Views.Controls;
 
-public class RoutedViewHost : TransitioningContentControl
+public class RoutedViewHost : ContentControl
 {
     public static readonly StyledProperty<RoutingState?> RouterProperty =
         AvaloniaProperty.Register<RoutedViewHost, RoutingState?>(nameof(Router));
@@ -74,8 +74,6 @@ public class RoutedViewHost : TransitioningContentControl
     }
 
     public IViewLocator? ViewLocator { get; set; }
-
-    protected override Type StyleKeyOverride => typeof(TransitioningContentControl);
 
     private void NavigateToViewModel(ViewModelBase? viewModelBase)
     {

@@ -9,6 +9,7 @@ using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.Metadata;
 using AutoOrganize.Library.Services.NameParsers;
 using AutoOrganize.Models;
+using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.Utils;
@@ -86,7 +87,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             await _progressSemaphore.WaitAsync(token);
             CurrentProgress++;
             hasFiles = true;
-            _ = ProgressAndAddFileAsync(file, options.Type, token)
+            await ProgressAndAddFileAsync(file, options.Type, token)
                 .ContinueWith(_ =>
                 {
                     _progressSemaphore.Release();

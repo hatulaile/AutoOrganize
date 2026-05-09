@@ -32,7 +32,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public AvaloniaList<PageModel> NavigationItems { get; } =
     [
         new("主页", string.Empty, typeof(HomeViewModel)),
-        new("任务\n输出", string.Empty, typeof(ActivityViewModel)),
+        new("日志", string.Empty, typeof(LogViewModel)),
     ];
 
     [RelayCommand]

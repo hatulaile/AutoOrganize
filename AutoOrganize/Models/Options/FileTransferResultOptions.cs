@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 
-namespace AutoOrganize.Models;
+namespace AutoOrganize.Models.Options;
 
 public readonly struct FileTransferResultOptions
 {

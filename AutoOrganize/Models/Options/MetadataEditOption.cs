@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AutoOrganize.Models;
+namespace AutoOrganize.Models.Options;
 
 public readonly struct MetadataEditOption
 {

@@ -93,9 +93,6 @@
                             <controls:RoutedViewHost Router="{Binding RoutingState}"
                                                      IsVisible="{Binding RoutingState.CurrentPageViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
 
-                                <controls:RoutedViewHost.PageTransition>
-                                    <x:Null />
-                                </controls:RoutedViewHost.PageTransition>
                             </controls:RoutedViewHost>
                         </ScrollViewer>
                     </Border>

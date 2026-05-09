@@ -14,8 +14,7 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Core;
-using Serilog.Debugging;
+using Logger = Serilog.Core.Logger;
 
 namespace AutoOrganize;
 
@@ -68,21 +67,24 @@ public partial class App : Application
             .AddSingleton<Logger>(provider =>
             {
                 var loggerService = provider.GetRequiredService<ILoggerService>();
+                var logViewModel = provider.GetRequiredService<LogViewModel>();
                 Logger logger = new LoggerConfiguration()
                     .MinimumLevel.ControlledBy(loggerService.LevelSwitch)
-                    .Filter.ByIncludingOnly(_ => loggerService.IsEnabledLogger)
+                    .Filter.ByIncludingOnly(_ => loggerService.Config.IsEnabledLogger)
                     .WriteTo.Conditional
                     (
-                        _ => loggerService.IsEnabledLogger,
+                        _ => loggerService.Config.IsWriteToFile,
                         configuration => configuration.Async(sinkConfiguration => sinkConfiguration.File
                         (
                             Path.Join(PathUtils.GetDefaultAppdataPath(), "Logs", "log-.log"),
                             outputTemplate:
                             "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] [{ThreadId}] {Message:lj}{NewLine}{Exception}",
                             fileSizeLimitBytes: 10L * 1024L * 1024L,
-                            rollingInterval: RollingInterval.Day
+                            rollingInterval: RollingInterval.Day,
+                            levelSwitch: loggerService.FileLevelSwitch
                         ))
                     )
+                    .WriteTo.View(logViewModel, loggerService.ViewLevelSwitch)
 #if DEBUG
                     .WriteTo.Console
                     (

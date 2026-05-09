@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using AutoOrganize.Library.Models.Metadata;
 
-namespace AutoOrganize.Models;
+namespace AutoOrganize.Models.Options;
 
 [StructLayout(LayoutKind.Auto)]
 public readonly struct FileProcessOptions

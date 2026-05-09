@@ -16,8 +16,4 @@ public sealed partial class HomeViewModel : ViewModelBase, INavigationViewModel
         RoutingState.SetOwnerViewModel(this);
         navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
     }
-
-    public void OnNavigatedTo()
-    {
-    }
 }

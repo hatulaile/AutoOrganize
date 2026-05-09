@@ -7,6 +7,7 @@ using AutoOrganize.Models;
 using AutoOrganize.Models.MetadataViewModels;
 using AutoOrganize.Models.MetadataViewModels.FileSystem;
 using AutoOrganize.Models.MetadataViewModels.Metadata;
+using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.ViewModels.MetadataViewModels;
 using Avalonia.Collections;

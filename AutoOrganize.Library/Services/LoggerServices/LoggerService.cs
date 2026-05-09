@@ -21,17 +21,9 @@ public sealed class LoggerService : ILoggerService
 
     public LoggingLevelSwitch LevelSwitch { get; } = new();
 
-    public void SetLogLevel(LogEventLevel logLevel)
-    {
-        SetLogLevelInternal(logLevel);
-        _fileConfigManager.SetConfig(Config);
-    }
+    public LoggingLevelSwitch FileLevelSwitch { get; } = new();
 
-    public async Task SetLogLevelAsync(LogEventLevel logLevel)
-    {
-        SetLogLevelInternal(logLevel);
-        await _fileConfigManager.SetConfigAsync(Config).ConfigureAwait(false);
-    }
+    public LoggingLevelSwitch ViewLevelSwitch { get; } = new();
 
     private void SetLogLevelInternal(LogEventLevel logLevel)
     {
@@ -45,5 +37,10 @@ public sealed class LoggerService : ILoggerService
         _fileConfigManager = fileConfigManager;
         Config = fileConfigManager.GetConfigOrLoad<LoggerConfig>();
         LevelSwitch.MinimumLevel = Config.LogLevel;
+        FileLevelSwitch.MinimumLevel = Config.FileLogLevel;
+        ViewLevelSwitch.MinimumLevel = Config.ViewLogLevel;
+        Config.LogLevelChanged += ev => LevelSwitch.MinimumLevel = ev.NewValue;
+        Config.FileLogLevelChanged += ev => FileLevelSwitch.MinimumLevel = ev.NewValue;
+        Config.ViewLogLevelChanged += ev => ViewLevelSwitch.MinimumLevel = ev.NewValue;
     }
 }

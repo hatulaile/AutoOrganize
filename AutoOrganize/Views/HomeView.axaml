@@ -8,5 +8,5 @@
              x:Class="AutoOrganize.Views.HomeView"
              x:DataType="vm:HomeViewModel">
 
-    <controls:RoutedViewHost Router="{Binding RoutingState}" />
+        <controls:RoutedViewHost Router="{Binding RoutingState}" />
 </UserControl>

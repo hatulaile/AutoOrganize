@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Models;
+using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using Avalonia.Collections;
