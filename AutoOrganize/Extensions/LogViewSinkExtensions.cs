@@ -1,5 +1,5 @@
 ﻿using AutoOrganize.Services;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.LogViewModels;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Core;

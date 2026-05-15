@@ -93,10 +93,57 @@
         <DependentUpon>MetadataFields.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\HomeViews\MetadataEditView.axaml.cs">
+        <DependentUpon>MetadataEditView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\HomeViews\SelectFilesView.axaml.cs">
+        <DependentUpon>SelectFilesView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\HomeViews\FileTransferResultView.axaml.cs">
+        <DependentUpon>FileTransferResultView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\HomeViews\FileTransferProcessedView.axaml.cs">
+        <DependentUpon>FileTransferProcessedView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\HomeViews\FileMetadataProgressView.axaml.cs">
+        <DependentUpon>FileMetadataProgressView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\AboutViews\AboutWindow.axaml.cs">
+        <DependentUpon>AboutWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\AboutViews\LicenseWindow.axaml.cs">
+        <DependentUpon>LicenseWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\AboutViews\ThirdPartyLicensesWindow.axaml.cs">
+        <DependentUpon>ThirdPartyLicensesWindow.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\HomeViews\HomeView.axaml.cs">
+        <DependentUpon>HomeView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\LogViews\LogView.axaml.cs">
+        <DependentUpon>LogView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
       <AdditionalFiles Include="Views\Controls\Loading.axaml" />
       <AdditionalFiles Include="Views\Controls\MetadataFields.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedDirectoryMetadataView.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedFileMetadataRootView.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedFileMetadataView.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedTransferFileView.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FileMetadataView.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\MetadataView.axaml" />
+      <AdditionalFiles Include="Views\HomeViews\MetadataViews\TransferFileView.axaml" />
     </ItemGroup>
 </Project>

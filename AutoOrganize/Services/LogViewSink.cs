@@ -1,4 +1,4 @@
-﻿using AutoOrganize.ViewModels;
+﻿using AutoOrganize.ViewModels.LogViewModels;
 using Serilog.Core;
 using Serilog.Events;
 

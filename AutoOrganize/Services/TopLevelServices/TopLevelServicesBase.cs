@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using AutoOrganize.Services.WindowManagers;
-using AutoOrganize.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;

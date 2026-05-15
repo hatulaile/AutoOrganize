@@ -2,7 +2,6 @@
 using System.Linq;
 using AutoOrganize.ViewLocators;
 using AutoOrganize.ViewModels;
-using AutoOrganize.Views;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 

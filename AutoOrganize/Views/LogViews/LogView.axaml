@@ -1,0 +1,112 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels.LogViewModels"
+             xmlns:logsConverter="using:AutoOrganize.Converters.LogsConverter"
+             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:LogViewModel"
+             x:Class="AutoOrganize.Views.LogViews.LogView"
+             x:Name="LoggerView">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <logsConverter:LogEventMessageToStringConverter x:Key="LogEventMessageToStringConverter" />
+            <logsConverter:LogEventToTimeConverter x:Key="LogEventToTimeConverter" />
+            <logsConverter:LogLevelToShortNameConverter x:Key="LogLevelToShortNameConverter" />
+            <logsConverter:LogLevelToBorderBrushConverter x:Key="LogLevelToBorderBrushConverter" />
+            <logsConverter:LogLevelToBackgroundConverter x:Key="LogLevelToBackgroundConverter" />
+            <logsConverter:LogLevelToForegroundConverter x:Key="LevelToForegroundConverter" />
+            <logsConverter:LogLevelToFontWeightConverter x:Key="LevelToFontWeightConverter" />
+            <logsConverter:LogEventToThreadIdConverter x:Key="LogEventToThreadIdConverter" />
+            <logsConverter:LevelToRowBackgroundConverter x:Key="LevelToRowBackgroundConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer Name="MainScrollViewer">
+        <Border Padding="20,12">
+            <ItemsRepeater ItemsSource="{Binding LogEvents}" Name="ItemsRepeater">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            BorderBrush="#2D2D2D"
+                            BorderThickness="0,0,0,1"
+                            Margin="0,0,0,4"
+                            Padding="4,4,4,8"
+                            Background="{Binding Level, Converter={StaticResource LevelToRowBackgroundConverter}}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto, *">
+                                <StackPanel
+                                    Grid.Column="0"
+                                    Grid.Row="0"
+                                    Orientation="Horizontal"
+                                    Spacing="8"
+                                    Margin="0,0,12,0">
+
+                                    <Border
+                                        Background="#2D2D2D"
+                                        BorderBrush="#404040"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8,4"
+                                        VerticalAlignment="Top">
+                                        <TextBlock FontSize="12"
+                                                   Foreground="#D4D4D4"
+                                                   Text="{Binding ., Converter={StaticResource LogEventToTimeConverter}}" />
+                                    </Border>
+
+                                    <Border
+                                        Width="48"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8,4"
+                                        Background="{Binding Level, Converter={StaticResource LogLevelToBackgroundConverter}}"
+                                        BorderBrush="{Binding Level, Converter={StaticResource LogLevelToBorderBrushConverter}}"
+                                        VerticalAlignment="Top">
+                                        <TextBlock FontSize="12"
+                                                   HorizontalAlignment="Center"
+                                                   Foreground="{Binding Level, Converter={StaticResource LevelToForegroundConverter}}"
+                                                   FontWeight="{Binding Level, Converter={StaticResource LevelToFontWeightConverter}}"
+                                                   Text="{Binding ., Converter={StaticResource LogLevelToShortNameConverter}}" />
+                                    </Border>
+
+                                    <Border
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8,4"
+                                        BorderBrush="#404040"
+                                        Background="#2D2D2D"
+                                        Width="40"
+                                        VerticalAlignment="Top">
+                                        <TextBlock FontSize="12"
+                                                   Foreground="#569CD6"
+                                                   HorizontalAlignment="Center"
+                                                   Text="{Binding ., Converter={StaticResource LogEventToThreadIdConverter}}" />
+                                    </Border>
+                                </StackPanel>
+
+                                <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Center">
+                                    <SelectableTextBlock
+                                        Text="{Binding ., Converter={StaticResource LogEventMessageToStringConverter}}"
+                                        Foreground="#D4D4D4"
+                                        FontFamily="Consolas, monospace"
+                                        FontSize="14"
+                                        VerticalAlignment="Center"
+                                        TextWrapping="Wrap" />
+                                </Border>
+
+                                <Border Grid.Row="0" Grid.Column="2">
+                                    <Button
+                                        Command="{Binding #LoggerView.DataContext.CopyStringCommand}"
+                                        CommandParameter="{Binding .,Converter={StaticResource LogEventMessageToStringConverter}}">
+                                        <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                    </Button>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </Border>
+    </ScrollViewer>
+</UserControl>

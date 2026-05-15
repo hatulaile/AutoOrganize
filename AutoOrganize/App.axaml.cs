@@ -7,6 +7,7 @@ using AutoOrganize.Library.Services.LoggerServices;
 using AutoOrganize.Library.Utils;
 using AutoOrganize.ViewLocators;
 using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.LogViewModels;
 using AutoOrganize.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;

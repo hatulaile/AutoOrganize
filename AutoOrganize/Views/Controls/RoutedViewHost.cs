@@ -8,7 +8,6 @@
 //完整的许可证 https://github.com/reactiveui/ReactiveUI.Avalonia?tab=MIT-1-ov-file
 //感谢 ReactiveUI.Avalonia 项目提供的源码参考
 
-using System;
 using System.ComponentModel;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.ViewLocators;

@@ -1,0 +1,20 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="using:AutoOrganize.Views.AboutViews"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="620"
+        Width="450" Height="520" Title="License"
+        x:Class="AutoOrganize.Views.AboutViews.LicenseWindow">
+
+    <ScrollViewer>
+        <Border Padding="12">
+            <StackPanel>
+                <TextBlock HorizontalAlignment="Center" FontSize="20" FontWeight="Bold"
+                           Text="GNU GENERAL PUBLIC LICENSE" />
+                <TextBlock HorizontalAlignment="Center" Text="Version 3, 29 June 2007" Margin="0,0,0,12" />
+                <SelectableTextBlock Text="{x:Static v:LicenseWindow.LICENSE}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
+</Window>
