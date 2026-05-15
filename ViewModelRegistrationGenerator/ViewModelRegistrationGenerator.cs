@@ -62,11 +62,20 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
         [global::System.AttributeUsageAttribute(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
         public sealed class ViewModelRegistrationAttribute : Attribute
         {
-            public ViewModelLifetime Lifetime { get; }
+            public ViewModelLifetime ViewLifetime { get; }
+
+            public ViewModelLifetime ViewModelLifetime { get; }
 
             public ViewModelRegistrationAttribute(ViewModelLifetime lifetime = ViewModelLifetime.Transient)
             {
-                Lifetime = lifetime;
+                ViewLifetime = lifetime;
+                ViewModelLifetime = lifetime;
+            }
+
+            public ViewModelRegistrationAttribute(ViewModelLifetime viewLifetime, ViewModelLifetime viewModelLifetime)
+            {
+                ViewLifetime = viewLifetime;
+                ViewModelLifetime = viewModelLifetime;
             }
         }
         """;
@@ -756,27 +765,27 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
                 isSupportedView = false;
             }
 
-            var lifetimeString = GetLifetimeString(viewModelSymbol);
+            (string? viewLifetime, string? viewModelLifetime) = GetLifetimeString(viewModelSymbol);
 
-            if (lifetimeString is null)
+            if (viewLifetime is null && viewModelLifetime is null)
             {
                 continue;
             }
 
             if (isSupportedView)
             {
-                source.AppendLine($$"""
-                                            services.Add{{lifetimeString}}<{{classNameViewModel}}>();
-                                            services.Add{{lifetimeString}}<{{classNameView}}>();
-                                    """);
+                source.AppendLine(viewLifetime is not null
+                    ? $"        services.Add{viewLifetime}<{classNameView}>();"
+                    : $"        //services.None<{classNameView}>();");
             }
             else
             {
-                source.AppendLine($$"""
-                                            services.Add{{lifetimeString}}<{{classNameViewModel}}>();
-                                            // services.Add{{lifetimeString}}<{{classNameView}}>();
-                                    """);
+                source.AppendLine($"        //No supported services.None<{classNameView}>();");
             }
+
+            source.AppendLine(viewModelLifetime is not null
+                ? $"        services.Add{viewModelLifetime}<{classNameViewModel}>();"
+                : $"        //services.None<{classNameView}>();");
 
             IfHasAddConfigRegistration(viewModelSymbol, source);
             source.AppendLine();
@@ -789,23 +798,33 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
         return source.ToString();
     }
 
-    private static string? GetLifetimeString(ITypeSymbol typeSymbol)
+    private static (string? ViewLifetime, string? ViewModelLifetime) GetLifetimeString(ITypeSymbol typeSymbol)
     {
         var data = typeSymbol.GetAttributes().FirstOrDefault(x =>
             x.AttributeClass?.ToDisplayString().Equals(ATTRIBUTE_DISPLAY_STRING) ?? false);
-        var lifetimeTyped = data?.ConstructorArguments.Length > 0 ? data.ConstructorArguments[0] : default;
+        if (data is null) return (null, null);
 
-        if (lifetimeTyped.IsNull || lifetimeTyped.Value is not int i)
-            return null;
-
-        return i switch
+        if (data.ConstructorArguments.Length == 1)
         {
-            0 => null,
-            1 => "Transient",
-            2 => "Singleton",
-            3 => "Scoped",
-            _ => null
-        };
+            string? lifetime = GetLifetimeForId(data.ConstructorArguments[0].Value as int?);
+            return (lifetime, lifetime);
+        }
+
+        return (GetLifetimeForId(data.ConstructorArguments[0].Value as int?),
+            GetLifetimeForId(data.ConstructorArguments[1].Value as int?));
+
+        static string? GetLifetimeForId(int? id)
+        {
+            if (id is null) return null;
+
+            return id switch
+            {
+                1 => "Transient",
+                2 => "Singleton",
+                3 => "Scoped",
+                _ => null
+            };
+        }
     }
 
     private static void IfHasAddConfigRegistration(ITypeSymbol typeSymbol, StringBuilder builder)
