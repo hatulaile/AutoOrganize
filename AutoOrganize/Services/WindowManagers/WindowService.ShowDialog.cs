@@ -11,14 +11,8 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
-        hostWindow.Closed += (_, _) =>
-        {
-            viewModel.OnCloseWindow();
-            if (hostWindow.DataContext is not null)
-                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-        };
         viewModel.OnOpenWindow();
         return hostWindow.ShowDialog(ownerWindow);
     }
@@ -35,14 +29,8 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
-        hostWindow.Closed += (_, _) =>
-        {
-            viewModel.OnCloseWindow();
-            if (hostWindow.DataContext is not null)
-                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-        };
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         return hostWindow.ShowDialog(ownerWindow);
@@ -61,14 +49,8 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IResultWindowViewModel<TResult>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
-        hostWindow.Closed += (_, _) =>
-        {
-            viewModel.OnCloseWindow();
-            if (hostWindow.DataContext is not null)
-                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-        };
         viewModel.OnOpenWindow();
         return hostWindow.ShowDialog<TResult>(ownerWindow);
     }
@@ -86,14 +68,8 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs, TResult>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
-        hostWindow.Closed += (_, _) =>
-        {
-            viewModel.OnCloseWindow();
-            if (hostWindow.DataContext is not null)
-                _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-        };
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         return hostWindow.ShowDialog<TResult>(ownerWindow);

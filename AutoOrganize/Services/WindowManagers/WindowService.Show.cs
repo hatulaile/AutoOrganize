@@ -13,28 +13,11 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         if (ownerWindow is null)
-        {
             MainWindow.Closed += (_, _) => hostWindow.Close();
-            hostWindow.Closed += (_, _) =>
-            {
-                viewModel.OnCloseWindow();
-                if (hostWindow.DataContext is not null)
-                    _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-            };
-        }
-        else
-        {
-            hostWindow.Closed += (_, _) =>
-            {
-                viewModel.OnCloseWindow();
-                if (hostWindow.DataContext is not null)
-                    _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-            };
-        }
 
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
@@ -51,29 +34,12 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
-        Window hostWindow = CreateOrGetHostWindow(viewModel);
+        Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         if (ownerWindow is null)
-        {
             MainWindow.Closed += (_, _) => hostWindow.Close();
-            hostWindow.Closed += (_, _) =>
-            {
-                viewModel.OnCloseWindow();
-                if (hostWindow.DataContext is not null)
-                    _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-            };
-        }
-        else
-        {
-            hostWindow.Closed += (_, _) =>
-            {
-                viewModel.OnCloseWindow();
-                if (hostWindow.DataContext is not null)
-                    _windowByViewModel.TryRemove(hostWindow.DataContext, out _);
-            };
-        }
 
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
@@ -86,7 +52,7 @@ public partial class WindowService
         Show(ownerWindow, defaultViewModel);
     }
 
-    private Window CreateOrGetHostWindow<TWindowViewModel>(TWindowViewModel viewModel)
+    private Window CreateOrGetWindow<TWindowViewModel>(TWindowViewModel viewModel)
         where TWindowViewModel : ViewModelBase, IWindowViewModel
     {
         if (!viewModel.AllowMultipleInstances)
@@ -103,7 +69,10 @@ public partial class WindowService
             throw new Exception();
         }
 
-        window.DataContext = viewModel;
+        InitializeIfNeeded(window);
+
+        if (!ReferenceEquals(window.DataContext, viewModel))
+            window.DataContext = viewModel;
         return window;
     }
 
@@ -117,5 +86,26 @@ public partial class WindowService
 
         if (ownerWindow is null) window.Show();
         else window.Show(ownerWindow);
+    }
+
+    private void InitializeIfNeeded(Window window)
+    {
+        window.Closing += (windowObj, ev) =>
+        {
+            var win = (Window?)windowObj ?? throw new ArgumentException("Window cannot be null", nameof(windowObj));
+            var viewModel = win.DataContext as IWindowViewModel;
+
+            viewModel?.OnCloseWindow();
+            if (!CanCloseWindow(win) && MainWindow.IsVisible &&
+                ev.CloseReason is not (WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown))
+            {
+                ev.Cancel = true;
+                win.Hide();
+                return;
+            }
+
+            if (win.DataContext is not null)
+                _windowByViewModel.TryRemove(win.DataContext, out _);
+        };
     }
 }
