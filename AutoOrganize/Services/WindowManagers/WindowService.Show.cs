@@ -49,7 +49,7 @@ public partial class WindowService
         where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        Show(ownerWindow, defaultViewModel);
+        Show(arg, ownerWindow, defaultViewModel);
     }
 
     private Window CreateOrGetWindow<TWindowViewModel>(TWindowViewModel viewModel)
