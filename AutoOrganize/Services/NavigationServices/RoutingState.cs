@@ -14,6 +14,8 @@ public partial class RoutingState : ObservableObject
         private set => SetProperty(ref field, value);
     }
 
+    public event NavigatedHandler? Navigated;
+
     public void SetOwnerViewModel(ViewModelBase owner)
     {
         OwnerViewModel = owner;
@@ -22,7 +24,9 @@ public partial class RoutingState : ObservableObject
     [RelayCommand]
     private void NavigateTo(ViewModelBase viewModel)
     {
+        ViewModelBase? oldViewModel = CurrentPageViewModel;
         CurrentPageViewModel = viewModel;
+        Navigated?.Invoke(this, new NavigatedEventArgs(oldViewModel, viewModel, OwnerViewModel));
     }
 
     [RelayCommand]
