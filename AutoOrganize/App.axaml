@@ -1,6 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vl="using:AutoOrganize.ViewLocators"
+             xmlns:semi="https://irihi.tech/semi"
              x:Class="AutoOrganize.App"
              RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
@@ -10,9 +10,10 @@
 
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://IconPacks.Avalonia.PhosphorIcons/PhosphorIcons.axaml" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.v2.xaml" />
+        <semi:SemiTheme Locale="zh-CN" />
+        <semi:UrsaSemiTheme Locale="zh-CN"/>
         <StyleInclude Source="Views/Controls/ControlsStyles.axaml"/>
         <StyleInclude Source="Views/Stytes/Stytes.axaml"/>
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.v2.xaml" />
     </Application.Styles>
 </Application>

@@ -47,13 +47,13 @@
                     </Border>
                     <Button Command="{Binding CopyStringCommand}"
                             CommandParameter="{Binding FileInfo.FullName}">
-                        <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                        <PathIcon Data="{StaticResource SemiIconCopy}" />
                     </Button>
                     <Button Command="{Binding OpenFileCommand}">
-                        <iconPacks:PackIconPhosphorIcons Kind="File" />
+                        <PathIcon Data="{StaticResource SemiIconExternalOpen}" />
                     </Button>
                     <Button Command="{Binding OpenContainingFolderCommand}">
-                        <iconPacks:PackIconPhosphorIcons Kind="FolderOpen" />
+                        <PathIcon Data="{StaticResource SemiIconFolderOpen}" />
                     </Button>
                 </WrapPanel>
             </Border>

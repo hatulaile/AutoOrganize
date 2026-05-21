@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels"
              xmlns:converter="using:AutoOrganize.Converters"
-             xmlns:controls="using:AutoOrganize.Views.Controls"
+             xmlns:u="https://irihi.tech/ursa"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="vm:FileMetadataProgressViewModel"
              x:Class="AutoOrganize.Views.HomeViews.FileMetadataProgressView">
@@ -15,17 +15,17 @@
 
     <Panel>
         <Grid RowDefinitions="*,Auto,*">
-            <controls:Loading Grid.Row="1" Classes="big" VerticalAlignment="Bottom">
-                <controls:Loading.Styles>
-                    <Style Selector="controls|Loading.big">
+            <u:LoadingIcon Grid.Row="1" VerticalAlignment="Bottom">
+                <u:LoadingIcon.Styles>
+                    <Style Selector="u|LoadingIcon">
                         <Style Selector="^ /template/ Arc#PART_Arc">
                             <Setter Property="Height" Value="64" />
                             <Setter Property="Width" Value="64" />
                             <Setter Property="StrokeThickness" Value="8"></Setter>
                         </Style>
                     </Style>
-                </controls:Loading.Styles>
-            </controls:Loading>
+                </u:LoadingIcon.Styles>
+            </u:LoadingIcon>
 
             <StackPanel Grid.Row="2" VerticalAlignment="Bottom" Margin="60,0,60,60">
                 <Panel>

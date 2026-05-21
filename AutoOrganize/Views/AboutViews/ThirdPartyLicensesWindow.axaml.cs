@@ -16,8 +16,14 @@ public partial class ThirdPartyLicensesWindow : Window
         new(".NET", "https://github.com/dotnet", "10.0.7", "MIT",
             "https://github.com/dotnet/runtime?tab=MIT-1-ov-file"),
 
-        new("Avalonia", "https://github.com/AvaloniaUI/Avalonia", "12.0.2", "MIT",
+        new("Avalonia", "https://github.com/AvaloniaUI/Avalonia", "12.0.1", "MIT",
             "https://github.com/AvaloniaUI/Avalonia?tab=MIT-1-ov-file"),
+
+        new("Semi.Avalonia", "https://github.com/irihitech/Semi.Avalonia", "12.0.2", "MIT",
+            "https://github.com/irihitech/Semi.Avalonia?tab=MIT-1-ov-file"),
+
+        new("Ursa.Avalonia", "https://github.com/irihitech/Ursa.Avalonia", "2.0.0", "MIT",
+            "https://github.com/irihitech/Ursa.Avalonia?tab=MIT-1-ov-file"),
 
         new("AsyncImageLoader.Avalonia", "https://github.com/AvaloniaUtils/AsyncImageLoader.Avalonia", "3.8.0", "MIT",
             "https://github.com/AvaloniaUtils/AsyncImageLoader.Avalonia?tab=MIT-1-ov-file"),

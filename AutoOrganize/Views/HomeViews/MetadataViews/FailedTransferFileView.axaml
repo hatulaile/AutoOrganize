@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels"
              xmlns:controls="using:AutoOrganize.Views.Controls"
-             xmlns:iconPacks="https://github.com/MahApps/IconPacks.Avalonia"
              xmlns:converters="using:AutoOrganize.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="vm:FailedTransferFileViewModel"
@@ -54,13 +53,13 @@
                                 </Border>
                                 <Button Command="{Binding CopyStringCommand}"
                                         CommandParameter="{Binding FileInfo.FullName}">
-                                    <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                    <PathIcon Data="{StaticResource SemiIconCopy}" />
                                 </Button>
                                 <Button Command="{Binding OpenFileCommand}">
-                                    <iconPacks:PackIconPhosphorIcons Kind="File" />
+                                    <PathIcon Data="{StaticResource SemiIconExternalOpen}" />
                                 </Button>
                                 <Button Command="{Binding OpenContainingFolderCommand}">
-                                    <iconPacks:PackIconPhosphorIcons Kind="FolderOpen" />
+                                    <PathIcon Data="{StaticResource SemiIconFolderOpen}" />
                                 </Button>
                             </WrapPanel>
 
@@ -77,14 +76,14 @@
                                 <Button Command="{Binding CopyStringCommand}"
                                         CommandParameter="{Binding Metadata.OutputPath}"
                                         IsVisible="{Binding Metadata.OutputPath, Converter={x:Static converters:FileConverters.FileNameToExistsConverter}}">
-                                    <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                    <PathIcon Data="{StaticResource SemiIconCopy}" />
                                 </Button>
                                 <Button Command="{Binding OpenFileCommand}">
-                                    <iconPacks:PackIconPhosphorIcons Kind="File" />
+                                    <PathIcon Data="{StaticResource SemiIconExternalOpen}" />
                                 </Button>
                                 <Button Command="{Binding OpenContainingFolderCommand}"
                                         IsVisible="{Binding Metadata.OutputPath, Converter={x:Static converters:FileConverters.FileNameToNameWithoutExtensionConverter}}">
-                                    <iconPacks:PackIconPhosphorIcons Kind="FolderOpen" />
+                                    <PathIcon Data="{StaticResource SemiIconFolderOpen}" />
                                 </Button>
                             </WrapPanel>
                         </StackPanel>
@@ -128,7 +127,7 @@
                             <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
                                     Command="{Binding CopyStringCommand}"
                                     CommandParameter="{Binding Metadata.Exception.Message}">
-                                <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                <PathIcon Data="{StaticResource SemiIconCopy}" />
                             </Button>
                         </Grid>
                     </Border>
@@ -142,7 +141,7 @@
                             <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
                                     Command="{Binding CopyStringCommand}"
                                     CommandParameter="{Binding Metadata.Exception, StringFormat='{}{0}'}">
-                                <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                <PathIcon Data="{StaticResource SemiIconCopy}" />
                             </Button>
                         </Grid>
                     </Border>

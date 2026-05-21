@@ -27,7 +27,7 @@
                         Grid.Column="0"
                         Classes="hideFocus"
                         BorderThickness="2,2,0,2"
-                        BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
+                        BorderBrush="#2D2D2D"
                         HierarchicalModel="{Binding Model}"
                         SelectedItem="{Binding SelectedMetadata}"
                         SelectionUnit="FullRow"
@@ -65,7 +65,7 @@
                     <GridSplitter Grid.Column="1"
                                   ShowsPreview="False"
                                   Margin="0,0,1,0"
-                                  Background="{DynamicResource SystemControlTransientBackgroundBrush}">
+                                  Background="#2D2D2D">
                         <GridSplitter.Styles>
                             <Style Selector="GridSplitter">
                                 <Setter Property="MinWidth" Value="3" />
@@ -75,7 +75,7 @@
                     </GridSplitter>
 
                     <Border Grid.Column="2"
-                            BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
+                            BorderBrush="#2D2D2D"
                             BorderThickness="2">
                         <ScrollViewer>
                             <control:RoutedViewHost Router="{Binding RoutingState}"

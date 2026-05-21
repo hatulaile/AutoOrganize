@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="using:AutoOrganize.Views.Controls"
+        xmlns:u="https://irihi.tech/ursa"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
         Width="1280" Height="720"
         x:Class="AutoOrganize.Views.MainWindow"
@@ -14,26 +15,16 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
-            <MenuItem Header="关于" Command="{Binding ShowAboutCommand}"/>
+            <MenuItem Header="关于" Command="{Binding ShowAboutCommand}" />
         </Menu>
+
         <Grid ColumnDefinitions="60,*">
             <Border Grid.Column="0" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
-                <StackPanel HorizontalAlignment="Stretch">
-                    <ListBox ItemsSource="{Binding NavigationItems}"
-                             SelectedItem="{Binding SelectedPage}"
-                             SelectionMode="Single">
-
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <!-- todo: icon -->
-                                    <!-- <PathIcon Data="{Binding Icon}"/> -->
-                                    <TextBlock Text="{Binding Title}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
+                <u:NavMenu
+                    ItemsSource="{Binding NavigationItems}"
+                    SelectedItem="{Binding SelectedPage}"
+                    HeaderBinding="{Binding Title}"
+                    IconBinding="{Binding Icon}" />
             </Border>
             <controls:RoutedViewHost Grid.Column="1" Router="{Binding RoutingState}" />
         </Grid>

@@ -87,7 +87,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             await _progressSemaphore.WaitAsync(token);
             CurrentProgress++;
             hasFiles = true;
-            await ProgressAndAddFileAsync(file, options.Type, token)
+            _ = ProgressAndAddFileAsync(file, options.Type, token)
                 .ContinueWith(_ =>
                 {
                     _progressSemaphore.Release();
@@ -193,7 +193,8 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         if (metadata is null)
             throw new MetadataNotFoundException(filePath, "tv", "未找到匹配的电视元数据");
 
-        _logger.LogDebug("电视元数据匹配成功: {SeriesName} ({Year}) - {SeasonName} - {EpisodeName}", metadata.Series?.Name, metadata.AirDate?.Year,
+        _logger.LogDebug("电视元数据匹配成功: {SeriesName} ({Year}) - {SeasonName} - {EpisodeName}", metadata.Series?.Name,
+            metadata.AirDate?.Year,
             metadata.Season?.Name, metadata.Name);
         return new FileMetadataProcessingResult(filePath, metadata);
     }

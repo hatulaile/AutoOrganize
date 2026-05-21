@@ -99,7 +99,7 @@
                                     <Button
                                         Command="{Binding #LoggerView.DataContext.CopyStringCommand}"
                                         CommandParameter="{Binding .,Converter={StaticResource LogEventMessageToStringConverter}}">
-                                        <iconPacks:PackIconPhosphorIcons Kind="ClipboardTextBold" />
+                                        <PathIcon Data="{StaticResource SemiIconCopy}" />
                                     </Button>
                                 </Border>
                             </Grid>
