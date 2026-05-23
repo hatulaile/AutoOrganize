@@ -14,6 +14,12 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
+        NavigateTo(routingState, defaultViewModel);
+    }
+
+    public void NavigateTo<TViewModel>(RoutingState routingState, TViewModel? defaultViewModel = null)
+        where TViewModel : ViewModelBase, INavigationViewModel
+    {
         if ((defaultViewModel ?? _serviceProvider.GetRequiredService<TViewModel>()) is not { } viewModel)
             return;
 
@@ -35,9 +41,14 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
+        NavigateTo(routingState, viewModelType);
+    }
+
+    public void NavigateTo(RoutingState routingState, Type viewModelType)
+    {
         object? vm = _serviceProvider.GetRequiredService(viewModelType);
         if (vm is not (INavigationViewModel navigationViewModel and ViewModelBase viewModelBase))
-            return;
+            throw new InvalidOperationException($"{viewModelType.FullName} is not a navigationViewModel");
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
 
@@ -58,6 +69,13 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
+        NavigateTo(routingState, args, defaultViewModel);
+    }
+
+    public void NavigateTo<TViewModel, TArgs>(RoutingState routingState, TArgs args,
+        TViewModel? defaultViewModel = null)
+        where TViewModel : ViewModelBase, INavigationViewModel<TArgs>
+    {
         if ((defaultViewModel ?? _serviceProvider.GetRequiredService<TViewModel>()) is not { } viewModel)
             return;
 
@@ -81,9 +99,14 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
+        NavigateTo<TViewModel, TArgs>(routingState, args, viewModelType);
+    }
+
+    public void NavigateTo<TViewModel, TArgs>(RoutingState routingState, TArgs args, Type viewModelType)
+    {
         object? vm = _serviceProvider.GetRequiredService(viewModelType);
         if (vm is not (INavigationViewModel<TArgs> navigationViewModel and ViewModelBase viewModelBase))
-            return;
+            throw new InvalidOperationException($"{viewModelType.FullName} is not a navigationViewModel");
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
 
@@ -105,6 +128,11 @@ public class NavigationService : INavigationService
         if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
             return;
 
+        Clear(routingState);
+    }
+
+    public void Clear(RoutingState routingState)
+    {
         var navigationViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
 
         navigationViewModel?.OnNavigatingFrom();
