@@ -12,7 +12,7 @@ public static class PathUtils
 
     public static string GetValidFileName(string fileName, char replacement = '_')
     {
-        _invalidFileName ??= [..Path.GetInvalidFileNameChars()];
+        _invalidFileName ??= [.. Path.GetInvalidFileNameChars()];
         return string.Create(fileName.Length, (fileName, replacement, _invalidFileName), (span, state) =>
         {
             for (int i = 0; i < state.fileName.Length; i++)
@@ -22,9 +22,24 @@ public static class PathUtils
         });
     }
 
+    public static bool TryGetValidFileName(ReadOnlySpan<char> fileName, Span<char> span, out int written)
+    {
+        if (fileName.Length > span.Length)
+        {
+            written = 0;
+            return false;
+        }
+
+        for (int i = 0; i < fileName.Length; i++)
+            span[i] = fileName[i];
+
+        written = fileName.Length;
+        return true;
+    }
+
     public static string GetInvalidPath(string path, char replacement = '_')
     {
-        _invalidPath ??= [..Path.GetInvalidPathChars()];
+        _invalidPath ??= [.. Path.GetInvalidPathChars()];
         return string.Create(path.Length, (path, replacement, _invalidPath), (span, state) =>
         {
             for (int i = 0; i < state.path.Length; i++)
@@ -36,11 +51,11 @@ public static class PathUtils
 
     public static bool IsValidPath(ReadOnlySpan<char> path)
     {
-        _invalidFileName ??= [..Path.GetInvalidFileNameChars()];
-        _invalidPath ??= [..Path.GetInvalidPathChars()];
+        _invalidFileName ??= [.. Path.GetInvalidFileNameChars()];
+        _invalidPath ??= [.. Path.GetInvalidPathChars()];
         foreach (char c in path)
         {
-            if(_invalidPath.Contains(c))
+            if (_invalidPath.Contains(c))
                 return false;
         }
 
