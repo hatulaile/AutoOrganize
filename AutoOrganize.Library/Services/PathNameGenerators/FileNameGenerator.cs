@@ -442,9 +442,10 @@ public sealed class FileNameGenerator : IFileNameGenerator
         return result;
     }
 
-    private bool TryGetValidName(ReadOnlySpan<char> source, Span<char> target, out int written)
+    private static bool TryGetValidName(ReadOnlySpan<char> source, Span<char> target, out int written,
+        char replaceCharacter = ' ')
     {
-        return PathUtils.TryGetValidFileName(source, target, out written);
+        return PathUtils.TryGetValidFileName(source, target, replaceCharacter, out written);
     }
 
     private static bool TryGetZeroPaddedCount(in ReadOnlySpan<char> source, in ReadOnlySpan<char> token, out int count)

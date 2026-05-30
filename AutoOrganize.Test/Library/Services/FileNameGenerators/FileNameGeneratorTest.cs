@@ -1,5 +1,7 @@
 ﻿using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Test.Utils;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace AutoOrganize.Test.Library.Services.FileNameGenerators;
 
@@ -9,6 +11,8 @@ public class FileNameGeneratorTest
 
     public FileNameGeneratorTest()
     {
+        Mock<ILogger<FileNameGenerator>> mock = new Mock<ILogger<FileNameGenerator>>();
+        _generator = new FileNameGenerator(mock.Object);
     }
 
     [Fact]
@@ -105,7 +109,7 @@ public class FileNameGeneratorTest
 
         string name = _generator.GetMovieFolderName(metadata, "{name}.{oname}.{year}");
 
-        Assert.Equal("悠哉日常大王剧场版：假期活动.劇場版 のんのんびより ばけーしょん", name);
+        Assert.Equal("悠哉日常大王剧场版：假期活动.劇場版 のんのんびより ばけーしょん.2018", name);
     }
 
     [Fact]
