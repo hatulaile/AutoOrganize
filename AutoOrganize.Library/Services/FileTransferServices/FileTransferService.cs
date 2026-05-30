@@ -63,7 +63,10 @@ public sealed class FileTransferService : IFileTransferService
             case FileTransferMode.None:
             default:
                 _logger.LogError("无效的文件传输模式: {Mode}", options.Mode);
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(
+                    nameof(options),
+                    options.Mode,
+                    null);
         }
 
         _logger.LogInformation("文件传输完成: {Input} -> {Output} (模式: {Mode})",
