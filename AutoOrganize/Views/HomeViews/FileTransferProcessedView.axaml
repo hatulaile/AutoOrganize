@@ -10,9 +10,9 @@
 
     <Panel>
         <Grid RowDefinitions="*,Auto,*">
-            <u:LoadingIcon Grid.Row="1" VerticalAlignment="Bottom">
+            <u:LoadingIcon Grid.Row="1" VerticalAlignment="Bottom" Classes="big">
                 <u:LoadingIcon.Styles>
-                    <Style Selector="u|LoadingIcon">
+                    <Style Selector="u|LoadingIcon.big">
                         <Style Selector="^ /template/ Arc#PART_Arc">
                             <Setter Property="Height" Value="64" />
                             <Setter Property="Width" Value="64" />
