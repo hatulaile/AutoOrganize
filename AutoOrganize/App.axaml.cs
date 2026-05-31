@@ -44,7 +44,12 @@ public partial class App : Application
         {
             desktop.MainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             desktop.MainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            desktop.Exit += (_, _) =>
+            AppDomain.CurrentDomain.UnhandledException += (_, ev) =>
+            {
+                var logger = ServiceProvider.GetRequiredService<ILogger<App>>();
+                logger.LogCritical(ev.ExceptionObject as Exception, "应用程序发生未处理的异常，应用即将崩溃");
+            };
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
                 var log = ServiceProvider.GetRequiredService<ILogger<App>>();
                 log.LogDebug("应用正在退出，正在执行清理工作...");

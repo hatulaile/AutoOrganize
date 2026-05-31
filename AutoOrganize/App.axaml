@@ -10,9 +10,9 @@
 
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.v2.xaml" />
         <semi:SemiTheme Locale="zh-CN" />
         <semi:UrsaSemiTheme Locale="zh-CN"/>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.v2.xaml" />
         <StyleInclude Source="Views/Controls/ControlsStyles.axaml"/>
         <StyleInclude Source="Views/Stytes/Stytes.axaml"/>
     </Application.Styles>
