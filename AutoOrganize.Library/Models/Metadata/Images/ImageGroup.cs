@@ -1,36 +1,8 @@
-using System.Collections;
-
 namespace AutoOrganize.Library.Models.Metadata.Images;
 
-public sealed class ImageGroup : IEnumerable<ImageDataListBase>
+public sealed class ImageGroup : Dictionary<string, ImageDataListBase>
 {
-    public Dictionary<string, ImageDataListBase> ImageDataListForId { get; } = new();
-
-    public IReadOnlyCollection<ImageDataListBase> ImageDataList => ImageDataListForId.Values;
-
-    public void Add(ImageDataListBase imageDataList)
-    {
-        if (ImageDataListForId.TryGetValue(imageDataList.Id, out var list))
-        {
-            list.ImageData.AddRange(imageDataList.ImageData);
-            return;
-        }
-
-        ImageDataListForId[imageDataList.Id] = imageDataList;
-    }
-
-    public void AddRange(params IEnumerable<ImageDataListBase> imageDataLists)
-    {
-        foreach (ImageDataListBase imageDataList in imageDataLists)
-            Add(imageDataList);
-    }
-
-    public void Set(ImageDataListBase imageDataList)
-    {
-        ImageDataListForId[imageDataList.Id] = imageDataList;
-    }
-
-    public ImageGroup()
+    public ImageGroup() : base(0)
     {
     }
 
@@ -42,13 +14,26 @@ public sealed class ImageGroup : IEnumerable<ImageDataListBase>
         }
     }
 
-    IEnumerator<ImageDataListBase> IEnumerable<ImageDataListBase>.GetEnumerator()
+    public void Add(ImageDataListBase imageDataList)
     {
-        return ImageDataList.GetEnumerator();
+        if (TryGetValue(imageDataList.Id, out var list))
+        {
+            list.AddRange(imageDataList);
+            return;
+        }
+
+        this[imageDataList.Id] = imageDataList;
     }
 
-    public IEnumerator GetEnumerator()
+    public void AddRange(ImageGroup group)
     {
-        return ImageDataList.GetEnumerator();
+        foreach (ImageDataListBase imageDataList in group.Values)
+            Add(imageDataList);
+    }
+
+    public void AddRange(params IEnumerable<ImageDataListBase> imageDataLists)
+    {
+        foreach (ImageDataListBase imageDataList in imageDataLists)
+            Add(imageDataList);
     }
 }

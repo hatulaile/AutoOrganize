@@ -1,10 +1,20 @@
+using System.Collections;
+
 namespace AutoOrganize.Library.Models.Metadata.Images;
 
-public abstract class ImageDataListBase
+public abstract class ImageDataListBase : List<ImageData>
 {
     public abstract string Id { get; }
 
-    public List<ImageData> ImageData => field ??= new List<ImageData>(16);
+    protected ImageDataListBase() : base(0)
+    {
+
+    }
+
+    protected ImageDataListBase(int capacity) : base(capacity)
+    {
+
+    }
 }
 
 public sealed class MetadataProviderImageDataList : ImageDataListBase
@@ -21,7 +31,6 @@ public sealed class MetadataProviderImageDataList : ImageDataListBase
     public MetadataProviderImageDataList(MetadataProviderType type, IEnumerable<ImageData> imageData)
     {
         ProviderType = type;
-        //不知道为什么会警告
-        ImageData!.AddRange(imageData);
+        AddRange(imageData);
     }
 }

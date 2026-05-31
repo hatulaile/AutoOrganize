@@ -28,13 +28,12 @@ public static class MetadataConverters
     {
         if (groups is null) return null;
         string? highestPriorityId = GetHighestPriorityId(App.Current.ServiceProvider.GetServices<IMetadataProvider>(),
-            groups.ImageDataListForId
-                .Where(x => x.Value.ImageData.Count > 0).Select(x => x.Key));
+            groups.Where(x => x.Value.Count > 0).Select(x => x.Key));
         if (highestPriorityId is null)
             return null;
 
-        ImageDataListBase list = groups.ImageDataListForId[highestPriorityId];
-        return list.ImageData.MaxBy(x => x.Priority)?.ImageUrl;
+        ImageDataListBase list = groups[highestPriorityId];
+        return list.MaxBy(x => x.Priority)?.ImageUrl;
     }
 
     private static string? GetHighestPriorityId(IEnumerable<IMetadataProvider> providers,
