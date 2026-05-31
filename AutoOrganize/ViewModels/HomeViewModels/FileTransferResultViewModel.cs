@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Models;
@@ -135,6 +136,9 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     {
         _logger.LogDebug("导航到文件选择页面");
         _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
+
+        if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
+            ram.ClearRamCache();
     }
 
     [RelayCommand]

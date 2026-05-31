@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Models;
@@ -54,6 +55,9 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     {
         _logger.LogDebug("返回文件选择页");
         _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
+
+        if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
+            ram.ClearRamCache();
     }
 
     public bool CanNext()
@@ -101,8 +105,9 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     public void OnParametersChanged(MetadataEditOption option)
     {
-        _logger.LogDebug("参数变更，IsClear: {IsClear}, 处理结果数量: {Count}",
-            option.IsClear, option.FileProcessResultInfos?.Count() ?? 0);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("参数变更，IsClear: {IsClear}, 处理结果数量: {Count}",
+                option.IsClear, option.FileProcessResultInfos?.Count() ?? 0);
         CreateSource(option);
     }
 

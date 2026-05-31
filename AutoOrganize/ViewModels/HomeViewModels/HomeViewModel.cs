@@ -4,7 +4,7 @@ using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
-[ViewModelRegistration(ViewModelLifetime.Singleton)]
+[ViewModelRegistration(ViewModelLifetime.Singleton,ViewModelLifetime.Singleton)]
 public sealed partial class HomeViewModel : ViewModelBase, INavigationViewModel
 {
     public RoutingState? RoutingState { get; }
