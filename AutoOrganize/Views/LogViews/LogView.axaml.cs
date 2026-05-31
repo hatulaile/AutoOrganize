@@ -1,7 +1,12 @@
+using System;
 using System.Collections.Specialized;
 using AutoOrganize.ViewModels.LogViewModels;
+using AutoOrganize.ViewModels.SettingsViewModels;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Serilog;
+using Serilog.Events;
 
 namespace AutoOrganize.Views.LogViews;
 
@@ -29,5 +34,15 @@ public partial class LogView : UserControl
     private void LogEventsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         // MainScrollViewer.ScrollToEnd();
+    }
+
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+       Log.Logger.Verbose("Verbose log event");
+       Log.Logger.Debug("Debug log event");
+       Log.Logger.Information("Information log event");
+       Log.Logger.Warning("Warning log event");
+       Log.Logger.Error("Error log event");
+       Log.Logger.Fatal("Fatal log event");
     }
 }

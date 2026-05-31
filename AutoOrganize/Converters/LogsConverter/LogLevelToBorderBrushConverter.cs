@@ -8,13 +8,13 @@ namespace AutoOrganize.Converters.LogsConverter;
 
 public class LogLevelToBorderBrushConverter : IValueConverter
 {
-    private static readonly IBrush VrbBorder = new SolidColorBrush(Color.Parse("#505050"));
-    private static readonly IBrush DbgBorder = new SolidColorBrush(Color.Parse("#4A8AAA"));
-    private static readonly IBrush InfoBorder = new SolidColorBrush(Color.Parse("#4A9A6A"));
-    private static readonly IBrush WarnBorder = new SolidColorBrush(Color.Parse("#B8A050"));
-    private static readonly IBrush ErrorBorder = new SolidColorBrush(Color.Parse("#B86050"));
-    private static readonly IBrush FatalBorder = new SolidColorBrush(Color.Parse("#C06060"));
-    private static readonly IBrush DefaultBorder = new SolidColorBrush(Color.Parse("#404040"));
+    private static readonly IBrush VrbBorder = new SolidColorBrush(Color.Parse("#6B7280"));
+    private static readonly IBrush DbgBorder = new SolidColorBrush(Color.Parse("#2B7AD4"));
+    private static readonly IBrush InfoBorder = new SolidColorBrush(Color.Parse("#2B7AD4"));
+    private static readonly IBrush WarnBorder = new SolidColorBrush(Color.Parse("#D97706"));
+    private static readonly IBrush ErrorBorder = new SolidColorBrush(Color.Parse("#DC2626"));
+    private static readonly IBrush FatalBorder = new SolidColorBrush(Color.Parse("#B91C1C"));
+    private static readonly IBrush DefaultBorder = new SolidColorBrush(Color.Parse("#6B7280"));
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

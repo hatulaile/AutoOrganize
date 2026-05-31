@@ -26,14 +26,13 @@
 
     <ScrollViewer Name="MainScrollViewer">
         <Border Padding="20,12">
-            <ItemsRepeater ItemsSource="{Binding LogEvents}" Name="ItemsRepeater">
+            <ItemsRepeater ItemsSource="{Binding LogEvents}" Name="ItemsRepeater" HorizontalAlignment="Stretch"
+                           VerticalAlignment="Stretch">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate>
                         <Border
-                            BorderBrush="#2D2D2D"
-                            BorderThickness="0,0,0,1"
                             Margin="0,0,0,4"
-                            Padding="4,4,4,8"
+                            Padding="4,4,4,4"
                             Background="{Binding Level, Converter={StaticResource LevelToRowBackgroundConverter}}">
                             <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto, *">
                                 <StackPanel

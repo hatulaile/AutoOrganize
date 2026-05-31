@@ -8,12 +8,12 @@ namespace AutoOrganize.Converters.LogsConverter;
 
 public class LogLevelToForegroundConverter : IValueConverter
 {
-    private static readonly IBrush VrbColor = new SolidColorBrush(Color.Parse("#A0A0A0"));
-    private static readonly IBrush DbgColor = new SolidColorBrush(Color.Parse("#7DC4E4"));
-    private static readonly IBrush InfoColor = new SolidColorBrush(Color.Parse("#7CCF9C"));
-    private static readonly IBrush WarnColor = new SolidColorBrush(Color.Parse("#E8D47C"));
-    private static readonly IBrush ErrorColor = new SolidColorBrush(Color.Parse("#E88C7C"));
-    private static readonly IBrush FatalColor = new SolidColorBrush(Color.Parse("#F0A0A0"));
+    private static readonly IBrush VrbColor = new SolidColorBrush(Color.Parse("#9CA3AF"));
+    private static readonly IBrush DbgColor = new SolidColorBrush(Color.Parse("#4B9EFF"));
+    private static readonly IBrush InfoColor = new SolidColorBrush(Color.Parse("#4B9EFF"));
+    private static readonly IBrush WarnColor = new SolidColorBrush(Color.Parse("#F59E0B"));
+    private static readonly IBrush ErrorColor = new SolidColorBrush(Color.Parse("#E85C5C"));
+    private static readonly IBrush FatalColor = new SolidColorBrush(Color.Parse("#FF4444"));
     private static readonly IBrush DefaultColor = new SolidColorBrush(Color.Parse("#D4D4D4"));
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
