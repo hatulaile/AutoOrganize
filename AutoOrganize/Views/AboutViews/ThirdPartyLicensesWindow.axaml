@@ -12,8 +12,14 @@
         <Border Padding="16">
             <StackPanel>
                 <TextBlock Text="第三方库许可" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" />
-                <ItemsRepeater ItemsSource="{x:Static v:ThirdPartyLicensesWindow.ThirdPartyModels}">
-                    <ItemsRepeater.ItemTemplate>
+                <ItemsControl ItemsSource="{x:Static v:ThirdPartyLicensesWindow.ThirdPartyModels}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Margin="0,10,0,0">
                                 <Panel>
@@ -35,8 +41,8 @@
                                 </Panel>
                             </Border>
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </Border>
 

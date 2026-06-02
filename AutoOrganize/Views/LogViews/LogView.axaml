@@ -26,9 +26,16 @@
 
     <ScrollViewer Name="MainScrollViewer">
         <Border Padding="20,12">
-            <ItemsRepeater ItemsSource="{Binding LogEvents}" Name="ItemsRepeater" HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch">
-                <ItemsRepeater.ItemTemplate>
+            <ItemsControl ItemsSource="{Binding LogEvents}" Name="ItemsRepeater" HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border
                             Margin="0,0,0,4"
@@ -104,8 +111,8 @@
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Border>
     </ScrollViewer>
 </UserControl>
