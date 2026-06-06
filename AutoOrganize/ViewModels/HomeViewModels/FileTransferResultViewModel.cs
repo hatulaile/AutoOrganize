@@ -3,9 +3,9 @@ using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Models;
-using AutoOrganize.Models.MetadataViewModels;
-using AutoOrganize.Models.MetadataViewModels.FileSystem;
-using AutoOrganize.Models.MetadataViewModels.Metadata;
+using AutoOrganize.Models.MetadataNodes.Abstractions;
+using AutoOrganize.Models.MetadataNodes.FileSystem;
+using AutoOrganize.Models.MetadataNodes.Metadata;
 using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
@@ -25,17 +25,17 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     private readonly INavigationService _navigationService;
     private readonly ILogger<FileTransferResultViewModel> _logger;
 
-    private MetadataRoot? _metadataRoot;
+    private MetadataTreeRoot? _metadataRoot;
 
     public AvaloniaList<IFileTransferBatchInfo> FileTransferBatchInfos { get; } = [];
 
     public RoutingState RoutingState { get; }
 
     [ObservableProperty]
-    public partial HierarchicalModel<FileMetadataBase>? Model { get; set; }
+    public partial HierarchicalModel<MetadataTreeNodeBase>? Model { get; set; }
 
     [ObservableProperty]
-    public partial FileMetadataBase? SelectedMetadata { get; set; }
+    public partial MetadataTreeNodeBase? SelectedMetadata { get; set; }
 
     [ObservableProperty]
     public partial FileTransferFilterType FileTransferFilterType { get; set; }
@@ -56,7 +56,7 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
         CreateHierarchicalModel();
     }
 
-    partial void OnSelectedMetadataChanged(FileMetadataBase? value)
+    partial void OnSelectedMetadataChanged(MetadataTreeNodeBase? value)
     {
         if (value is null)
         {
@@ -74,13 +74,13 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
 
         switch (value)
         {
-            case TransferFileModel transferFileModel:
-                _navigationService.NavigateTo<TransferFileViewModel, TransferFileModel>
+            case TransferredFileNode transferFileModel:
+                _navigationService.NavigateTo<TransferredFileViewModel, TransferredFileNode>
                     (HostScreens.TransferResult, transferFileModel);
                 break;
 
-            case FailedTransferFileModel failedTransferFileModel:
-                _navigationService.NavigateTo<FailedTransferFileViewModel, FailedTransferFileModel>
+            case FailedTransferFileNode failedTransferFileModel:
+                _navigationService.NavigateTo<FailedTransferFileViewModel, FailedTransferFileNode>
                     (HostScreens.TransferResult, failedTransferFileModel);
                 break;
         }
@@ -93,7 +93,7 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
 
         if (Model is null)
         {
-            Model = new HierarchicalModel<FileMetadataBase>(new HierarchicalOptions<FileMetadataBase>
+            Model = new HierarchicalModel<MetadataTreeNodeBase>(new HierarchicalOptions<MetadataTreeNodeBase>
             {
                 ChildrenSelector = x => x.Children,
                 IsLeafSelector = x => !x.HasChildren,
@@ -103,7 +103,7 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
         }
 
         SelectedMetadata = null;
-        _metadataRoot = new MetadataRoot();
+        _metadataRoot = new MetadataTreeRoot();
         int successCount = 0, failedCount = 0;
         foreach (IFileTransferBatchInfo info in FileTransferBatchInfos)
         {

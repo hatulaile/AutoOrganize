@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Services.TopLevelServices;
@@ -9,19 +9,26 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 
 [ViewModelRegistration]
-public sealed partial class FailedDirectoryMetadataViewModel : MetadataViewModelBase<FailedDirectoryNode>
+public sealed partial class TransferredFileViewModel : MetadataViewModelBase<TransferredFileNode>
 {
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
 
     [ObservableProperty]
-    public partial DirectoryInfo? DirectoryInfo { get; set; }
+    public partial FileInfo? FileInfo { get; set; }
+
+    [RelayCommand]
+    private async Task OpenFile()
+    {
+        if (FileInfo is null) return;
+        await _launcherServices.LaunchFileInfoAsync(FileInfo, this);
+    }
 
     [RelayCommand]
     private async Task OpenContainingFolder()
     {
-        if (DirectoryInfo is null) return;
-        await _launcherServices.LaunchDirectoryInfoAsync(DirectoryInfo, this);
+        if (FileInfo?.Directory is null) return;
+        await _launcherServices.LaunchDirectoryInfoAsync(FileInfo.Directory, this);
     }
 
     [RelayCommand]
@@ -31,16 +38,16 @@ public sealed partial class FailedDirectoryMetadataViewModel : MetadataViewModel
         await _clipboardServices.SetTextAsync(str);
     }
 
-    protected override void MetadataChanging(FailedDirectoryNode? value)
+    protected override void MetadataChanging(TransferredFileNode? value)
     {
         base.MetadataChanging(value);
         if (value is not null)
         {
-            DirectoryInfo = new DirectoryInfo(value.FullPath);
+            FileInfo = new FileInfo(value.FullPath);
         }
     }
 
-    public FailedDirectoryMetadataViewModel(ILauncherServices launcherServices, IClipboardServices clipboardServices)
+    public TransferredFileViewModel(ILauncherServices launcherServices, IClipboardServices clipboardServices)
     {
         _launcherServices = launcherServices;
         _clipboardServices = clipboardServices;

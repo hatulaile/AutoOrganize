@@ -5,9 +5,9 @@ using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Models;
-using AutoOrganize.Models.MetadataViewModels;
-using AutoOrganize.Models.MetadataViewModels.FileSystem;
-using AutoOrganize.Models.MetadataViewModels.Metadata;
+using AutoOrganize.Models.MetadataNodes.Abstractions;
+using AutoOrganize.Models.MetadataNodes.FileSystem;
+using AutoOrganize.Models.MetadataNodes.Metadata;
 using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
@@ -27,18 +27,18 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     private readonly INavigationService _navigationService;
     private readonly ILogger<MetadataEditViewModel> _logger;
 
-    private MetadataRoot _metadataRoot = new();
+    private MetadataTreeRoot _metadataTreeRoot = new();
 
-    private FailedMetadataRoot _failedMetadataSystemRoot = new();
+    private FailedSourceFileRoot _failedSourceFileRootSystem = new();
 
     [ObservableProperty]
-    public partial FileMetadataBase? SelectedMetadata { get; set; }
+    public partial MetadataTreeNodeBase? SelectedMetadata { get; set; }
 
-    public IReadOnlyList<HierarchicalNode<FileMetadataBase>>? Rows => Model?.Flattened;
+    public IReadOnlyList<HierarchicalNode<MetadataTreeNodeBase>>? Rows => Model?.Flattened;
 
-    public AvaloniaList<FileMetadataBase> Source { get; } = [];
+    public AvaloniaList<MetadataTreeNodeBase> Source { get; } = [];
 
-    public HierarchicalModel<FileMetadataBase>? Model { get; private set; }
+    public HierarchicalModel<MetadataTreeNodeBase>? Model { get; private set; }
 
     public RoutingState RoutingState { get; }
 
@@ -47,7 +47,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     {
         _logger.LogInformation("进入文件传输处理页面.");
         _navigationService.NavigateTo<FileTransferProcessedViewModel, FileTransferProcessedOption>(HostScreens.Home,
-            new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataRoot)));
+            new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataTreeRoot)));
     }
 
     [RelayCommand]
@@ -62,10 +62,10 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     public bool CanNext()
     {
-        return Source.Any(x => x is not FailedMetadataRoot);
+        return Source.Any(x => x is not FailedSourceFileRoot);
     }
 
-    partial void OnSelectedMetadataChanged(FileMetadataBase? value)
+    partial void OnSelectedMetadataChanged(MetadataTreeNodeBase? value)
     {
         if (value is null)
         {
@@ -81,20 +81,20 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
                 _navigationService.NavigateTo<MetadataViewModel, MetadataBase>
                     (HostScreens.MetadataEdit, metadata.Metadata);
                 break;
-            case FileModel fileMetadata:
-                _navigationService.NavigateTo<FileMetadataViewModel, FileModel>
+            case SourceFileNode fileMetadata:
+                _navigationService.NavigateTo<SourceFileViewModel, SourceFileNode>
                     (HostScreens.MetadataEdit, fileMetadata);
                 break;
-            case FailedDirectoryModel failedDirectoryMetadata:
-                _navigationService.NavigateTo<FailedDirectoryMetadataViewModel, FailedDirectoryModel>(
+            case FailedDirectoryNode failedDirectoryMetadata:
+                _navigationService.NavigateTo<FailedDirectoryMetadataViewModel, FailedDirectoryNode>(
                     HostScreens.MetadataEdit, failedDirectoryMetadata);
                 break;
-            case FailedMetadataRoot failedFileMetadataRoot:
-                _navigationService.NavigateTo<FailedFileMetadataRootViewModel, FailedMetadataRoot>(
+            case FailedSourceFileRoot failedFileMetadataRoot:
+                _navigationService.NavigateTo<FailedFileRootViewModel, FailedSourceFileRoot>(
                     HostScreens.MetadataEdit, failedFileMetadataRoot);
                 break;
-            case FailedFile failedMetadata:
-                _navigationService.NavigateTo<FailedFileMetadataViewModel, FailedFile>
+            case FailedFileNode failedMetadata:
+                _navigationService.NavigateTo<FailedFileViewModel, FailedFileNode>
                     (HostScreens.MetadataEdit, failedMetadata);
                 break;
             default:
@@ -116,8 +116,8 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         if (options.IsClear)
         {
             _logger.LogDebug("清空现有源数据");
-            _metadataRoot = new MetadataRoot();
-            _failedMetadataSystemRoot = new FailedMetadataRoot();
+            _metadataTreeRoot = new MetadataTreeRoot();
+            _failedSourceFileRootSystem = new FailedSourceFileRoot();
             Source.Clear();
         }
 
@@ -134,19 +134,19 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
             {
                 try
                 {
-                    _metadataRoot.AddFile(result.Metadata, result.FilePath);
+                    _metadataTreeRoot.AddFile(result.Metadata, result.FilePath);
                     successCount++;
                 }
                 catch (Exception e)
                 {
                     _logger.LogWarning(e, "添加成功元数据到树失败: {FilePath}", result.FilePath);
-                    _failedMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, e);
+                    _failedSourceFileRootSystem.AddOrGetFailedMetadata(result.FilePath, e);
                     failedCount++;
                 }
             }
             else
             {
-                _failedMetadataSystemRoot.AddOrGetFailedMetadata(result.FilePath, result.Error,
+                _failedSourceFileRootSystem.AddOrGetFailedMetadata(result.FilePath, result.Error,
                     options.FileProcessOptions.Value);
                 failedCount++;
             }
@@ -156,17 +156,17 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
         if (options.IsClear)
         {
-            if (_failedMetadataSystemRoot.Children.Count > 0)
+            if (_failedSourceFileRootSystem.Children.Count > 0)
             {
-                Source.Add(_failedMetadataSystemRoot);
+                Source.Add(_failedSourceFileRootSystem);
             }
 
-            Source.AddRange(_metadataRoot.Children);
+            Source.AddRange(_metadataTreeRoot.Children);
         }
 
         if (Model is null)
         {
-            Model = new HierarchicalModel<FileMetadataBase>(new HierarchicalOptions<FileMetadataBase>
+            Model = new HierarchicalModel<MetadataTreeNodeBase>(new HierarchicalOptions<MetadataTreeNodeBase>
             {
                 ChildrenSelector = x => x.Children,
                 IsLeafSelector = x => !x.HasChildren,
@@ -178,20 +178,20 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         }
     }
 
-    private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(FileMetadataBase fileMetadata)
+    private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(MetadataTreeNodeBase metadataTreeNode)
     {
-        if (fileMetadata is FileEpisodeMetadata episodeMetadata)
+        if (metadataTreeNode is EpisodeMetadataTreeNode episodeMetadata)
         {
-            foreach (FileMetadataBase episodeMetadataChild in episodeMetadata.Children)
+            foreach (MetadataTreeNodeBase episodeMetadataChild in episodeMetadata.Children)
             {
-                if (episodeMetadataChild is not FileModel metadataChild)
+                if (episodeMetadataChild is not SourceFileNode metadataChild)
                     continue;
                 yield return new FileMetadataEntry(metadataChild.FullPath, episodeMetadata.Metadata);
             }
         }
 
-        if (!fileMetadata.HasChildren) yield break;
-        foreach (FileMetadataBase fileMetadataChildren in fileMetadata.Children)
+        if (!metadataTreeNode.HasChildren) yield break;
+        foreach (MetadataTreeNodeBase fileMetadataChildren in metadataTreeNode.Children)
         {
             foreach (var allFileMetadataEntry in GetAllFileMetadataEntries(fileMetadataChildren))
             {

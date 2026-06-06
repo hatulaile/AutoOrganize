@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using AutoOrganize.Models.MetadataViewModels.FileSystem;
+using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Services.TopLevelServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,7 +9,7 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 
 [ViewModelRegistration]
-public sealed partial class FailedTransferFileViewModel : MetadataViewModelBase<FailedTransferFileModel>
+public sealed partial class FailedTransferFileViewModel : MetadataViewModelBase<FailedTransferFileNode>
 {
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
@@ -38,7 +38,7 @@ public sealed partial class FailedTransferFileViewModel : MetadataViewModelBase<
         await _clipboardServices.SetTextAsync(str);
     }
 
-    protected override void MetadataChanging(FailedTransferFileModel? value)
+    protected override void MetadataChanging(FailedTransferFileNode? value)
     {
         base.MetadataChanging(value);
         if (value is not null)
