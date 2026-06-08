@@ -15,10 +15,8 @@ using AutoOrganize.Library.Services.RequestCoalescers;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.Services.WindowManagers;
-using AutoOrganize.Utils;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using TMDbLib.Client;
 using ViewModelRegistrationGenerator;
 using ConfigJsonSourceGenerationContext = AutoOrganize.Services.ConfigJsonSourceGenerationContext;
 
@@ -37,6 +35,7 @@ public static class ServiceCollectionExtension
                 .AddSingleton(new MemoryCache(new MemoryCacheOptions()));
 
             services
+                .AddSingleton<INavigationService, NavigationService>()
                 .AddSingleton<IMetadataCache, MemoryMetadataCache>()
                 .AddSingleton<INameParserManager, NameParserManager>()
                 .AddSingleton<IStorageServices, StorageServices>()
@@ -59,20 +58,7 @@ public static class ServiceCollectionExtension
             services.AddSingleton<IMovieParser, MoviePathParser>();
 
             services.AddViewModels()
-                .AddNavigationService()
                 .AddMetadataProviders();
-            return services;
-        }
-
-        public IServiceCollection AddNavigationService()
-        {
-            services
-                .AddSingleton<INavigationService, NavigationService>();
-            foreach (HostScreens screens in Enum.GetValues<HostScreens>().Skip(1))
-            {
-                services.AddRoutingState(screens);
-            }
-
             return services;
         }
 
@@ -85,10 +71,5 @@ public static class ServiceCollectionExtension
             return services;
         }
 
-        private IServiceCollection AddRoutingState(HostScreens screens)
-        {
-            services.AddKeyedSingleton<RoutingState>(screens);
-            return services;
-        }
     }
 }

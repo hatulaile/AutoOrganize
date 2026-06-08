@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AutoOrganize.Services.TopLevelServices;
-using AutoOrganize.Services.WindowManagers;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls.Notifications;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;

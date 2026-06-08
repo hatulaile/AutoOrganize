@@ -1,5 +1,5 @@
 ﻿using System;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 
 namespace AutoOrganize.Services.NavigationServices;
 
@@ -7,13 +7,13 @@ public delegate void NavigatedHandler(object sender, NavigatedEventArgs ev);
 
 public sealed class NavigatedEventArgs : EventArgs
 {
-    public ViewModelBase? OldViewModel { get; }
+    public IViewModel? OldViewModel { get; }
 
-    public ViewModelBase NewViewModel { get; }
+    public IViewModel NewViewModel { get; }
 
-    public ViewModelBase? OwnerViewModel { get; }
+    public IParentViewModel? OwnerViewModel { get; }
 
-    public NavigatedEventArgs(ViewModelBase? oldViewModel, ViewModelBase newViewModel, ViewModelBase? ownerViewModel)
+    public NavigatedEventArgs(IViewModel? oldViewModel, IViewModel newViewModel, IParentViewModel? ownerViewModel)
     {
         OldViewModel = oldViewModel;
         NewViewModel = newViewModel;

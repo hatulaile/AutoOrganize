@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AutoOrganize.ViewLocators;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,8 +9,8 @@ namespace AutoOrganize.Services.WindowManagers;
 
 public partial class WindowService
 {
-    public void Show<TWindowViewModel>(Window? ownerWindow = null, TWindowViewModel? defaultViewModel = null)
-        where TWindowViewModel : ViewModelBase, IWindowViewModel
+    public void Show<TWindowViewModel>(Window? ownerWindow = null, TWindowViewModel? defaultViewModel = default)
+        where TWindowViewModel :IWindowViewModel
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
@@ -54,8 +54,8 @@ public partial class WindowService
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
 
-    public void Show<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = null)
-        where TWindowViewModel : ViewModelBase, IWindowViewModel
+    public void Show<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = default)
+        where TWindowViewModel :IWindowViewModel
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
         Show(ownerWindow, defaultViewModel);
@@ -68,8 +68,8 @@ public partial class WindowService
     }
 
     public void Show<TWindowViewModel, TArgs>(TArgs args, Window? ownerWindow = null,
-        TWindowViewModel? defaultViewModel = null)
-        where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs>
+        TWindowViewModel? defaultViewModel = default)
+        where TWindowViewModel :  IWindowViewModel<TArgs>
     {
         TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
@@ -91,8 +91,8 @@ public partial class WindowService
     }
 
     public void Show<TWindowViewModel, TArgs>(TArgs arg, object ownerViewModel,
-        TWindowViewModel? defaultViewModel = null)
-        where TWindowViewModel : ViewModelBase, IWindowViewModel<TArgs>
+        TWindowViewModel? defaultViewModel = default)
+        where TWindowViewModel :IWindowViewModel<TArgs>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
         Show(arg, ownerWindow, defaultViewModel);
@@ -124,11 +124,11 @@ public partial class WindowService
 
     private void ShowOrActiveWindow(Window window, Window? ownerWindow = null)
     {
-        if (window.DataContext is ViewModelBase vm)
+        if (window.DataContext is IViewModel vm)
         {
-            ViewModelBase? ownerViewModel;
-            if (ownerWindow is not null) ownerViewModel = ownerWindow.DataContext as ViewModelBase;
-            else ownerViewModel = window.Owner?.DataContext as ViewModelBase;
+            IParentViewModel? ownerViewModel;
+            if (ownerWindow is not null) ownerViewModel = ownerWindow.DataContext as IParentViewModel;
+            else ownerViewModel = window.Owner?.DataContext as IParentViewModel;
 
             if (ownerViewModel is not null && !ReferenceEquals(ownerViewModel, vm))
                 vm.OwnerViewModel = ownerViewModel;
@@ -158,7 +158,7 @@ public partial class WindowService
             var win = (Window?)windowObj ?? throw new ArgumentException("Window cannot be null", nameof(windowObj));
             var viewModel = win.DataContext as IWindowViewModel;
 
-            (win.DataContext as ViewModelBase)?.OwnerViewModel = null;
+            (win.DataContext as IViewModel)?.OwnerViewModel = null;
             viewModel?.OnCloseWindow();
             if (!ReferenceEquals(win, MainWindow) && !CanCloseWindow(win) &&
                 ev.CloseReason is not (WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown) &&

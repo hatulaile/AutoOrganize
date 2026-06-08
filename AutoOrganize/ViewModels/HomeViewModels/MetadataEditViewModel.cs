@@ -10,19 +10,19 @@ using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Models.MetadataNodes.Metadata;
 using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.ViewModels.Abstractions;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 using Avalonia.Collections;
 using Avalonia.Controls.DataGridHierarchical;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton, ViewModelLifetime.Singleton)]
-public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationViewModel<MetadataEditOption>
+public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, INavigationViewModel<MetadataEditOption>
 {
     private readonly INavigationService _navigationService;
     private readonly ILogger<MetadataEditViewModel> _logger;
@@ -40,13 +40,11 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
 
     public HierarchicalModel<MetadataTreeNodeBase>? Model { get; private set; }
 
-    public RoutingState RoutingState { get; }
-
     [RelayCommand(CanExecute = nameof(CanNext))]
     public void Next()
     {
         _logger.LogInformation("进入文件传输处理页面.");
-        _navigationService.NavigateTo<FileTransferProcessedViewModel, FileTransferProcessedOption>(HostScreens.Home,
+        _navigationService.NavigateTo<FileTransferProcessedViewModel, FileTransferProcessedOption>(this,
             new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataTreeRoot)));
     }
 
@@ -54,7 +52,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     public void Back()
     {
         _logger.LogDebug("返回文件选择页");
-        _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
+        _navigationService.NavigateTo<SelectFilesViewModel>(this);
 
         if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
             ram.ClearRamCache();
@@ -70,7 +68,7 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         if (value is null)
         {
             _logger.LogDebug("取消选择元数据项");
-            _navigationService.Clear(HostScreens.MetadataEdit);
+            _navigationService.Clear(RoutingState);
             return;
         }
 
@@ -79,26 +77,26 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
         {
             case IFileMetadata<MetadataBase> metadata:
                 _navigationService.NavigateTo<MetadataViewModel, MetadataBase>
-                    (HostScreens.MetadataEdit, metadata.Metadata);
+                    (RoutingState, metadata.Metadata);
                 break;
             case SourceFileNode fileMetadata:
                 _navigationService.NavigateTo<SourceFileViewModel, SourceFileNode>
-                    (HostScreens.MetadataEdit, fileMetadata);
+                    (RoutingState, fileMetadata);
                 break;
             case FailedDirectoryNode failedDirectoryMetadata:
                 _navigationService.NavigateTo<FailedDirectoryMetadataViewModel, FailedDirectoryNode>(
-                    HostScreens.MetadataEdit, failedDirectoryMetadata);
+                    RoutingState, failedDirectoryMetadata);
                 break;
             case FailedSourceFileRoot failedFileMetadataRoot:
                 _navigationService.NavigateTo<FailedFileRootViewModel, FailedSourceFileRoot>(
-                    HostScreens.MetadataEdit, failedFileMetadataRoot);
+                    RoutingState, failedFileMetadataRoot);
                 break;
             case FailedFileNode failedMetadata:
                 _navigationService.NavigateTo<FailedFileViewModel, FailedFileNode>
-                    (HostScreens.MetadataEdit, failedMetadata);
+                    (RoutingState, failedMetadata);
                 break;
             default:
-                _navigationService.Clear(HostScreens.MetadataEdit);
+                _navigationService.Clear(RoutingState);
                 break;
         }
     }
@@ -201,13 +199,9 @@ public sealed partial class MetadataEditViewModel : ViewModelBase, INavigationVi
     }
 
     public MetadataEditViewModel(
-        INavigationService navigationViewModel,
-        [FromKeyedServices(HostScreens.MetadataEdit)]
-        RoutingState routingState, ILogger<MetadataEditViewModel> logger)
+        INavigationService navigationViewModel, ILogger<MetadataEditViewModel> logger)
     {
         _navigationService = navigationViewModel;
         _logger = logger;
-        RoutingState = routingState;
-        RoutingState.SetOwnerViewModel(this);
     }
 }

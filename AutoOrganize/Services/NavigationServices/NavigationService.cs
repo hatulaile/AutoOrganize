@@ -1,5 +1,5 @@
 using System;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoOrganize.Services.NavigationServices;
@@ -8,17 +8,8 @@ public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public void NavigateTo<TViewModel>(HostScreens screens, TViewModel? defaultViewModel = null)
-        where TViewModel : ViewModelBase, INavigationViewModel
-    {
-        if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
-            return;
-
-        NavigateTo(routingState, defaultViewModel);
-    }
-
-    public void NavigateTo<TViewModel>(RoutingState routingState, TViewModel? defaultViewModel = null)
-        where TViewModel : ViewModelBase, INavigationViewModel
+    public void NavigateTo<TViewModel>(RoutingState routingState, TViewModel? defaultViewModel = default)
+        where TViewModel : INavigationViewModel
     {
         if ((defaultViewModel ?? _serviceProvider.GetRequiredService<TViewModel>()) is not { } viewModel)
             return;
@@ -36,45 +27,28 @@ public class NavigationService : INavigationService
         viewModel.OnNavigatedTo();
     }
 
-    public void NavigateTo(HostScreens screens, Type viewModelType)
-    {
-        if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
-            return;
-
-        NavigateTo(routingState, viewModelType);
-    }
-
     public void NavigateTo(RoutingState routingState, Type viewModelType)
     {
-        object? vm = _serviceProvider.GetRequiredService(viewModelType);
-        if (vm is not (INavigationViewModel navigationViewModel and ViewModelBase viewModelBase))
+        object vm = _serviceProvider.GetRequiredService(viewModelType);
+        if (vm is not INavigationViewModel navigationViewModel)
             throw new InvalidOperationException($"{viewModelType.FullName} is not a navigationViewModel");
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
 
-        viewModelBase.OwnerViewModel = routingState.OwnerViewModel;
-        if (ReferenceEquals(oldViewModel, viewModelBase))
+        navigationViewModel.OwnerViewModel = routingState.OwnerViewModel;
+        if (ReferenceEquals(oldViewModel, navigationViewModel))
             return;
 
         oldViewModel?.OnNavigatingFrom();
         navigationViewModel.OnNavigatingTo();
-        routingState.NavigateToCommand.Execute(viewModelBase);
+        routingState.NavigateToCommand.Execute(navigationViewModel);
         oldViewModel?.OnNavigatedFrom();
         navigationViewModel.OnNavigatedTo();
     }
 
-    public void NavigateTo<TViewModel, TArgs>(HostScreens screens, TArgs args, TViewModel? defaultViewModel = null)
-        where TViewModel : ViewModelBase, INavigationViewModel<TArgs>
-    {
-        if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
-            return;
-
-        NavigateTo(routingState, args, defaultViewModel);
-    }
-
     public void NavigateTo<TViewModel, TArgs>(RoutingState routingState, TArgs args,
-        TViewModel? defaultViewModel = null)
-        where TViewModel : ViewModelBase, INavigationViewModel<TArgs>
+        TViewModel? defaultViewModel = default)
+        where TViewModel : INavigationViewModel<TArgs>
     {
         if ((defaultViewModel ?? _serviceProvider.GetRequiredService<TViewModel>()) is not { } viewModel)
             return;
@@ -89,23 +63,15 @@ public class NavigationService : INavigationService
         viewModel.OnNavigatingTo();
         viewModel.OnNavigatingTo(args);
         routingState.NavigateToCommand.Execute(viewModel);
+        oldViewModel?.OnNavigatedFrom();
         viewModel.OnNavigatedTo();
         viewModel.OnNavigatedTo(args);
-        oldViewModel?.OnNavigatedFrom();
-    }
-
-    public void NavigateTo<TViewModel, TArgs>(HostScreens screens, TArgs args, Type viewModelType)
-    {
-        if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
-            return;
-
-        NavigateTo<TViewModel, TArgs>(routingState, args, viewModelType);
     }
 
     public void NavigateTo<TViewModel, TArgs>(RoutingState routingState, TArgs args, Type viewModelType)
     {
-        object? vm = _serviceProvider.GetRequiredService(viewModelType);
-        if (vm is not (INavigationViewModel<TArgs> navigationViewModel and ViewModelBase viewModelBase))
+        object vm = _serviceProvider.GetRequiredService(viewModelType);
+        if (vm is not INavigationViewModel<TArgs> navigationViewModel)
             throw new InvalidOperationException($"{viewModelType.FullName} is not a navigationViewModel");
 
         var oldViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
@@ -113,28 +79,19 @@ public class NavigationService : INavigationService
         navigationViewModel.OnParametersChanged(args);
 
         if (ReferenceEquals(oldViewModel, navigationViewModel)) return;
-        viewModelBase.OwnerViewModel = routingState.OwnerViewModel;
+        navigationViewModel.OwnerViewModel = routingState.OwnerViewModel;
         oldViewModel?.OnNavigatingFrom();
-        navigationViewModel.OnNavigatingTo(args);
         navigationViewModel.OnNavigatingTo();
+        navigationViewModel.OnNavigatingTo(args);
         routingState.NavigateToCommand.Execute(navigationViewModel);
+        oldViewModel?.OnNavigatedFrom();
         navigationViewModel.OnNavigatedTo();
         navigationViewModel.OnNavigatedTo(args);
-        oldViewModel?.OnNavigatedFrom();
-    }
-
-    public void Clear(HostScreens screens)
-    {
-        if (_serviceProvider.GetKeyedService<RoutingState>(screens) is not { } routingState)
-            return;
-
-        Clear(routingState);
     }
 
     public void Clear(RoutingState routingState)
     {
         var navigationViewModel = routingState.CurrentPageViewModel as INavigationViewModel;
-
         navigationViewModel?.OnNavigatingFrom();
         routingState.ClearCommand.Execute(null);
         navigationViewModel?.OnNavigatedFrom();

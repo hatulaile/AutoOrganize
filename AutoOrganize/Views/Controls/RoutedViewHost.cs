@@ -11,7 +11,7 @@
 using System.ComponentModel;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.ViewLocators;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia;
 using Avalonia.Controls;
 
@@ -74,7 +74,7 @@ public class RoutedViewHost : ContentControl
 
     public IViewLocator? ViewLocator { get; set; }
 
-    private void NavigateToViewModel(ViewModelBase? viewModelBase)
+    private void NavigateToViewModel(IViewModel? viewModelBase)
     {
         if (Router == null)
         {

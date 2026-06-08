@@ -1,31 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.Models;
 using AutoOrganize.Services.NavigationServices;
-using AutoOrganize.Services.WindowManagers;
+using AutoOrganize.ViewModels.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.SettingsViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton)]
-public sealed partial class SettingsWindowViewModel : ViewModelBase, IWindowViewModel
+public sealed partial class SettingsWindowViewModel : SubNavigateViewModelBase, IWindowViewModel
 {
     private readonly INavigationService _navigationService;
 
     private readonly HashSet<ISettingsViewModel> _settingsViewModels = [];
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CurrentSettingsViewModel))]
-    public partial RoutingState RoutingState { get; set; }
-
-    public ISettingsViewModel? CurrentSettingsViewModel => (ISettingsViewModel?)RoutingState.CurrentPageViewModel;
+    private ISettingsViewModel? CurrentSettingsViewModel => (ISettingsViewModel?)RoutingState.CurrentPageViewModel;
 
     [ObservableProperty]
     public partial IPageModel? SelectedItem { get; set; }
@@ -71,9 +64,7 @@ public sealed partial class SettingsWindowViewModel : ViewModelBase, IWindowView
             await CurrentSettingsViewModel.CancelConfigChangeAsync(token);
     }
 
-    public SettingsWindowViewModel(INavigationService navigationService,
-        [FromKeyedServices(HostScreens.Settings)]
-        RoutingState routingState)
+    public SettingsWindowViewModel(INavigationService navigationService)
     {
         Pages =
         [
@@ -84,7 +75,6 @@ public sealed partial class SettingsWindowViewModel : ViewModelBase, IWindowView
                 new PageModel<ThemoviedbMetadataProviderSettingsViewModel>("TMDB设置", string.Empty))
         ];
         _navigationService = navigationService;
-        RoutingState = routingState;
         RoutingState.SetOwnerViewModel(this);
         IPageModel page = Pages.First(x => x.ViewModelType is not null);
         Navigate(page);

@@ -1,5 +1,5 @@
 ﻿using System;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls;
 
 namespace AutoOrganize.Services.WindowManagers;
@@ -8,13 +8,13 @@ public partial class WindowService
 {
     public Window? GetWindowByViewModel(object viewModel)
     {
-        if(ReferenceEquals(viewModel, MainWindow.DataContext))
+        if (ReferenceEquals(viewModel, MainWindow.DataContext))
             return MainWindow;
 
         if (_windowByViewModel.TryGetValue(viewModel, out Window? window))
             return window;
 
-        if (viewModel is ViewModelBase vm)
+        if (viewModel is IViewModel vm)
             return GetWindowByViewModel(vm);
 
         return null;
@@ -26,18 +26,18 @@ public partial class WindowService
         return window ?? throw new InvalidOperationException($"No window found for {viewModel.GetType().Name}");
     }
 
-    public Window? GetWindowByViewModel(ViewModelBase viewModel)
+    public Window? GetWindowByViewModel(IViewModel viewModel)
     {
-        if(ReferenceEquals(viewModel, MainWindow.DataContext))
+        if (ReferenceEquals(viewModel, MainWindow.DataContext))
             return MainWindow;
 
         if (_windowByViewModel.TryGetValue(viewModel, out var window))
             return window;
 
-        ViewModelBase? currentViewModel = viewModel;
+        IViewModel? currentViewModel = viewModel;
         do
         {
-            if (_windowByViewModel.TryGetValue(currentViewModel, out window))
+            if (currentViewModel is IWindowViewModel && _windowByViewModel.TryGetValue(currentViewModel, out window))
                 return window;
 
             currentViewModel = currentViewModel.OwnerViewModel;
@@ -46,7 +46,7 @@ public partial class WindowService
         return null;
     }
 
-    public Window GetRequiredWindowByViewModel(ViewModelBase viewModel)
+    public Window GetRequiredWindowByViewModel(IViewModel viewModel)
     {
         Window? window = GetWindowByViewModel(viewModel);
         return window ?? throw new InvalidOperationException($"No window found for {viewModel.GetType().Name}");

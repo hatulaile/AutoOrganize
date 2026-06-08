@@ -1,6 +1,6 @@
-namespace AutoOrganize.Services.NavigationServices;
+namespace AutoOrganize.ViewModels.Abstractions;
 
-public interface INavigationViewModel
+public interface INavigationViewModel : IViewModel
 {
     void OnNavigatingFrom()
     {

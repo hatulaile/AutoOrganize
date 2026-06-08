@@ -1,11 +1,10 @@
 using System;
-using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.ViewModels.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 
-public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMetadataViewModel<TFileMetadata>,
-    INavigationViewModel<TFileMetadata>
+public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMetadataViewModel<TFileMetadata>, INavigationViewModel<TFileMetadata>
 {
     public virtual void OnNavigatingTo(TFileMetadata metadata)
     {
@@ -51,7 +50,7 @@ public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMeta
     }
 
 
-    object? IFileMetadataViewModel.Metadata
+    object? IMetadataViewModel.Metadata
     {
         get => Metadata;
         set

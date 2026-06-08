@@ -1,6 +1,6 @@
 ﻿using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Library.Services.PathNameGenerators.Configs;
-using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.ViewModels.Abstractions;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.SettingsViewModels;

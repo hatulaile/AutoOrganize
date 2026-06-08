@@ -10,6 +10,7 @@ using AutoOrganize.Library.Services.Observers;
 using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Collections;
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
@@ -69,7 +70,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
         if (Entries is null)
         {
             _logger.LogWarning("Entries 为空, 前往编辑页");
-            _navigationService.NavigateTo<MetadataEditViewModel>(HostScreens.Home);
+            _navigationService.NavigateTo<MetadataEditViewModel>(this);
             return;
         }
 
@@ -128,7 +129,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
                         this);
                 }
 
-                _navigationService.NavigateTo<FileTransferResultViewModel, FileTransferResultOptions>(HostScreens.Home,
+                _navigationService.NavigateTo<FileTransferResultViewModel, FileTransferResultOptions>(this,
                     new FileTransferResultOptions
                     {
                         BatchInfos = _transferBatchInfos
@@ -145,7 +146,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     private void GoBack()
     {
         _logger.LogDebug($"触发了返回方法, 返回{nameof(MetadataEditViewModel)}");
-        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
+        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(this,
             new MetadataEditOption
             {
                 IsClear = false

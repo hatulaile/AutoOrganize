@@ -6,6 +6,7 @@ using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Collections;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -119,7 +120,7 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     {
         _logger.LogInformation("用户前往 FileMetadataProgressViewModel, 类型: {Type}, 文件数量: {Count}", SelectedMetadataType,
             Source.Count);
-        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions>(HostScreens.Home,
+        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions>(this,
             new FileProcessOptions
             {
                 Type = SelectedMetadataType,

@@ -1,5 +1,5 @@
 using System.Linq;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia;
 using StaticViewLocator;
 

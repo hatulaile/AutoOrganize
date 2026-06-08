@@ -56,19 +56,18 @@
 
     <ItemGroup>
         <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.8.0" />
-        <PackageReference Include="Avalonia" Version="12.0.3" />
-        <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="12.0.0" />
-        <PackageReference Include="Avalonia.Desktop" Version="12.0.3" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.3" />
+        <PackageReference Include="Avalonia" Version="12.0.4" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.0.4" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.4" />
         <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
         <PackageReference Include="Irihi.Ursa" Version="2.0.0" />
         <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="2.0.0" />
         <PackageReference Include="ProDataGrid" Version="12.0.0" />
-        <PackageReference Include="Semi.Avalonia" Version="12.0.1" />
-        <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.10" />
+        <PackageReference Include="Semi.Avalonia" Version="12.0.3" />
+        <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.11" />
         <PackageReference Include="Xaml.Behaviors.Avalonia" Version="12.0.0.1" />
-        <PackageReference Include="HotAvalonia" Version="3.1.0" PrivateAssets="All" Publish="True" />
-        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="12.0.3" PrivateAssets="All" />
+        <PackageReference Include="HotAvalonia" Version="3.1.1" PrivateAssets="All" Publish="True" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="12.0.4" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
@@ -136,11 +135,7 @@
     <ItemGroup>
       <AdditionalFiles Include="Views\Controls\MetadataFields.axaml" />
       <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedDirectoryMetadataView.axaml" />
-      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedFileMetadataRootView.axaml" />
-      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedFileMetadataView.axaml" />
       <AdditionalFiles Include="Views\HomeViews\MetadataViews\FailedTransferFileView.axaml" />
-      <AdditionalFiles Include="Views\HomeViews\MetadataViews\FileMetadataView.axaml" />
       <AdditionalFiles Include="Views\HomeViews\MetadataViews\MetadataView.axaml" />
-      <AdditionalFiles Include="Views\HomeViews\MetadataViews\TransferFileView.axaml" />
     </ItemGroup>
 </Project>

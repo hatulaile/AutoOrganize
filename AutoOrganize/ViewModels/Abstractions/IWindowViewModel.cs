@@ -1,6 +1,6 @@
-﻿namespace AutoOrganize.Services.WindowManagers;
+﻿namespace AutoOrganize.ViewModels.Abstractions;
 
-public interface IWindowViewModel
+public interface IWindowViewModel : IViewModel
 {
     bool AllowMultipleInstances => false;
 

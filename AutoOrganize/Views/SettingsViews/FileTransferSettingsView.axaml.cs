@@ -2,10 +2,8 @@
 using AutoOrganize.Library.Models.FileTransfers;
 using AutoOrganize.Library.Services.Config;
 using AutoOrganize.ViewModels.SettingsViewModels;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 
 namespace AutoOrganize.Views.SettingsViews;
 

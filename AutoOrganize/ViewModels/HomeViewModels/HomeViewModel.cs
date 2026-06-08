@@ -1,19 +1,14 @@
 using AutoOrganize.Services.NavigationServices;
-using Microsoft.Extensions.DependencyInjection;
+using AutoOrganize.ViewModels.Abstractions;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton,ViewModelLifetime.Singleton)]
-public sealed partial class HomeViewModel : ViewModelBase, INavigationViewModel
+public sealed partial class HomeViewModel : SubNavigateViewModelBase, INavigationViewModel
 {
-    public RoutingState? RoutingState { get; }
-
-    public HomeViewModel(INavigationService navigationService,
-        [FromKeyedServices(HostScreens.Home)] RoutingState routingState)
+    public HomeViewModel(INavigationService navigationService)
     {
-        RoutingState = routingState;
-        RoutingState.SetOwnerViewModel(this);
-        navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
+        navigationService.NavigateTo<SelectFilesViewModel>(RoutingState);
     }
 }

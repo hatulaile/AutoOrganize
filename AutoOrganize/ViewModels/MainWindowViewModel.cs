@@ -3,26 +3,23 @@ using System.Linq;
 using AutoOrganize.Models;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.WindowManagers;
-using AutoOrganize.ViewModels.AboutViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using AutoOrganize.ViewModels.HomeViewModels;
 using AutoOrganize.ViewModels.LogViewModels;
 using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.None)]
-public sealed partial class MainWindowViewModel : ViewModelBase
+public sealed partial class MainWindowViewModel : SubNavigateViewModelBase
 {
     private readonly INavigationService _navigationService;
     private readonly IWindowService _windowService;
     private readonly ILogger<MainWindowViewModel> _logger;
-
-    public RoutingState? RoutingState { get; }
 
     [ObservableProperty]
     public partial IPageModel SelectedPage { get; set; }
@@ -33,11 +30,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         new PageModel<LogViewModel>("日志", string.Empty),
     ];
 
-    public MainWindowViewModel(INavigationService navigationService,
-        [FromKeyedServices(HostScreens.Main)] RoutingState routingState, IWindowService windowService,
-        ILogger<MainWindowViewModel> logger)
+    public MainWindowViewModel(INavigationService navigationService, IWindowService windowService, ILogger<MainWindowViewModel> logger)
     {
-        RoutingState = routingState;
         RoutingState.SetOwnerViewModel(this);
         _navigationService = navigationService;
         _windowService = windowService;
@@ -52,7 +46,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         if (pageModel.ViewModelType is null) return;
         _logger.LogDebug("导航到页面: {PageName} ({ViewModelType})", pageModel.Title, pageModel.ViewModelType.Name);
-        _navigationService.NavigateTo(HostScreens.Main, pageModel.ViewModelType);
+        _navigationService.NavigateTo(RoutingState, pageModel.ViewModelType);
     }
 
     [RelayCommand]

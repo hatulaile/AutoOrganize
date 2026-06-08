@@ -1,4 +1,4 @@
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -6,9 +6,9 @@ namespace AutoOrganize.Services.NavigationServices;
 
 public partial class RoutingState : ObservableObject
 {
-    public ViewModelBase? OwnerViewModel { get; private set; }
+    public IParentViewModel? OwnerViewModel { get; private set; }
 
-    public ViewModelBase? CurrentPageViewModel
+    public IViewModel? CurrentPageViewModel
     {
         get;
         private set => SetProperty(ref field, value);
@@ -16,15 +16,15 @@ public partial class RoutingState : ObservableObject
 
     public event NavigatedHandler? Navigated;
 
-    public void SetOwnerViewModel(ViewModelBase owner)
+    public void SetOwnerViewModel(IParentViewModel owner)
     {
         OwnerViewModel = owner;
     }
 
     [RelayCommand]
-    private void NavigateTo(ViewModelBase viewModel)
+    private void NavigateTo(IViewModel viewModel)
     {
-        ViewModelBase? oldViewModel = CurrentPageViewModel;
+        IViewModel? oldViewModel = CurrentPageViewModel;
         CurrentPageViewModel = viewModel;
         Navigated?.Invoke(this, new NavigatedEventArgs(oldViewModel, viewModel, OwnerViewModel));
     }

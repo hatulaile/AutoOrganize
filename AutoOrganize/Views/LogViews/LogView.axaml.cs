@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Specialized;
 using AutoOrganize.ViewModels.LogViewModels;
-using AutoOrganize.ViewModels.SettingsViewModels;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Serilog;
-using Serilog.Events;
 
 namespace AutoOrganize.Views.LogViews;
 

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.Library.Services.Config;
-using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.ViewModels.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutoOrganize.ViewModels.SettingsViewModels;

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AsyncImageLoader.Loaders;
+﻿using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Models;
@@ -8,19 +7,20 @@ using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Models.MetadataNodes.Metadata;
 using AutoOrganize.Models.Options;
 using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.ViewModels.Abstractions;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 using Avalonia.Collections;
 using Avalonia.Controls.DataGridHierarchical;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton)]
-public partial class FileTransferResultViewModel : ViewModelBase, INavigationViewModel<FileTransferResultOptions>
+public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
+    INavigationViewModel<FileTransferResultOptions>
 {
     private readonly INavigationService _navigationService;
     private readonly ILogger<FileTransferResultViewModel> _logger;
@@ -28,8 +28,6 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     private MetadataTreeRoot? _metadataRoot;
 
     public AvaloniaList<IFileTransferBatchInfo> FileTransferBatchInfos { get; } = [];
-
-    public RoutingState RoutingState { get; }
 
     [ObservableProperty]
     public partial HierarchicalModel<MetadataTreeNodeBase>? Model { get; set; }
@@ -67,8 +65,7 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
         _logger.LogDebug("选中传输结果项: {Type} - {Name}", value.GetType().Name, value.Title);
         if (value is IFileMetadata fileMetadata)
         {
-            _navigationService.NavigateTo<MetadataViewModel, MetadataBase>(HostScreens.TransferResult,
-                fileMetadata.Metadata);
+            _navigationService.NavigateTo<MetadataViewModel, MetadataBase>(RoutingState, fileMetadata.Metadata);
             return;
         }
 
@@ -76,12 +73,12 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
         {
             case TransferredFileNode transferFileModel:
                 _navigationService.NavigateTo<TransferredFileViewModel, TransferredFileNode>
-                    (HostScreens.TransferResult, transferFileModel);
+                    (RoutingState, transferFileModel);
                 break;
 
             case FailedTransferFileNode failedTransferFileModel:
                 _navigationService.NavigateTo<FailedTransferFileViewModel, FailedTransferFileNode>
-                    (HostScreens.TransferResult, failedTransferFileModel);
+                    (RoutingState, failedTransferFileModel);
                 break;
         }
     }
@@ -135,7 +132,7 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     public void NavigateToSelectFilesViewModel()
     {
         _logger.LogDebug("导航到文件选择页面");
-        _navigationService.NavigateTo<SelectFilesViewModel>(HostScreens.Home);
+        _navigationService.NavigateTo<SelectFilesViewModel>(this);
 
         if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
             ram.ClearRamCache();
@@ -145,19 +142,17 @@ public partial class FileTransferResultViewModel : ViewModelBase, INavigationVie
     public void NavigateToMetadataEditViewModel()
     {
         _logger.LogDebug("导航到元数据编辑页面");
-        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(HostScreens.Home,
+        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(this,
             new MetadataEditOption()
             {
                 IsClear = false
             });
     }
 
-    public FileTransferResultViewModel([FromKeyedServices(HostScreens.TransferResult)] RoutingState routingState,
-        INavigationService navigationService, ILogger<FileTransferResultViewModel> logger)
+    public FileTransferResultViewModel(INavigationService navigationService,
+        ILogger<FileTransferResultViewModel> logger)
     {
         _navigationService = navigationService;
         _logger = logger;
-        RoutingState = routingState;
-        routingState.SetOwnerViewModel(this);
     }
 }

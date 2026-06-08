@@ -1,11 +1,11 @@
 namespace AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 
-public interface IFileMetadataViewModel
+public interface IMetadataViewModel
 {
     object? Metadata { get; set; }
 }
 
-public interface IMetadataViewModel<TFileMetadata> : IFileMetadataViewModel
+public interface IMetadataViewModel<TFileMetadata> : IMetadataViewModel
 {
     new TFileMetadata? Metadata { get; set; }
 }

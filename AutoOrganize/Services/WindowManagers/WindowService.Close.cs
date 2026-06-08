@@ -1,14 +1,13 @@
 ﻿using System;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls;
-using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.Services.WindowManagers;
 
 public partial class WindowService
 {
     public void Close<TWindowViewModel>(TWindowViewModel viewModel)
-        where TWindowViewModel : ViewModelBase, IWindowViewModel
+        where TWindowViewModel : IWindowViewModel
     {
         Window window = GetRequiredWindowByViewModel(viewModel);
         if (CanCloseWindow(window)) window.Hide();
@@ -16,7 +15,7 @@ public partial class WindowService
     }
 
     public void Close<TWindowViewModel, TResult>(TWindowViewModel viewModel, TResult result)
-        where TWindowViewModel : ViewModelBase, IResultWindowViewModel<TResult>
+        where TWindowViewModel : IResultWindowViewModel<TResult>
     {
         Window window = GetRequiredWindowByViewModel(viewModel);
         //todo

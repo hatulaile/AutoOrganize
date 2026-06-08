@@ -2,7 +2,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;
-using AutoOrganize.Models.MetadataNodes.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ViewModelRegistrationGenerator;
 

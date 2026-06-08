@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using AutoOrganize.ViewModels;
+using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls;
 
 namespace AutoOrganize.Services.WindowManagers;
@@ -12,7 +12,7 @@ public interface IWindowProvider
 
     Window GetRequiredWindowByViewModel(object viewModel);
 
-    Window? GetWindowByViewModel(ViewModelBase viewModel);
+    Window? GetWindowByViewModel(IViewModel viewModel);
 
-    Window GetRequiredWindowByViewModel(ViewModelBase viewModel);
+    Window GetRequiredWindowByViewModel(IViewModel viewModel);
 }
