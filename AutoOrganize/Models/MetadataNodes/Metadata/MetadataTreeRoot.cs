@@ -1,13 +1,13 @@
 using System;
-using AutoOrganize.Library.Models.Metadata;
-using AutoOrganize.Library.Models.Metadata.Movie;
-using AutoOrganize.Library.Models.Metadata.Tv;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;
 
 namespace AutoOrganize.Models.MetadataNodes.Metadata;
 
-public sealed class MetadataTreeRoot : MetadataTreeNodeBase, IMetadataTreeRoot
+public sealed class MetadataTreeRoot : MetadataTreeNodeBase
 {
     public override string Title => string.Empty;
 

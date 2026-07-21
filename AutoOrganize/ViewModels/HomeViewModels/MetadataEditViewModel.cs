@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models;
-using AutoOrganize.Library.Models.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;

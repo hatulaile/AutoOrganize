@@ -1,5 +1,5 @@
-﻿using AutoOrganize.Library.Models.Metadata.Movie;
-using AutoOrganize.Library.Models.Metadata.Tv;
+﻿using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 
 namespace AutoOrganize.Library.Services.PathNameGenerators;
 

@@ -1,4 +1,4 @@
-﻿using AutoOrganize.Library.Models.Metadata;
+﻿using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 
 namespace AutoOrganize.Library.Models;
 

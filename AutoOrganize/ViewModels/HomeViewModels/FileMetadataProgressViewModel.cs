@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.Library.Exceptions;
 using AutoOrganize.Library.Models;
-using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
+using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Tv;
 using AutoOrganize.Library.Services.NameParsers;
 using AutoOrganize.Models;
 using AutoOrganize.Models.Options;
@@ -31,8 +37,8 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     public const int PROGRESS_MAX = 128;
     public static string ProgressMax => PROGRESS_MAX.ToString();
 
-    private readonly INameParserManager _nameParserManager;
-    private readonly IMetadataManager _metadataManager;
+    private readonly INameParserService _nameParserService;
+    private readonly IMetadataService _metadataService;
     private readonly INavigationService _navigationService;
     private readonly INotificationServices _notificationServices;
     private readonly ILogger<FileMetadataProgressViewModel> _logger;
@@ -159,12 +165,18 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
     private async Task<FileMetadataProcessingResult> ProcessMovieFileAsync(string filePath, CancellationToken token)
     {
-        var movieParse = _nameParserManager.ParseMovie(filePath);
+        var movieParse = _nameParserService.ParseMovie(filePath);
         if (!movieParse.IsComplete())
             throw new MetadataParseException(filePath, "movie", "无法解析成一个可用的电影元数据");
 
         var metadata =
-            await _metadataManager.SearchMovieSingleAsync(new SearchQuery(movieParse.Title, movieParse.Year), token);
+            await _metadataService.GetMovieAsync(
+                new MovieMetadataRequest
+                {
+                    Title = movieParse.Title,
+                    Year = movieParse.Year,
+                    Language = "zh-cn"
+                }, token);
 
         if (metadata is null)
             throw new MetadataNotFoundException(filePath, "movie", "未找到匹配的电影元数据");
@@ -175,7 +187,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
     private async Task<FileMetadataProcessingResult> ProcessTvFileAsync(string filePath, CancellationToken token)
     {
-        var tvParse = _nameParserManager.ParseTv(filePath);
+        var tvParse = _nameParserService.ParseTv(filePath);
 
         if (tvParse.Season is null)
         {
@@ -186,9 +198,14 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         if (!tvParse.IsComplete())
             throw new MetadataParseException(filePath, "tv", "无法解析成一个可用的电视元数据");
 
-        var metadata =
-            await _metadataManager.SearchEpisodeAsync(new SearchQuery(tvParse.Title, tvParse.Year),
-                tvParse.Season.Value, tvParse.Episode.Value, token);
+        var metadata = await _metadataService.GetEpisodeAsync(
+            new EpisodeMetadataRequest
+            {
+                Name = tvParse.Title,
+                SeasonNumber = tvParse.Season.Value,
+                EpisodeNumber = (int)tvParse.Episode.Value,
+                Language = "zh-cn",
+            }, token);
 
         if (metadata is null)
             throw new MetadataNotFoundException(filePath, "tv", "未找到匹配的电视元数据");
@@ -253,12 +270,12 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         Dispose(false);
     }
 
-    public FileMetadataProgressViewModel(INameParserManager nameParserManager, IMetadataManager metadataManager,
+    public FileMetadataProgressViewModel(INameParserService nameParserService, IMetadataService metadataService,
         INavigationService navigationService, INotificationServices notificationServices,
         ILogger<FileMetadataProgressViewModel> logger)
     {
-        _nameParserManager = nameParserManager;
-        _metadataManager = metadataManager;
+        _nameParserService = nameParserService;
+        _metadataService = metadataService;
         _navigationService = navigationService;
         _notificationServices = notificationServices;
         _logger = logger;

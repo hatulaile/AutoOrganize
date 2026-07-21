@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
 using AutoOrganize.Library.Models;
-using AutoOrganize.Library.Services.Caches;
 using AutoOrganize.Library.Services.Config;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.FileTransferServices;
 using AutoOrganize.Library.Services.Metadata;
 using AutoOrganize.Library.Services.Metadata.Providers;
-using AutoOrganize.Library.Services.Metadata.Providers.ThemoviedbMetadataProviders;
+using AutoOrganize.Library.Services.Metadata.Providers.Abstractions;
+using AutoOrganize.Library.Services.Metadata.Providers.ThemoviedbProviders;
 using AutoOrganize.Library.Services.NameParsers;
 using AutoOrganize.Library.Services.NameParsers.Parsers;
 using AutoOrganize.Library.Services.PathNameGenerators;
@@ -31,18 +31,17 @@ public static class ServiceCollectionExtension
             services
                 .AddSingleton<ParserOptions>()
                 .AddSingleton<IFileConfigManager, FileConfigManager>(_ =>
-                    new FileConfigManager(contexts: ConfigJsonSourceGenerationContext.Default))
-                .AddSingleton(new MemoryCache(new MemoryCacheOptions()));
+                    new FileConfigManager(contexts: ConfigJsonSourceGenerationContext.Default));
 
             services
                 .AddSingleton<INavigationService, NavigationService>()
-                .AddSingleton<IMetadataCache, MemoryMetadataCache>()
-                .AddSingleton<INameParserManager, NameParserManager>()
+                .AddSingleton<INameParserService, NameParserService>()
                 .AddSingleton<IStorageServices, StorageServices>()
                 .AddSingleton<IFileTransferService, FileTransferService>();
 
             services
-                .AddSingleton<IMetadataManager, MetadataManager>()
+                .AddSingleton<IProviderService, ProviderService>()
+                .AddSingleton<IMetadataService, MetadataService>()
                 .AddSingleton<IWindowService, WindowService>()
                 .AddSingleton<IWindowProvider>(provider =>
                     (IWindowProvider)provider.GetRequiredService<IWindowService>())
@@ -65,9 +64,9 @@ public static class ServiceCollectionExtension
         public IServiceCollection AddMetadataProviders()
         {
             services
-                .AddTransient<IMetadataProvider>(x =>
-                    x.GetRequiredKeyedService<IMetadataProvider>(nameof(MetadataProviderType.ThemovieDB)))
-                .AddKeyedSingleton<IMetadataProvider, ThemoviedbMetadataProvider>(nameof(MetadataProviderType.ThemovieDB));
+                .AddTransient<IProvider>(x =>
+                    x.GetRequiredKeyedService<IProvider>(nameof(ProviderType.ThemovieDB)))
+                .AddKeyedSingleton<IProvider, ThemoviedbProvider>(nameof(ProviderType.ThemovieDB));
             return services;
         }
 

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using AutoOrganize.Library.Models.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using Avalonia.Collections;
 using Avalonia.Controls;
 

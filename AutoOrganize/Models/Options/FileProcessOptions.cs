@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using AutoOrganize.Library.Models.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 
 namespace AutoOrganize.Models.Options;
 

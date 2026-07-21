@@ -1,10 +1,10 @@
 ﻿using AutoOrganize.Library.Extensions;
 using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Models.FileTransfers;
-using AutoOrganize.Library.Models.Metadata.Movie;
-using AutoOrganize.Library.Models.Metadata.Tv;
 using AutoOrganize.Library.Services.Config;
 using AutoOrganize.Library.Services.FileTransferServices;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 using AutoOrganize.Library.Services.Observers;
 using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Library.Services.PathNameGenerators.Configs;

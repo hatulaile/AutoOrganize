@@ -1,6 +1,6 @@
 ﻿using AsyncImageLoader.Loaders;
-using AutoOrganize.Library.Models.Metadata;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;

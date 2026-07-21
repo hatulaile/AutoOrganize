@@ -82,7 +82,7 @@
 
                     <!-- 用于显示元数据网站 -->
                     <StackPanel
-                        IsVisible="{Binding Metadata.ExternalIds.Count, FallbackValue=False, TargetNullValue=False}">
+                        IsVisible="{Binding Metadata.ProviderIds.Count, FallbackValue=False, TargetNullValue=False}">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" Classes="small" AllowAutoHide="False">
                             <!-- 写的丑爆了 :( -->
                             <ScrollViewer.Styles>
@@ -120,7 +120,7 @@
                             </ScrollViewer.Styles>
 
                             <!-- 元数据网站展示 -->
-                            <ItemsControl ItemsSource="{Binding Metadata.ExternalIds, Mode=OneWay}" Margin="0,0,0,0">
+                            <ItemsControl ItemsSource="{Binding Metadata.ProviderIds, Mode=OneWay}" Margin="0,0,0,0">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="12" />

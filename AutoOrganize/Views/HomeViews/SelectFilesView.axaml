@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="using:AutoOrganize.Converters"
              xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels"
-             xmlns:metadata="clr-namespace:AutoOrganize.Library.Models.Metadata;assembly=AutoOrganize.Library"
+             xmlns:abstractions="clr-namespace:AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;assembly=AutoOrganize.Library"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="AutoOrganize.Views.HomeViews.SelectFilesView"
              x:DataType="vm:SelectFilesViewModel"
@@ -50,7 +50,7 @@
                     ItemsSource="{Binding MetadataTypes,ElementName=SelectFiles}">
 
                     <ComboBox.ItemTemplate>
-                        <DataTemplate DataType="metadata:MetadataType">
+                        <DataTemplate DataType="abstractions:MetadataType">
                             <TextBlock Text="{Binding ., Converter={StaticResource MetadataTypeToStringConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>

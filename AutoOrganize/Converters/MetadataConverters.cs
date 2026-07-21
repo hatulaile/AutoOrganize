@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoOrganize.Library.Models;
-using AutoOrganize.Library.Models.Metadata.Images;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Images;
 using AutoOrganize.Library.Services.Metadata.Providers;
+using AutoOrganize.Library.Services.Metadata.Providers.Abstractions;
 using Avalonia.Data.Converters;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +18,7 @@ public static class MetadataConverters
 
         return providerName switch
         {
-            nameof(MetadataProviderType.ThemovieDB) => "/Assets/Images/TheMovieDB/PrimaryFull.svg",
+            nameof(ProviderType.ThemovieDB) => "/Assets/Images/TheMovieDB/PrimaryFull.svg",
             _ => string.Empty
         };
     });
@@ -27,16 +28,16 @@ public static class MetadataConverters
     public static string? GetImageGroupUrl(ImageGroup? groups)
     {
         if (groups is null) return null;
-        string? highestPriorityId = GetHighestPriorityId(App.Current.ServiceProvider.GetServices<IMetadataProvider>(),
+        string? highestPriorityId = GetHighestPriorityId(App.Current.ServiceProvider.GetServices<IProvider>(),
             groups.Where(x => x.Value.Count > 0).Select(x => x.Key));
         if (highestPriorityId is null)
             return null;
 
-        ImageDataListBase list = groups[highestPriorityId];
-        return list.MaxBy(x => x.Priority)?.ImageUrl;
+        ImageDataList list = groups[highestPriorityId];
+        return list.MaxBy(x => x.Priority)?.ImageUrl.AbsoluteUri;
     }
 
-    private static string? GetHighestPriorityId(IEnumerable<IMetadataProvider> providers,
+    private static string? GetHighestPriorityId(IEnumerable<IProvider> providers,
         IEnumerable<string> providerIds)
     {
         (int order, string? providerId) highestPriority = (int.MinValue, null);

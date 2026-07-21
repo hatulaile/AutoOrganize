@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoOrganize.Converters;
-using AutoOrganize.Library.Models.Metadata;
-using AutoOrganize.Library.Models.Metadata.Interfaces;
-using AutoOrganize.Library.Models.Metadata.Tv;
+using AutoOrganize.Library.Services.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 using AutoOrganize.Library.Services.Metadata.Providers;
+using AutoOrganize.Library.Services.Metadata.Providers.Abstractions;
 using AutoOrganize.Services.TopLevelServices;
 using Avalonia.Controls.Notifications;
 using CommunityToolkit.Mvvm.Input;
@@ -21,6 +22,7 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
     private readonly ILauncherServices _launcherServices;
     private readonly IClipboardServices _clipboardServices;
     private readonly INotificationServices _notificationServices;
+    private readonly IProviderService _providerService;
 
     public string? Title
     {
@@ -84,13 +86,12 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
     {
         (string providerId, string id) = parm;
 
-        var info = (IUrlMetadataProviderInfo?)App.Current.ServiceProvider.GetKeyedService<IMetadataProvider>(providerId)
+        var info = (IUriProviderInfo?)App.Current.ServiceProvider.GetKeyedService<IProvider>(providerId)
             ?.Info;
         if (info is null || Metadata is null)
             return;
 
-        if (!info.TryGetUrl(id, Metadata.Type, out var uriStr) ||
-            !Uri.TryCreate(uriStr, UriKind.Absolute, out var uri))
+        if (!info.TryGetUri(id, Metadata.Type, out var uri))
             return;
 
         await _launcherServices.LaunchUriAsync(uri, this);
@@ -99,12 +100,11 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
     [RelayCommand(CanExecute = nameof(CanOpenProviderHomeInBrowser))]
     private async Task OpenProviderHomeInBrowser(string providerId)
     {
-        var info = (IUrlMetadataProviderInfo?)App.Current.ServiceProvider.GetKeyedService<IMetadataProvider>(providerId)
-            ?.Info;
-        if (info is null || Metadata is null)
+        var info = _providerService.GetProvidersForId(providerId).FirstOrDefault()?.Info;
+        if (info is not IUriProviderInfo uriInfo || Metadata is null)
             return;
 
-        if (!Uri.TryCreate(info.HomeUrl, UriKind.Absolute, out var uri))
+        if (!uriInfo.TryGetUri(providerId, Metadata.Type, out var uri))
             return;
 
         await _launcherServices.LaunchUriAsync(uri, this);
@@ -117,14 +117,8 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
 
         (string providerId, string id) = parm;
 
-        //其实这里最好能直接把所有 provider 写在 vm 内的, 但是 key services 不能使用一个 Dictionary 依赖注入, 所以暂时这样写
-        if (App.Current.ServiceProvider.GetKeyedService<IMetadataProvider>(providerId)?.Info is not
-            IUrlMetadataProviderInfo info)
-        {
-            return false;
-        }
-
-        return info.TryGetUrl(id, Metadata.Type, out _);
+        return _providerService.GetProvidersForId(providerId).FirstOrDefault()?.Info is IUriProviderInfo uriInfo &&
+               uriInfo.TryGetUri(id, Metadata.Type, out _);
     }
 
     private bool CanOpenProviderHomeInBrowser(string providerId)
@@ -132,8 +126,8 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
         if (Metadata is null)
             return false;
 
-        if (App.Current.ServiceProvider.GetKeyedService<IMetadataProvider>(providerId)?.Info is not
-            IUrlMetadataProviderInfo)
+        if (App.Current.ServiceProvider.GetKeyedService<IProvider>(providerId)?.Info is not
+            IUriProviderInfo)
         {
             return false;
         }
@@ -150,11 +144,12 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
     }
 
     public MetadataViewModel(ILauncherServices launcherServices, IClipboardServices clipboardServices,
-        INotificationServices notificationServices)
+        INotificationServices notificationServices, IProviderService providerService)
     {
         _launcherServices = launcherServices;
         _clipboardServices = clipboardServices;
         _notificationServices = notificationServices;
+        _providerService = providerService;
     }
 
     protected override void MetadataChanging(MetadataBase? value)

@@ -1,4 +1,4 @@
-using AutoOrganize.Library.Models.Metadata.Tv;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 
 namespace AutoOrganize.Models.MetadataNodes.Metadata;

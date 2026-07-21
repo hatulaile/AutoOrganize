@@ -1,4 +1,4 @@
-using AutoOrganize.Library.Models.Metadata.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 
 namespace AutoOrganize.Models.MetadataNodes.Metadata;

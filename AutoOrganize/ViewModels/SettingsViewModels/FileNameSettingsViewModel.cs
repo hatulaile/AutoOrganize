@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using AutoOrganize.Library.Models.Metadata.Movie;
-using AutoOrganize.Library.Models.Metadata.Tv;
 using AutoOrganize.Library.Services.Config;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 using AutoOrganize.Library.Services.PathNameGenerators;
 using AutoOrganize.Library.Services.PathNameGenerators.Configs;
 using ViewModelRegistrationGenerator;
@@ -78,7 +78,7 @@ public partial class FileNameSettingsViewModel : SettingsViewModelBase<FileNameG
             Overview =
                 "春天，在新生决定社团的时候，田井中律硬拉着青梅竹马的秋山澪参观轻音部让其入部，在得知前辈们毕业后由于人数不足将面临闭部结局，秋山澪与琴吹䌷成为了轻音部成员，但离4人指标还差1位名额。这时，一名弄错了部名的少女平泽唯误打误撞之下填补了最后一位空位，但这位少女却是一个连乐谱也看不懂的新人，学习成绩又差。而就是这样的4名少女，却展开了奏响青春的音乐之旅。!",
             AirDate = new DateTime(2009, 4, 3),
-            ExternalIds = new Dictionary<string, string>
+            ProviderIds = new ProviderIds
             {
                 ["tmdb"] = "42253",
             },
@@ -97,7 +97,7 @@ public partial class FileNameSettingsViewModel : SettingsViewModelBase<FileNameG
             Name = "悠哉日常大王剧场版：假期活动",
             Overview = "旭丘分校的学生只有5人。即使学年和性格都各不相同，也总是在四季变换中一同享受着乡村生活。某天，旭丘分校的众人在百货店的抽奖中抽到了特等奖冲绳旅行券。于是，大家利用暑假时间前往冲绳……",
             AirDate = new DateTime(2018, 8, 25),
-            ExternalIds = new Dictionary<string, string>()
+            ProviderIds = new ProviderIds
             {
                 ["tmdb"] = "494471",
             },

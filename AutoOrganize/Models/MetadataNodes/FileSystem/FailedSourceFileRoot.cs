@@ -6,7 +6,7 @@ using AutoOrganize.Utils;
 
 namespace AutoOrganize.Models.MetadataNodes.FileSystem;
 
-public sealed class FailedSourceFileRoot : MetadataTreeNodeBase, IMetadataTreeRoot
+public sealed class FailedSourceFileRoot : MetadataTreeNodeBase
 {
     public override string Title => "发生错误的文件列表";
 

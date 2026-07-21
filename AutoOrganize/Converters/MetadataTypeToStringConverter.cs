@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using AutoOrganize.Library.Models.Metadata;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using Avalonia.Data.Converters;
 
 namespace AutoOrganize.Converters;
