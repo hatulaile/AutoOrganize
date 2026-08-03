@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoOrganize.Converters;
 using AutoOrganize.Library.Services.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata.Images;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
-using AutoOrganize.Library.Services.Metadata.Providers;
 using AutoOrganize.Library.Services.Metadata.Providers.Abstractions;
 using AutoOrganize.Services.TopLevelServices;
 using Avalonia.Controls.Notifications;
@@ -72,14 +71,25 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
     public string? Revenue => IfCastOrNull<IRevenue, string?>(Metadata, revenue => revenue.Revenue.ToString());
 
     public string? Logo =>
-        IfCastOrNull<ILogos, string?>(Metadata, logos => MetadataConverters.GetImageGroupUrl(logos.Logos));
+        IfCastOrNull<ILogos, string?>(Metadata, logos => GetImageUrl(logos.Logos));
 
     public string? Poster =>
-        IfCastOrNull<IPosters, string?>(Metadata, posters => MetadataConverters.GetImageGroupUrl(posters.Posters));
+        IfCastOrNull<IPosters, string?>(Metadata, posters => GetImageUrl(posters.Posters));
 
     public string? Backdrop =>
-        IfCastOrNull<IBackdrops, string?>(Metadata,
-            backdrops => MetadataConverters.GetImageGroupUrl(backdrops.Backdrops));
+        IfCastOrNull<IBackdrops, string?>(Metadata, backdrops => GetImageUrl(backdrops.Backdrops));
+
+    private string? GetImageUrl(ImageGroup? groups)
+    {
+        if (groups is null) return null;
+
+        string? providerId = _providerService
+            .GetProviders()
+            .Select(p => p.Info.ProviderId)
+            .FirstOrDefault(id => groups.TryGetValue(id, out var list) && list.Count > 0);
+
+        return providerId is null ? null : groups[providerId].MaxBy(x => x.Priority)?.ImageUrl.AbsoluteUri;
+    }
 
     [RelayCommand(CanExecute = nameof(CanOpenMetadataInBrowser))]
     private async Task OpenMetadataInBrowser(KeyValuePair<string, string> parm)

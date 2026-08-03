@@ -154,7 +154,6 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         catch (OperationCanceledException)
         {
             _logger.LogDebug("文件处理被取消: {FilePath}", filePath);
-            // Ignore
         }
         catch (Exception exception)
         {
