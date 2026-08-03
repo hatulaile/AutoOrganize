@@ -8,6 +8,7 @@ using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
 using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Tv;
 using AutoOrganize.Library.Services.Metadata.Providers.Abstractions;
+using AutoOrganize.Library.Services.RequestCoalescers;
 using AutoOrganize.Library.Utils;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Caching.Memory;
@@ -32,6 +33,7 @@ public sealed partial class ThemoviedbProvider :
     IHasCacheMetadataProvider<EpisodeMetadataRequest, EpisodeMetadata>
 {
     private readonly ILogger<ThemoviedbProvider> _logger;
+    private readonly IFlightCoordinator _flightCoordinator;
     private TMDbClient Client { get; set; }
 
     private readonly SemaphoreSlim _semaphoreSlim = new(1);
@@ -42,9 +44,11 @@ public sealed partial class ThemoviedbProvider :
     public ThemoviedbProviderInfo Info { get; }
     public ThemoviedbProviderConfig Config { get; }
 
-    public ThemoviedbProvider(IFileConfigManager fileConfigManager, ILogger<ThemoviedbProvider> logger)
+    public ThemoviedbProvider(IFileConfigManager fileConfigManager, IFlightCoordinator flightCoordinator,
+        ILogger<ThemoviedbProvider> logger)
     {
         _logger = logger;
+        _flightCoordinator = flightCoordinator;
         Info = new ThemoviedbProviderInfo();
         Config = fileConfigManager.GetConfigOrLoad<ThemoviedbProviderConfig>();
         //这里使用了 api.tmdb.org, 国内访问默认的 api.themoviedb.org 会有问题);
@@ -100,9 +104,6 @@ public sealed partial class ThemoviedbProvider :
             }
         });
     }
-
-    private static string GetSearchCacheKey(string name, int? year, string? language) =>
-        $"search_{name}_{year}_{language}";
 
     private async Task IfNotHasConfigGet(CancellationToken token = default)
     {

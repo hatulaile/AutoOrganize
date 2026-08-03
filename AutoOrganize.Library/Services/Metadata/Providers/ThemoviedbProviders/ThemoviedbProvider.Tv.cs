@@ -4,6 +4,7 @@ using AutoOrganize.Library.Services.Metadata.Models.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
 using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Tv;
+using AutoOrganize.Library.Services.RequestCoalescers;
 using Microsoft.Extensions.Caching.Memory;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.Search;
@@ -26,18 +27,36 @@ public sealed partial class ThemoviedbProvider
         if (tvId is null) return null;
 
         string cacheKey = $"metadata_series_{tvId}_{request.Language}_{request.ImageLanguages}";
-        if (!ignoreCache && _cache.TryGetValue(cacheKey, out SeriesMetadata? cached) && cached is not null)
-            return cached;
 
-        var methods = TvShowMethods.Images | TvShowMethods.ExternalIds;
-        TvShow? tvShow = await Client.GetTvShowAsync(tvId.Value, extraMethods: methods,
-            language: request.Language, includeImageLanguage: request.ImageLanguages,
-            cancellationToken: token).ConfigureAwait(false);
-        if (tvShow is null) return null;
+        ILease? lease;
+        do
+        {
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out SeriesMetadata? cached) && cached is not null)
+                return cached;
 
-        var metadata = TvShowToMetadata(tvShow);
-        _cache.Set(cacheKey, metadata, CacheTime);
-        return metadata;
+            (bool acquired, lease) =
+                await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
+
+            if (acquired)
+                break;
+        } while (true);
+
+        try
+        {
+            TvShow? tvShow = await Client.GetTvShowAsync(tvId.Value, extraMethods: TvShowMethods.ExternalIds,
+                language: request.Language, cancellationToken: token).ConfigureAwait(false);
+            if (tvShow is null) return null;
+
+            ImagesWithId? images = await Client.GetTvShowImagesAsync(tvId.Value, request.ImageLanguages, null, token)
+                .ConfigureAwait(false);
+            var metadata = TvShowToMetadata(tvShow, images);
+            _cache.Set(cacheKey, metadata, CacheTime);
+            return metadata;
+        }
+        finally
+        {
+            lease?.Dispose();
+        }
     }
 
     public async Task<SeasonMetadata?> GetMetadataAsync(SeasonMetadataRequest request,
@@ -48,19 +67,38 @@ public sealed partial class ThemoviedbProvider
         if (tvId is null) return null;
 
         string cacheKey = $"metadata_season_{tvId}_{request.SeasonNumber}_{request.Language}_{request.ImageLanguages}";
-        if (!ignoreCache && _cache.TryGetValue(cacheKey, out SeasonMetadata? cached) && cached is not null)
-            return cached;
 
-        var methods = TvSeasonMethods.Images | TvSeasonMethods.ExternalIds;
-        TvSeason? season = await Client.GetTvSeasonAsync(tvId.Value, request.SeasonNumber,methods,
-            language: request.Language, includeImageLanguage: request.ImageLanguages,
-            cancellationToken: token).ConfigureAwait(false);
+        ILease? lease;
+        do
+        {
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out SeasonMetadata? cached) && cached is not null)
+                return cached;
 
-        if (season is null) return null;
+            (bool acquired, lease) =
+                await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
 
-        var metadata = TvSeasonToMetadata(season);
-        _cache.Set(cacheKey, metadata, CacheTime);
-        return metadata;
+            if (acquired)
+                break;
+        } while (true);
+
+        try
+        {
+            TvSeason? season = await Client.GetTvSeasonAsync(tvId.Value, request.SeasonNumber,
+                TvSeasonMethods.ExternalIds, language: request.Language, cancellationToken: token)
+                .ConfigureAwait(false);
+
+            if (season is null) return null;
+
+            PosterImages? images = await Client.GetTvSeasonImagesAsync(tvId.Value, request.SeasonNumber,
+                request.ImageLanguages, null, token).ConfigureAwait(false);
+            var metadata = TvSeasonToMetadata(season, images);
+            _cache.Set(cacheKey, metadata, CacheTime);
+            return metadata;
+        }
+        finally
+        {
+            lease?.Dispose();
+        }
     }
 
     public async Task<EpisodeMetadata?> GetMetadataAsync(EpisodeMetadataRequest request,
@@ -71,37 +109,75 @@ public sealed partial class ThemoviedbProvider
         if (tvId is null) return null;
 
         string cacheKey = $"metadata_episode_{tvId}_{request.SeasonNumber}_{request.EpisodeNumber}_{request.Language}_{request.ImageLanguages}";
-        if (!ignoreCache && _cache.TryGetValue(cacheKey, out EpisodeMetadata? cached) && cached is not null)
-            return cached;
 
-        var methods = TvEpisodeMethods.Images | TvEpisodeMethods.ExternalIds;
-        TvEpisode? episode = await Client.GetTvEpisodeAsync(tvId.Value, request.SeasonNumber, request.EpisodeNumber,methods,
-            language: request.Language, includeImageLanguage: request.ImageLanguages,
-            cancellationToken: token).ConfigureAwait(false);
+        ILease? lease;
+        do
+        {
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out EpisodeMetadata? cached) && cached is not null)
+                return cached;
 
-        if (episode is null) return null;
+            (bool acquired, lease) =
+                await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
 
-        var metadata = TvEpisodeToMetadata(episode);
-        _cache.Set(cacheKey, metadata, CacheTime);
-        return metadata;
+            if (acquired)
+                break;
+        } while (true);
+
+        try
+        {
+            TvEpisode? episode = await Client.GetTvEpisodeAsync(tvId.Value, request.SeasonNumber, request.EpisodeNumber,
+                TvEpisodeMethods.ExternalIds, language: request.Language, cancellationToken: token)
+                .ConfigureAwait(false);
+
+            if (episode is null) return null;
+
+            StillImages? images = await Client.GetTvEpisodeImagesAsync(tvId.Value, request.SeasonNumber,
+                (int)request.EpisodeNumber, request.ImageLanguages, null, token).ConfigureAwait(false);
+            var metadata = TvEpisodeToMetadata(episode, images);
+            _cache.Set(cacheKey, metadata, CacheTime);
+            return metadata;
+        }
+        finally
+        {
+            lease?.Dispose();
+        }
     }
 
     private async Task<IEnumerable<SearchTv>> SearchTvRawAsync(SeriesSearchRequest request, bool ignoreCache,
         CancellationToken token)
     {
-        string cacheKey = GetSearchCacheKey(request.Name, request.FirstAirDateYear, request.Language);
-        if (!ignoreCache && _cache.TryGetValue(cacheKey, out IEnumerable<SearchTv>? cached) && cached is not null)
-            return cached;
+        string cacheKey = $"search_tv_{request.Name}_{request.FirstAirDateYear}_{request.Language}";
 
-        await IfNotHasConfigGet(token).ConfigureAwait(false);
-        SearchContainer<SearchTv>? container = await Client.SearchTvShowAsync(request.Name, request.Language,
-            firstAirDateYear: request.FirstAirDateYear ?? 0, cancellationToken: token).ConfigureAwait(false);
+        ILease? lease;
+        do
+        {
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out IEnumerable<SearchTv>? cached) &&
+                cached is not null)
+                return cached;
 
-        var searchTvs = container?.Results;
-        if (searchTvs is { Count: > 0 })
-            _cache.Set(cacheKey, searchTvs, CacheTime);
+            (bool acquired, lease) =
+                await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
 
-        return searchTvs ?? [];
+            if (acquired)
+                break;
+        } while (true);
+
+        try
+        {
+            await IfNotHasConfigGet(token).ConfigureAwait(false);
+            SearchContainer<SearchTv>? container = await Client.SearchTvShowAsync(request.Name, request.Language,
+                firstAirDateYear: request.FirstAirDateYear ?? 0, cancellationToken: token).ConfigureAwait(false);
+
+            var searchTvs = container?.Results;
+            if (searchTvs is { Count: > 0 })
+                _cache.Set(cacheKey, searchTvs, CacheTime);
+
+            return searchTvs ?? [];
+        }
+        finally
+        {
+            lease?.Dispose();
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,21 +211,21 @@ public sealed partial class ThemoviedbProvider
 
     //todo：如果有新的Provider，需要把额外id加入
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SeriesMetadata TvShowToMetadata(TvShow tvShow) => new()
+    private SeriesMetadata TvShowToMetadata(TvShow tvShow, ImagesWithId? images) => new()
     {
         Name = tvShow.Name,
         Overview = tvShow.Overview,
         AirDate = tvShow.FirstAirDate,
         OriginalName = tvShow.OriginalName,
         InProduction = tvShow.InProduction,
-        Backdrops = ImageDataListToGroup(tvShow.Images?.Backdrops),
-        Posters = ImageDataListToGroup(tvShow.Images?.Posters),
-        Logos = ImageDataListToGroup(tvShow.Images?.Logos),
+        Backdrops = ImageDataListToGroup(images?.Backdrops),
+        Posters = ImageDataListToGroup(images?.Posters),
+        Logos = ImageDataListToGroup(images?.Logos),
         ProviderIds = { [nameof(ProviderType.ThemovieDB)] = tvShow.Id.ToString() }
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SeasonMetadata TvSeasonToMetadata(TvSeason season)
+    private SeasonMetadata TvSeasonToMetadata(TvSeason season, PosterImages? images)
     {
         var metadata = new SeasonMetadata
         {
@@ -157,9 +233,7 @@ public sealed partial class ThemoviedbProvider
             Overview = season.Overview,
             AirDate = season.AirDate,
             SeasonNumber = season.SeasonNumber,
-            Posters = ImageDataListToGroup(season.PosterPath is not null
-                ? [new ImageData { FilePath = season.PosterPath }]
-                : null)
+            Posters = ImageDataListToGroup(images?.Posters)
         };
 
         if (season.Id is not null)
@@ -169,7 +243,7 @@ public sealed partial class ThemoviedbProvider
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private EpisodeMetadata TvEpisodeToMetadata(TvEpisode episode)
+    private EpisodeMetadata TvEpisodeToMetadata(TvEpisode episode, StillImages? images)
     {
         var metadata = new EpisodeMetadata
         {
@@ -177,9 +251,7 @@ public sealed partial class ThemoviedbProvider
             Overview = episode.Overview,
             AirDate = episode.AirDate,
             EpisodeNumber = episode.EpisodeNumber,
-            Backdrops = ImageDataListToGroup(episode.StillPath is not null
-                ? [new ImageData { FilePath = episode.StillPath }]
-                : null)
+            Backdrops = ImageDataListToGroup(images?.Stills)
         };
 
         if (episode.Id is not null)

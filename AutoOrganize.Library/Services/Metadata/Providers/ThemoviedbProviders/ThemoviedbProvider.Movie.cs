@@ -3,6 +3,7 @@ using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Movie;
+using AutoOrganize.Library.Services.RequestCoalescers;
 using Microsoft.Extensions.Caching.Memory;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.Movies;
@@ -40,37 +41,75 @@ public sealed partial class ThemoviedbProvider
         }
 
         string cacheKey = $"metadata_movie_{movieId}_{request.Language}_{request.ImageLanguages}";
-        if (!ignoreCache && _cache.TryGetValue(cacheKey, out MovieMetadata? cached) && cached is not null)
-            return cached;
 
-        var methods = MovieMethods.Images | MovieMethods.ExternalIds;
-        Movie? movie = await Client.GetMovieAsync(movieId, request.Language, request.ImageLanguages,
-            extraMethods: methods, cancellationToken: token).ConfigureAwait(false);
-        if (movie is null) return null;
+        ILease? lease;
+        do
+        {
+            (bool acquired, lease) =
+                await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
 
-        var metadata = MovieToMetadata(movie);
-        _cache.Set(cacheKey, metadata, CacheTime);
-        return metadata;
+            if (acquired)
+                break;
+
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out MovieMetadata? cached) && cached is not null)
+                return cached;
+        } while (true);
+
+        try
+        {
+            Movie? movie = await Client.GetMovieAsync(movieId, request.Language,
+                extraMethods: MovieMethods.ExternalIds, cancellationToken: token).ConfigureAwait(false);
+            if (movie is null) return null;
+
+
+            ImagesWithId? images = await Client.GetMovieImagesAsync(movieId, request.ImageLanguages, null, token)
+                .ConfigureAwait(false);
+            var metadata = MovieToMetadata(movie, images);
+            _cache.Set(cacheKey, metadata, CacheTime);
+            return metadata;
+        }
+        finally
+        {
+            lease?.Dispose();
+        }
     }
 
     private async Task<IEnumerable<SearchMovie>> SearchMovieRawAsync(MovieSearchRequest request, bool ignoreCache,
         CancellationToken token)
     {
-        string cacheKey = GetSearchCacheKey(request.Name, request.Year, request.Language);
-        if (!ignoreCache && _cache.TryGetValue(cacheKey, out IEnumerable<SearchMovie>? cached) &&
-            cached is not null)
-            return cached;
+        string cacheKey = $"search_movie_{request.Name}_{request.Year}_{request.Language}_{request.IncludeAdult}";
 
-        await IfNotHasConfigGet(token).ConfigureAwait(false);
-        SearchContainer<SearchMovie>? container = await Client.SearchMovieAsync(request.Name, request.Language,
-                includeAdult: request.IncludeAdult, year: request.Year ?? 0, cancellationToken: token)
-            .ConfigureAwait(false);
+        ILease? lease;
+        do
+        {
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out IEnumerable<SearchMovie>? cached) &&
+                cached is not null)
+                return cached;
 
-        var results = container?.Results;
-        if (results is { Count: > 0 })
-            _cache.Set(cacheKey, results, CacheTime);
+            (bool acquired, lease) =
+                await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
 
-        return results ?? [];
+            if (acquired)
+                break;
+        } while (true);
+
+        try
+        {
+            await IfNotHasConfigGet(token).ConfigureAwait(false);
+            SearchContainer<SearchMovie>? container = await Client.SearchMovieAsync(request.Name, request.Language,
+                    includeAdult: request.IncludeAdult, year: request.Year ?? 0, cancellationToken: token)
+                .ConfigureAwait(false);
+
+            var results = container?.Results;
+            if (results is { Count: > 0 })
+                _cache.Set(cacheKey, results, CacheTime);
+
+            return results ?? [];
+        }
+        finally
+        {
+            lease?.Dispose();
+        }
     }
 
 
@@ -85,7 +124,7 @@ public sealed partial class ThemoviedbProvider
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private MovieMetadata MovieToMetadata(Movie movie)
+    private MovieMetadata MovieToMetadata(Movie movie, ImagesWithId? images)
     {
         var metadata = new MovieMetadata
         {
@@ -95,9 +134,9 @@ public sealed partial class ThemoviedbProvider
             OriginalName = movie.OriginalTitle,
             Runtime = movie.Runtime,
             Revenue = movie.Revenue,
-            Backdrops = ImageDataListToGroup(movie.Images?.Backdrops),
-            Posters = ImageDataListToGroup(movie.Images?.Posters),
-            Logos = ImageDataListToGroup(movie.Images?.Logos),
+            Backdrops = ImageDataListToGroup(images?.Backdrops),
+            Posters = ImageDataListToGroup(images?.Posters),
+            Logos = ImageDataListToGroup(images?.Logos),
             ProviderIds = { [nameof(ProviderType.ThemovieDB)] = movie.Id.ToString() }
         };
 

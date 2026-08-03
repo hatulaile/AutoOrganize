@@ -42,14 +42,14 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
         string[] cacheNames = [.. info.GetCacheNames()];
         do
         {
+            if (!ignoreCache && GetCachedSearchResults<TResult>(cacheNames) is { } results)
+                return results;
+
             (bool acquired, lease) =
                 await _flightCoordinator.AcquireAsync(cacheNames, token).ConfigureAwait(false);
 
             if (acquired)
                 break;
-
-            if (!ignoreCache && GetCachedSearchResults<TResult>(cacheNames) is { } results)
-                return results;
         } while (true);
 
         try
@@ -200,14 +200,14 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
         ILease? lease;
         do
         {
+            if (!ignoreCache && GetCachedMetadata<TResult>(cacheNames) is { } result)
+                return result;
+
             (bool acquired, lease) =
                 await _flightCoordinator.AcquireAsync(request.GetCacheNames(), token).ConfigureAwait(false);
 
             if (acquired)
                 break;
-
-            if (!ignoreCache && GetCachedMetadata<TResult>(cacheNames) is { } result)
-                return result;
         } while (true);
 
         try
@@ -298,14 +298,14 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
         ILease? lease;
         do
         {
+            if (!ignoreCache && GetCachedMetadata<TResult>(cacheNames) is { } cached)
+                return cached;
+
             (bool acquired, lease) =
                 await _flightCoordinator.AcquireAsync(cacheNames, token).ConfigureAwait(false);
 
             if (acquired)
                 break;
-
-            if (!ignoreCache && GetCachedMetadata<TResult>(cacheNames) is { } cached)
-                return cached;
         } while (true);
 
         try
@@ -336,14 +336,14 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
         ILease? lease;
         do
         {
+            if (!ignoreCache && GetCachedMetadata<TResult>(cacheNames) is { } result)
+                return result;
+
             (bool acquired, lease) =
                 await _flightCoordinator.AcquireAsync(cacheNames, token).ConfigureAwait(false);
 
             if (acquired)
                 break;
-
-            if (!ignoreCache && GetCachedMetadata<TResult>(cacheNames) is { } result)
-                return result;
         } while (true);
 
         try
@@ -382,11 +382,6 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
         ILease? identityLease;
         do
         {
-            (bool acquired, identityLease) = await _flightCoordinator
-                .AcquireAsync(identityKeys, token).ConfigureAwait(false);
-
-            if (acquired) break;
-
             var existing = GetCachedMetadata<TResult>(identityKeys);
             if (existing is not null)
             {
@@ -394,6 +389,11 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
                 TryCacheMetadata(requestCacheNames, existing);
                 return existing;
             }
+
+            (bool acquired, identityLease) = await _flightCoordinator
+                .AcquireAsync(identityKeys, token).ConfigureAwait(false);
+
+            if (acquired) break;
         } while (true);
 
         try
