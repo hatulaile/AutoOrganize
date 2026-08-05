@@ -1,24 +1,10 @@
 using System;
-using System.Linq;
-using AutoOrganize.Library.Models;
-using AutoOrganize.Library.Services.Config;
-using AutoOrganize.Library.Services.FileTransferBatchServices;
-using AutoOrganize.Library.Services.FileTransferServices;
-using AutoOrganize.Library.Services.Metadata;
-using AutoOrganize.Library.Services.Metadata.Providers;
-using AutoOrganize.Library.Services.Metadata.Providers.Abstractions;
-using AutoOrganize.Library.Services.Metadata.Providers.ThemoviedbProviders;
-using AutoOrganize.Library.Services.NameParsers;
-using AutoOrganize.Library.Services.NameParsers.Parsers;
-using AutoOrganize.Library.Services.PathNameGenerators;
-using AutoOrganize.Library.Services.RequestCoalescers;
+using AutoOrganize.Library.Extensions;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.Services.WindowManagers;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using ViewModelRegistrationGenerator;
-using ConfigJsonSourceGenerationContext = AutoOrganize.Services.ConfigJsonSourceGenerationContext;
 
 namespace AutoOrganize.Extensions;
 
@@ -28,45 +14,19 @@ public static class ServiceCollectionExtension
     {
         public IServiceCollection AddAutoOrganize()
         {
-            services
-                .AddSingleton<ParserOptions>()
-                .AddSingleton<IFileConfigManager, FileConfigManager>(_ =>
-                    new FileConfigManager(contexts: ConfigJsonSourceGenerationContext.Default));
+            services.AddAutoOrganizeLibrary();
 
             services
                 .AddSingleton<INavigationService, NavigationService>()
-                .AddSingleton<INameParserService<TvParseResult>, NameParserService<TvParseResult>>()
-                .AddSingleton<INameParserService<MovieParseResult>, NameParserService<MovieParseResult>>()
                 .AddSingleton<IStorageServices, StorageServices>()
-                .AddSingleton<IFileTransferService, FileTransferService>();
-
-            services
-                .AddSingleton<IProviderService, ProviderService>()
-                .AddSingleton<IMetadataService, MetadataService>()
                 .AddSingleton<IWindowService, WindowService>()
                 .AddSingleton<IWindowProvider>(provider =>
                     (IWindowProvider)provider.GetRequiredService<IWindowService>())
-                .AddSingleton<IFlightCoordinator, FlightCoordinator>()
-                .AddSingleton<IFileNameGenerator, FileNameGenerator>()
-                .AddSingleton<IFileTransferBatchService, FileTransferBatchService>()
                 .AddSingleton<ILauncherServices, LauncherServices>()
                 .AddSingleton<IClipboardServices, ClipboardServices>()
                 .AddSingleton<INotificationServices, NotificationServices>();
 
-            services.AddSingleton<INameParserStrategy<TvParseResult>, TvPathParser>();
-            services.AddSingleton<INameParserStrategy<MovieParseResult>, MoviePathParser>();
-
-            services.AddViewModels()
-                .AddMetadataProviders();
-            return services;
-        }
-
-        public IServiceCollection AddMetadataProviders()
-        {
-            services
-                .AddTransient<IProvider>(x =>
-                    x.GetRequiredKeyedService<IProvider>(nameof(ProviderType.ThemovieDB)))
-                .AddKeyedSingleton<IProvider, ThemoviedbProvider>(nameof(ProviderType.ThemovieDB));
+            services.AddViewModels();
             return services;
         }
     }
