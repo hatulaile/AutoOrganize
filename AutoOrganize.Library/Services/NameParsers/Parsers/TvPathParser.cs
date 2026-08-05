@@ -3,7 +3,7 @@ using AutoOrganize.Library.Models;
 
 namespace AutoOrganize.Library.Services.NameParsers.Parsers;
 
-public class TvPathParser : ITvParser
+public sealed class TvPathParser : INameParserStrategy<TvParseResult>
 {
     private readonly ParserOptions _options;
 
@@ -16,7 +16,7 @@ public class TvPathParser : ITvParser
         DirectoryInfo? parent = info.Directory;
         for (int i = 0; i < _options.MaxNestingLevel; i++)
         {
-            if (parent is null || result.IsComplete(true)) break;
+            if (parent is null || result.IsComplete()) break;
             result.Complement(ParseInternal(parent.Name, false));
             parent = parent.Parent;
         }

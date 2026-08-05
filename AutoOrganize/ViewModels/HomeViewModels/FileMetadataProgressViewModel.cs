@@ -165,14 +165,14 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     private async Task<FileMetadataProcessingResult> ProcessMovieFileAsync(string filePath, CancellationToken token)
     {
         var movieParse = _nameParserService.ParseMovie(filePath);
-        if (!movieParse.IsComplete())
+        if (movieParse.Title is not { } title)
             throw new MetadataParseException(filePath, "movie", "无法解析成一个可用的电影元数据");
 
         var metadata =
             await _metadataService.GetMovieAsync(
                 new MovieMetadataRequest
                 {
-                    Title = movieParse.Title,
+                    Title = title,
                     Year = movieParse.Year,
                     Language = "zh-cn"
                 }, token);
@@ -194,15 +194,15 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             tvParse.Season ??= 1;
         }
 
-        if (!tvParse.IsComplete())
+        if (tvParse is not { Title: { } title, Season: { } season, Episode: { } episode })
             throw new MetadataParseException(filePath, "tv", "无法解析成一个可用的电视元数据");
 
         var metadata = await _metadataService.GetEpisodeAsync(
             new EpisodeMetadataRequest
             {
-                Name = tvParse.Title,
-                SeasonNumber = tvParse.Season.Value,
-                EpisodeNumber = (int)tvParse.Episode.Value,
+                Name = title,
+                SeasonNumber = season,
+                EpisodeNumber = (int)episode,
                 Language = "zh-cn",
             }, token);
 

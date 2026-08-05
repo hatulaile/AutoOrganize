@@ -6,23 +6,22 @@ namespace AutoOrganize.Library.Services.NameParsers;
 
 public sealed class NameParserService : INameParserService
 {
-    private readonly IEnumerable<ITvParser> _tvNameParsers;
-    private readonly IEnumerable<IMovieParser> _movieNameParsers;
+    private readonly IEnumerable<INameParserStrategy> _strategies;
     private readonly ILogger<NameParserService> _logger;
 
-    public TvParseResult ParseTv(string filePath)
+    public TResult Parse<TResult>(string filePath) where TResult : class, IParseResult<TResult>, new()
     {
-        _logger.LogDebug("开始解析电视剧文件名: {FilePath}", filePath);
-        var result = new TvParseResult();
-        foreach (ITvParser parser in _tvNameParsers)
+        _logger.LogDebug("开始解析文件名: {FilePath}", filePath);
+        var result = new TResult();
+
+        foreach (INameParserStrategy<TResult> strategy in _strategies.OfType<INameParserStrategy<TResult>>())
         {
-            var partial = parser.Parse(filePath);
-            _logger.LogDebug("使用解析器 {ParserType} 解析电视剧: {@Result}", parser.GetType().Name, partial);
+            TResult partial = strategy.Parse(filePath);
+            _logger.LogDebug("解析策略 {ParserType} 产生结果: {@Result}", strategy.GetType().Name, partial);
             result.Complement(partial);
-            if (result.IsComplete(true))
+            if (result.IsComplete())
             {
-                _logger.LogDebug("电视剧解析完成: {FilePath} -> {Title} (S{Season:D2}E{Episode:D2})",
-                    filePath, result.Title, result.Season ?? 0, result.Episode ?? 0);
+                _logger.LogDebug("文件名解析完成: {FilePath} -> {@Result}", filePath, result);
                 break;
             }
         }
@@ -30,31 +29,9 @@ public sealed class NameParserService : INameParserService
         return result;
     }
 
-    public MovieParseResult ParseMovie(string filePath)
+    public NameParserService(IEnumerable<INameParserStrategy> strategies, ILogger<NameParserService> logger)
     {
-        _logger.LogDebug("开始解析电影文件名: {FilePath}", filePath);
-        var result = new MovieParseResult();
-        foreach (IMovieParser parser in _movieNameParsers)
-        {
-            var partial = parser.Parse(filePath);
-            _logger.LogDebug("使用解析器 {ParserType} 解析电影: {@Result}", parser.GetType().Name, partial);
-            result.Complement(partial);
-            if (result.IsComplete(true))
-            {
-                _logger.LogDebug("电影解析完成: {FilePath} -> {Title} ({Year})",
-                    filePath, result.Title, result.Year);
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    public NameParserService(IEnumerable<ITvParser> tvNameParsers, IEnumerable<IMovieParser> movieNameParsers,
-        ILogger<NameParserService> logger)
-    {
-        _tvNameParsers = tvNameParsers;
-        _movieNameParsers = movieNameParsers;
+        _strategies = strategies;
         _logger = logger;
     }
 }

@@ -4,6 +4,5 @@ namespace AutoOrganize.Library.Services.NameParsers;
 
 public interface INameParserService
 {
-    TvParseResult ParseTv(string filePath);
-    MovieParseResult ParseMovie(string filePath);
+    TResult Parse<TResult>(string filePath) where TResult : class, IParseResult<TResult>, new();
 }

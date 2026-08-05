@@ -35,7 +35,8 @@ public static class ServiceCollectionExtension
 
             services
                 .AddSingleton<INavigationService, NavigationService>()
-                .AddSingleton<INameParserService, NameParserService>()
+                .AddSingleton<INameParserService<TvParseResult>, NameParserService<TvParseResult>>()
+                .AddSingleton<INameParserService<MovieParseResult>, NameParserService<MovieParseResult>>()
                 .AddSingleton<IStorageServices, StorageServices>()
                 .AddSingleton<IFileTransferService, FileTransferService>();
 
@@ -52,9 +53,8 @@ public static class ServiceCollectionExtension
                 .AddSingleton<IClipboardServices, ClipboardServices>()
                 .AddSingleton<INotificationServices, NotificationServices>();
 
-            services.AddSingleton<ITvParser, TvPathParser>();
-
-            services.AddSingleton<IMovieParser, MoviePathParser>();
+            services.AddSingleton<INameParserStrategy<TvParseResult>, TvPathParser>();
+            services.AddSingleton<INameParserStrategy<MovieParseResult>, MoviePathParser>();
 
             services.AddViewModels()
                 .AddMetadataProviders();
@@ -69,6 +69,5 @@ public static class ServiceCollectionExtension
                 .AddKeyedSingleton<IProvider, ThemoviedbProvider>(nameof(ProviderType.ThemovieDB));
             return services;
         }
-
     }
 }

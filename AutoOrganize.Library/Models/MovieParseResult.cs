@@ -1,8 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace AutoOrganize.Library.Models;
 
-public sealed class MovieParseResult
+public sealed class MovieParseResult : IParseResult<MovieParseResult>
 {
     public string? Title { get; set; }
 
@@ -10,18 +8,12 @@ public sealed class MovieParseResult
 
     public void Complement(MovieParseResult other)
     {
-        if (other.Title is not null)
-            Title ??= other.Title;
-
-        if (other.Year is not null)
-            Year ??= other.Year;
+        Title ??= other.Title;
+        Year ??= other.Year;
     }
 
-    [MemberNotNullWhen(true, nameof(Title))]
-    public bool IsComplete(bool hasExtension = false)
+    public bool IsComplete()
     {
-        if (!hasExtension)
-            return Title is not null;
         return Title is not null && Year is not null;
     }
 }
