@@ -22,12 +22,21 @@ public class RoutedViewHost : ContentControl
     public static readonly StyledProperty<RoutingState?> RouterProperty =
         AvaloniaProperty.Register<RoutedViewHost, RoutingState?>(nameof(Router));
 
-    public static readonly StyledProperty<Control> DefaultContentProperty =
-        AvaloniaProperty.Register<RoutedViewHost, Control>(nameof(DefaultContent), defaultValue: new TextBlock
+    public static readonly StyledProperty<Control?> DefaultContentProperty =
+        AvaloniaProperty.Register<RoutedViewHost, Control?>(nameof(DefaultContent));
+
+    private TextBlock? _defaultContent;
+
+    private Control GetDefaultContent()
+    {
+        if (DefaultContent is { } content)
+            return content;
+        return _defaultContent ??= new TextBlock
         {
             Text =
                 "Not Found: No default content set for RoutedViewHost. Please set the DefaultContent property to specify what should be shown when no view is found."
-        });
+        };
+    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs ev)
     {
@@ -66,7 +75,7 @@ public class RoutedViewHost : ContentControl
         set => SetValue(RouterProperty, value);
     }
 
-    public object? DefaultContent
+    public Control? DefaultContent
     {
         get => GetValue(DefaultContentProperty);
         set => SetValue(DefaultContentProperty, value);
@@ -78,13 +87,13 @@ public class RoutedViewHost : ContentControl
     {
         if (Router == null)
         {
-            Content = DefaultContent;
+            Content = GetDefaultContent();
             return;
         }
 
         if (viewModelBase == null)
         {
-            Content = DefaultContent;
+            Content = GetDefaultContent();
             return;
         }
 
@@ -92,7 +101,7 @@ public class RoutedViewHost : ContentControl
         var viewInstance = viewLocator.Build(viewModelBase);
         if (viewInstance == null)
         {
-            Content = DefaultContent;
+            Content = GetDefaultContent();
             return;
         }
 
