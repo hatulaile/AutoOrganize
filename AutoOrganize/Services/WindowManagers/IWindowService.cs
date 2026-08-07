@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls;
@@ -24,35 +25,37 @@ public interface IWindowService
     void Show<TWindowViewModel, TArgs>(TArgs arg, object ownerViewModel, TWindowViewModel? defaultViewModel = default)
         where TWindowViewModel : IWindowViewModel<TArgs>;
 
-    Task ShowDialog<TWindowViewModel>(Window ownerWindow, TWindowViewModel? defaultViewModel = default)
+    Task ShowDialog<TWindowViewModel>(Window ownerWindow,
+        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel;
 
-    Task ShowDialog<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = default)
+    Task ShowDialog<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = default,
+        CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel;
 
     Task ShowDialog<TWindowViewModel, TArgs>(TArgs args, Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default)
+        TWindowViewModel? defaultViewModel = default,CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel<TArgs>;
 
     Task ShowDialog<TWindowViewModel, TArgs>(TArgs args, object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default)
+        TWindowViewModel? defaultViewModel = default,CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel<TArgs>;
 
     Task<TResult> ShowDialog<TWindowViewModel, TResult>(Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default)
+        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
         where TWindowViewModel : IResultWindowViewModel<TResult>;
 
     Task<TResult> ShowDialog<TWindowViewModel, TResult>(object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default)
+        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
         where TWindowViewModel : IResultWindowViewModel<TResult>;
 
     Task<TResult> ShowDialog<TWindowViewModel, TArgs, TResult>(TArgs args, Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default)
-        where TWindowViewModel : IWindowViewModel<TArgs, TResult>;
+        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
+        where TWindowViewModel : IResultWindowViewModel<TArgs, TResult>;
 
     Task<TResult> ShowDialog<TWindowViewModel, TArgs, TResult>(TArgs args, object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default)
-        where TWindowViewModel : IWindowViewModel<TArgs, TResult>;
+        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
+        where TWindowViewModel : IResultWindowViewModel<TArgs, TResult>;
 
     void Close<TWindowViewModel>(TWindowViewModel viewModel)
         where TWindowViewModel : IWindowViewModel;
