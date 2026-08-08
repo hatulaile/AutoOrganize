@@ -65,19 +65,19 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
         _logger.LogDebug("选中传输结果项: {Type} - {Name}", value.GetType().Name, value.Title);
         if (value is IFileMetadata fileMetadata)
         {
-            _navigationService.NavigateTo<MetadataViewModel, MetadataBase>(RoutingState, fileMetadata.Metadata);
+            _navigationService.Replace<MetadataViewModel, MetadataBase>(RoutingState, fileMetadata.Metadata);
             return;
         }
 
         switch (value)
         {
             case TransferredFileNode transferFileModel:
-                _navigationService.NavigateTo<TransferredFileViewModel, TransferredFileNode>
+                _navigationService.Replace<TransferredFileViewModel, TransferredFileNode>
                     (RoutingState, transferFileModel);
                 break;
 
             case FailedTransferFileNode failedTransferFileModel:
-                _navigationService.NavigateTo<FailedTransferFileViewModel, FailedTransferFileNode>
+                _navigationService.Replace<FailedTransferFileViewModel, FailedTransferFileNode>
                     (RoutingState, failedTransferFileModel);
                 break;
         }
@@ -132,7 +132,7 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
     public void NavigateToSelectFilesViewModel()
     {
         _logger.LogDebug("导航到文件选择页面");
-        _navigationService.NavigateTo<SelectFilesViewModel>(this);
+        _navigationService.Replace<SelectFilesViewModel>(this);
 
         if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
             ram.ClearRamCache();
@@ -142,7 +142,7 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
     public void NavigateToMetadataEditViewModel()
     {
         _logger.LogDebug("导航到元数据编辑页面");
-        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(this,
+        _navigationService.Replace<MetadataEditorViewModel, MetadataEditOption>(this,
             new MetadataEditOption()
             {
                 IsClear = false

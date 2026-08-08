@@ -1,10 +1,7 @@
-﻿using System.Threading;
-
 namespace AutoOrganize.ViewModels.Abstractions;
 
-public interface IResultWindowViewModel<out TResult> : IWindowViewModel
+public interface IResultWindowViewModel<out TResult> : IWindowViewModel, IResultViewModel<TResult>
 {
-    CancellationToken CancellationToken { get; set; }
 }
 
 public interface IResultWindowViewModel<in TArgs, out TResult> : IWindowViewModel<TArgs>, IResultWindowViewModel<TResult>

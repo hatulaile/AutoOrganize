@@ -35,7 +35,7 @@ public sealed partial class SettingsWindowViewModel : SubNavigateViewModelBase, 
             !_settingsViewModels.Contains(CurrentSettingsViewModel) && CurrentSettingsViewModel.HasConfigChanged())
             _settingsViewModels.Add(CurrentSettingsViewModel);
 
-        _navigationService.NavigateTo(RoutingState, page.ViewModelType);
+        _navigationService.Replace(RoutingState, page.ViewModelType);
 
         if (CurrentSettingsViewModel is not null)
             _settingsViewModels.Remove(CurrentSettingsViewModel);

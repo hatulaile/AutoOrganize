@@ -120,7 +120,7 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     {
         _logger.LogInformation("用户前往 FileMetadataProgressViewModel, 类型: {Type}, 文件数量: {Count}", SelectedMetadataType,
             Source.Count);
-        _navigationService.NavigateTo<FileMetadataProgressViewModel, FileProcessOptions>(this,
+        _navigationService.Replace<FileMetadataProgressViewModel, FileProcessOptions>(this,
             new FileProcessOptions
             {
                 Type = SelectedMetadataType,

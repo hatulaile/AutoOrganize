@@ -71,7 +71,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     public void GoBack()
     {
         _logger.LogDebug($"触发返回方法, 前往 {nameof(SelectFilesViewModel)}.");
-        _navigationService.NavigateTo<SelectFilesViewModel>(this);
+        _navigationService.Replace<SelectFilesViewModel>(this);
         Dispose();
     }
 
@@ -121,7 +121,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
                     : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCound} 个.", NotificationType.Warning),
                 this);
 
-            _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(this,
+            _navigationService.Replace<MetadataEditorViewModel, MetadataEditOption>(this,
                 new MetadataEditOption
                 {
                     FileProcessResultInfos = Results,
@@ -132,7 +132,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
         _logger.LogWarning("源数据处理全部失败: {failedCound}", FailedCound);
         _notificationServices.Show(new Notification("处理结果", "没有任何成功的文件", NotificationType.Error), this);
-        _navigationService.NavigateTo<SelectFilesViewModel>(this);
+        _navigationService.Replace<SelectFilesViewModel>(this);
     }
 
     private async Task ProgressAndAddFileAsync(string filePath, MetadataType type, CancellationToken token)
@@ -144,7 +144,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             FileMetadataProcessingResult processingResult = type switch
             {
                 MetadataType.Movie => await ProcessMovieFileAsync(filePath, token),
-                MetadataType.Tv => await ProcessTvFileAsync(filePath, token),
+                MetadataType.TvSeries => await ProcessTvFileAsync(filePath, token),
                 MetadataType.None => throw new NotSupportedException("Metadata type cannot be None"),
                 _ => throw new NotSupportedException($"Unsupported metadata type: {type}")
             };

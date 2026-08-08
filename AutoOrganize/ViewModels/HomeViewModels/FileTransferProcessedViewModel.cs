@@ -70,7 +70,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
         if (Entries is null)
         {
             _logger.LogWarning("Entries 为空, 前往编辑页");
-            _navigationService.NavigateTo<MetadataEditViewModel>(this);
+            _navigationService.Replace<MetadataEditorViewModel>(this);
             return;
         }
 
@@ -129,7 +129,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
                         this);
                 }
 
-                _navigationService.NavigateTo<FileTransferResultViewModel, FileTransferResultOptions>(this,
+                _navigationService.Replace<FileTransferResultViewModel, FileTransferResultOptions>(this,
                     new FileTransferResultOptions
                     {
                         BatchInfos = _transferBatchInfos
@@ -145,8 +145,8 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     [RelayCommand]
     private void GoBack()
     {
-        _logger.LogDebug($"触发了返回方法, 返回{nameof(MetadataEditViewModel)}");
-        _navigationService.NavigateTo<MetadataEditViewModel, MetadataEditOption>(this,
+        _logger.LogDebug($"触发了返回方法, 返回{nameof(MetadataEditorViewModel)}");
+        _navigationService.Replace<MetadataEditorViewModel, MetadataEditOption>(this,
             new MetadataEditOption
             {
                 IsClear = false
@@ -175,7 +175,8 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     {
         if (disposing)
         {
-            _cancellationTokenSource.Cancel();
+            if (!_cancellationTokenSource.IsCancellationRequested)
+                _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
         }
     }

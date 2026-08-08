@@ -46,7 +46,7 @@ public sealed partial class MainWindowViewModel : SubNavigateViewModelBase
     {
         if (pageModel.ViewModelType is null) return;
         _logger.LogDebug("导航到页面: {PageName} ({ViewModelType})", pageModel.Title, pageModel.ViewModelType.Name);
-        _navigationService.NavigateTo(RoutingState, pageModel.ViewModelType);
+        _navigationService.Replace(RoutingState, pageModel.ViewModelType);
     }
 
     [RelayCommand]

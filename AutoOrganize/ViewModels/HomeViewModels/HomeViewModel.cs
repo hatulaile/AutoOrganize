@@ -9,6 +9,6 @@ public sealed partial class HomeViewModel : SubNavigateViewModelBase, INavigatio
 {
     public HomeViewModel(INavigationService navigationService)
     {
-        navigationService.NavigateTo<SelectFilesViewModel>(RoutingState);
+        navigationService.Replace<SelectFilesViewModel>(RoutingState);
     }
 }

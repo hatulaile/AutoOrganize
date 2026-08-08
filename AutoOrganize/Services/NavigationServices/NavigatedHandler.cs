@@ -9,14 +9,14 @@ public sealed class NavigatedEventArgs : EventArgs
 {
     public IViewModel? OldViewModel { get; }
 
-    public IViewModel NewViewModel { get; }
+    public IViewModel? NewViewModel { get; }
 
-    public IParentViewModel? OwnerViewModel { get; }
+    public RoutingState RoutingState { get; }
 
-    public NavigatedEventArgs(IViewModel? oldViewModel, IViewModel newViewModel, IParentViewModel? ownerViewModel)
+    public NavigatedEventArgs(IViewModel? oldViewModel, IViewModel? newViewModel, RoutingState routingState)
     {
         OldViewModel = oldViewModel;
         NewViewModel = newViewModel;
-        OwnerViewModel = ownerViewModel;
+        RoutingState = routingState;
     }
 }

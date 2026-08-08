@@ -44,7 +44,7 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
     public void Next()
     {
         _logger.LogInformation("进入文件传输处理页面.");
-        _navigationService.NavigateTo<FileTransferProcessedViewModel, FileTransferProcessedOption>(this,
+        _navigationService.Replace<FileTransferProcessedViewModel, FileTransferProcessedOption>(this,
             new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataTreeRoot)));
     }
 
@@ -52,7 +52,7 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
     public void Back()
     {
         _logger.LogDebug("返回文件选择页");
-        _navigationService.NavigateTo<SelectFilesViewModel>(this);
+        _navigationService.Replace<SelectFilesViewModel>(this);
 
         if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
             ram.ClearRamCache();
@@ -76,23 +76,23 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
         switch (value)
         {
             case IFileMetadata<MetadataBase> metadata:
-                _navigationService.NavigateTo<MetadataViewModel, MetadataBase>
+                _navigationService.Replace<MetadataViewModel, MetadataBase>
                     (RoutingState, metadata.Metadata);
                 break;
             case SourceFileNode fileMetadata:
-                _navigationService.NavigateTo<SourceFileViewModel, SourceFileNode>
+                _navigationService.Replace<SourceFileViewModel, SourceFileNode>
                     (RoutingState, fileMetadata);
                 break;
             case FailedDirectoryNode failedDirectoryMetadata:
-                _navigationService.NavigateTo<FailedDirectoryMetadataViewModel, FailedDirectoryNode>(
+                _navigationService.Replace<FailedDirectoryMetadataViewModel, FailedDirectoryNode>(
                     RoutingState, failedDirectoryMetadata);
                 break;
             case FailedSourceFileRoot failedFileMetadataRoot:
-                _navigationService.NavigateTo<FailedFileRootViewModel, FailedSourceFileRoot>(
+                _navigationService.Replace<FailedFileRootViewModel, FailedSourceFileRoot>(
                     RoutingState, failedFileMetadataRoot);
                 break;
             case FailedFileNode failedMetadata:
-                _navigationService.NavigateTo<FailedFileViewModel, FailedFileNode>
+                _navigationService.Replace<FailedFileViewModel, FailedFileNode>
                     (RoutingState, failedMetadata);
                 break;
             default:

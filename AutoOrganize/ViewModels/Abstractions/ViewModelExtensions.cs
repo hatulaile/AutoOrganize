@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoOrganize.Services.NavigationServices;
 
 namespace AutoOrganize.ViewModels.Abstractions;
@@ -39,26 +41,87 @@ public static class ViewModelExtensions
 
     extension(INavigationService navigationService)
     {
-        public void NavigateTo<TViewModel>(IViewModel context, TViewModel? defaultViewModel = default)
+        public void Replace<TViewModel>(IViewModel context)
             where TViewModel : INavigationViewModel
         {
-            navigationService.NavigateTo(context.FindAncestorRouter(), defaultViewModel);
+            navigationService.Replace<TViewModel>(context.FindAncestorRouter());
         }
 
-        public void NavigateTo(IViewModel context, Type viewModelType)
+        public void Replace(IViewModel context, Type viewModelType)
         {
-            navigationService.NavigateTo(context.FindAncestorRouter(), viewModelType);
+            navigationService.Replace(context.FindAncestorRouter(), viewModelType);
         }
 
-        public void NavigateTo<TViewModel, TArgs>(IViewModel context, TArgs args, TViewModel? defaultViewModel = default)
+        public void Replace<TViewModel, TArgs>(IViewModel context, TArgs args)
             where TViewModel : INavigationViewModel<TArgs>
         {
-            navigationService.NavigateTo(context.FindAncestorRouter(), args, defaultViewModel);
+            navigationService.Replace<TViewModel, TArgs>(context.FindAncestorRouter(), args);
         }
 
-        public void NavigateTo<TViewModel, TArgs>(IViewModel context, TArgs args, Type viewModelType)
+        public void Replace<TViewModel, TArgs>(IViewModel context, TArgs args, Type viewModelType)
         {
-            navigationService.NavigateTo<TViewModel, TArgs>(context.FindAncestorRouter(), args, viewModelType);
+            navigationService.Replace<TViewModel, TArgs>(context.FindAncestorRouter(), args, viewModelType);
+        }
+
+        public void Push<TViewModel>(IViewModel context)
+            where TViewModel : INavigationViewModel
+        {
+            navigationService.Push<TViewModel>(context.FindAncestorRouter());
+        }
+
+        public void Push(IViewModel context, Type viewModelType)
+        {
+            navigationService.Push(context.FindAncestorRouter(), viewModelType);
+        }
+
+        public void Push<TViewModel, TArgs>(IViewModel context, TArgs args)
+            where TViewModel : INavigationViewModel<TArgs>
+        {
+            navigationService.Push<TViewModel, TArgs>(context.FindAncestorRouter(), args);
+        }
+
+        public void Push<TViewModel, TArgs>(IViewModel context, TArgs args, Type viewModelType)
+        {
+            navigationService.Push<TViewModel, TArgs>(context.FindAncestorRouter(), args, viewModelType);
+        }
+
+        public Task<TResult> RequestAsync<TViewModel, TResult>(IViewModel context,
+            CancellationToken token = default)
+            where TViewModel : IResultNavigationViewModel<TResult>
+        {
+            return navigationService.RequestAsync<TViewModel, TResult>(context.FindAncestorRouter(), token);
+        }
+
+        public Task<TResult> RequestAsync<TViewModel, TResult>(IViewModel context, Type viewModelType,
+            CancellationToken token = default)
+            where TViewModel : IResultNavigationViewModel<TResult>
+        {
+            return navigationService.RequestAsync<TViewModel, TResult>(context.FindAncestorRouter(), viewModelType, token);
+        }
+
+        public Task<TResult> RequestAsync<TViewModel, TArgs, TResult>(IViewModel context, TArgs args,
+            CancellationToken token = default)
+            where TViewModel : IResultNavigationViewModel<TArgs, TResult>
+        {
+            return navigationService.RequestAsync<TViewModel, TArgs, TResult>(context.FindAncestorRouter(), args, token);
+        }
+
+        public Task<TResult> RequestAsync<TViewModel, TArgs, TResult>(IViewModel context, TArgs args, Type viewModelType,
+            CancellationToken token = default)
+            where TViewModel : IResultNavigationViewModel<TArgs, TResult>
+        {
+            return navigationService.RequestAsync<TViewModel, TArgs, TResult>(context.FindAncestorRouter(), args,
+                viewModelType, token);
+        }
+
+        public void Pop(IViewModel context)
+        {
+            navigationService.Pop(context.FindAncestorRouter());
+        }
+
+        public void Pop<TResult>(IViewModel context, TResult result)
+        {
+            navigationService.Pop(context.FindAncestorRouter(), result);
         }
 
         public void Clear(IViewModel context)
