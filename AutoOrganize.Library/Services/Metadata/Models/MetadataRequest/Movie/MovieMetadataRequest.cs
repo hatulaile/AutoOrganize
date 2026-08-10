@@ -7,17 +7,17 @@ namespace AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Movie;
 
 public sealed class MovieMetadataRequest : IMetadataRequest<MovieMetadataRequest, MovieMetadata>, IHasCache
 {
-    public string? Title { get; init; }
+    public string? Title { get; set; }
 
-    public int? Year { get; init; }
+    public int? Year { get; set; }
 
-    public string? Country { get; init; }
+    public string? Country { get; set; }
 
-    public string? Language { get; init; }
+    public string? Language { get; set; }
 
-    public string? ImageLanguages { get; init; }
+    public string? ImageLanguages { get; set; }
 
-    public ProviderIds? ProviderIds { get; init; }
+    public IProviderIds? ProviderIds { get; set; }
 
     public IEnumerable<string> GetCacheNames()
     {

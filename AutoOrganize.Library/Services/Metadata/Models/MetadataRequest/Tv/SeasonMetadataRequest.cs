@@ -7,37 +7,60 @@ namespace AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
 
 public sealed class SeasonMetadataRequest :
     IMetadataRequest<SeasonMetadataRequest, SeasonMetadata>,
-    IHasParentRequest<SeriesMetadataRequest>,
+    IHasParentRequest<SeriesMetadataRequest,SeriesMetadata>,
     IHasCache
 {
-    public string? Name { get; init; }
+    public string? SeriesName { get; set; }
 
-    public required int SeasonNumber { get; init; }
+    public int SeasonNumber { get; set; }
 
-    public string? Language { get; init; }
+    public string? Language { get; set; }
 
-    public string? ImageLanguages { get; init; }
+    public string? ImageLanguages { get; set; }
 
-    public required ProviderIds? ProviderIds { get; init; }
+    public required IProviderIds? SeriesProviderIds { get; set; }
 
-    public ITypedRequest GetParentRequest()
+    public required IProviderIds? ProviderIds { get; set; }
+
+    public ITypedRequest<SeriesMetadataRequest,SeriesMetadata> GetParentRequest()
         => new CacheTypedRequest<SeriesMetadataRequest, SeriesMetadata>(new SeriesMetadataRequest
         {
-            Name = Name,
+            Name = SeriesName,
             Language = Language,
             ImageLanguages = ImageLanguages,
-            ProviderIds = ProviderIds,
+            ProviderIds = SeriesProviderIds,
         });
 
     public IEnumerable<string> GetCacheNames()
     {
-        if(!string.IsNullOrEmpty(Name))
-            yield return $"tv_season_{Name}_{SeasonNumber}_{Language}_{ImageLanguages}";
+        if (!string.IsNullOrEmpty(SeriesName))
+            yield return $"tv_season_{SeriesName}_{SeasonNumber}_{Language}_{ImageLanguages}";
 
         if (ProviderIds is null)
             yield break;
 
-        foreach ((string providerId, string id) in ProviderIds)
-            yield return $"tv_season_{providerId}_{id}_{SeasonNumber}_{Language}_{ImageLanguages}";
+        if (ProviderIds is not null && SeriesProviderIds is not null)
+        {
+            foreach ((string seriesProviderId, string seriesId) in SeriesProviderIds)
+                foreach ((string providerId, string id) in ProviderIds)
+                    yield return
+                        $"tv_season_{seriesProviderId}_{seriesId}_{providerId}_{id}_{SeasonNumber}_{Language}_{ImageLanguages}";
+        }
+
+        if (SeriesProviderIds is null && ProviderIds is not null)
+        {
+            foreach ((string providerId, string id) in ProviderIds)
+                yield return
+                    $"tv_season_{providerId}_{id}_{SeasonNumber}_{Language}_{ImageLanguages}";
+            yield break;
+        }
+
+        if (ProviderIds is null && SeriesProviderIds is not null)
+        {
+            foreach ((string providerId, string id) in SeriesProviderIds)
+                yield return
+                    $"tv_season_{providerId}_{id}_{SeasonNumber}_{Language}_{ImageLanguages}";
+            yield break;
+        }
     }
 }

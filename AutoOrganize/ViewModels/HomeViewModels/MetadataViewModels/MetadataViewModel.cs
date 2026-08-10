@@ -96,12 +96,11 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
     {
         (string providerId, string id) = parm;
 
-        var info = (IUriProviderInfo?)App.Current.ServiceProvider.GetKeyedService<IProvider>(providerId)
-            ?.Info;
-        if (info is null || Metadata is null)
+        var info = _providerService.GetProvidersForId(providerId).FirstOrDefault()?.Info;
+        if (info is not IUriProviderInfo uriProviderInfo || Metadata is null)
             return;
 
-        if (!info.TryGetUri(id, Metadata.Type, out var uri))
+        if (!uriProviderInfo.TryGetUri(Metadata, out var uri))
             return;
 
         await _launcherServices.LaunchUriAsync(uri, this);
@@ -114,7 +113,7 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
         if (info is not IUriProviderInfo uriInfo || Metadata is null)
             return;
 
-        if (!uriInfo.TryGetUri(providerId, Metadata.Type, out var uri))
+        if (!uriInfo.TryGetUri(Metadata, out var uri))
             return;
 
         await _launcherServices.LaunchUriAsync(uri, this);
@@ -128,7 +127,7 @@ public sealed partial class MetadataViewModel : MetadataViewModelBase<MetadataBa
         (string providerId, string id) = parm;
 
         return _providerService.GetProvidersForId(providerId).FirstOrDefault()?.Info is IUriProviderInfo uriInfo &&
-               uriInfo.TryGetUri(id, Metadata.Type, out _);
+               uriInfo.TryGetUri(Metadata, out _);
     }
 
     private bool CanOpenProviderHomeInBrowser(string providerId)

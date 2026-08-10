@@ -1,10 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using AutoOrganize.Library.Models;
 
 namespace AutoOrganize.Library.Services.Metadata.Models.Metadata;
 
-public sealed class ProviderIds : IEnumerable<KeyValuePair<string, string>>
+public sealed class ProviderIds : IProviderIds
 {
     private readonly Dictionary<string, string> _items;
 
@@ -18,12 +17,12 @@ public sealed class ProviderIds : IEnumerable<KeyValuePair<string, string>>
 
     public ProviderIds()
     {
-        _items = new Dictionary<string, string>(0);
+        _items = new Dictionary<string, string>();
     }
 
-    public ProviderIds(int count)
+    public ProviderIds(int capacity)
     {
-        _items = new Dictionary<string, string>(count);
+        _items = new Dictionary<string, string>(capacity);
     }
 
     public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
@@ -39,6 +38,8 @@ public sealed class ProviderIds : IEnumerable<KeyValuePair<string, string>>
 
     public bool Remove(string key) => _items.Remove(key);
 
+    public void Clear() =>
+        _items.Clear();
 
     public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _items.GetEnumerator();
 

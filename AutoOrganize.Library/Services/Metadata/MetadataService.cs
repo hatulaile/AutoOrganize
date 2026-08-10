@@ -435,7 +435,7 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
         {
             if (_metadataCache.TryGetValue(name, out _))
                 continue;
-            _metadataCache.Set(name, result, TimeSpan.FromMinutes(10L));
+            _metadataCache.Set(name, result);
         }
     }
 }

@@ -13,5 +13,5 @@ public sealed class MovieSearchResult : ISearchResult<MovieSearchResult>
 
     public DateTime? ReleaseDate { get; set; }
 
-    public ProviderIds ProviderIds { get; init; } = new();
+    public IProviderIds ProviderIds { get; set; } = new ProviderIds();
 }

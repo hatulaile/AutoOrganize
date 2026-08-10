@@ -7,13 +7,13 @@ namespace AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
 
 public sealed class SeriesMetadataRequest : IMetadataRequest<SeriesMetadataRequest, SeriesMetadata>, IHasCache
 {
-    public string? Name { get; init; }
+    public string? Name { get; set; }
 
-    public string? Language { get; init; }
+    public string? Language { get; set; }
 
-    public string? ImageLanguages { get; init; }
+    public string? ImageLanguages { get; set; }
 
-    public ProviderIds? ProviderIds { get; init; }
+    public IProviderIds? ProviderIds { get; set; }
 
 
     public IEnumerable<string> GetCacheNames()

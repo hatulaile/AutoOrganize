@@ -1,3 +1,4 @@
+using System.Globalization;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Abstractions;
 
@@ -9,9 +10,9 @@ public sealed class SeriesSearchResult : ISearchResult<SeriesSearchResult>
 
     public string? OriginalName { get; set; }
 
-    public string? OriginCountry { get; set; }
+    public List<RegionInfo>? OriginCountry { get; set; }
 
     public DateTime? FirstAirDate { get; set; }
 
-    public ProviderIds ProviderIds { get; init; } = new();
+    public IProviderIds ProviderIds { get; set; } = new ProviderIds();
 }

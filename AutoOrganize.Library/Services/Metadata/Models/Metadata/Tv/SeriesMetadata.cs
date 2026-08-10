@@ -1,4 +1,5 @@
 using System.Globalization;
+using AutoOrganize.Library.Extensions;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Images;
 using AutoOrganize.Library.Utils;
@@ -44,8 +45,17 @@ public sealed class SeriesMetadata : TvMetadata<SeriesMetadata>,
         Backdrops = ImageGroupUtils.Coalesce(Backdrops, other.Backdrops);
         Logos = ImageGroupUtils.Coalesce(Logos, other.Logos);
 
-        Languages ??= other.Languages;
-        Countries ??= other.Countries;
+        if (other.Languages is not null)
+        {
+            if (Languages is null) Languages = other.Languages;
+            else Languages.AddRangeIfNotExists(other.Languages);
+        }
+
+        if (other.Countries is not null)
+        {
+            if (Countries is null) Countries = other.Countries;
+            else Countries.AddRangeIfNotExists(other.Countries);
+        }
 
         return this;
     }

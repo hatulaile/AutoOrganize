@@ -4,7 +4,7 @@ namespace AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Abstractio
 
 public interface ISearchResult
 {
-    public ProviderIds ProviderIds { get; }
+    public IProviderIds ProviderIds { get; }
 }
 
 public interface ISearchResult<TSelf> : ISearchResult

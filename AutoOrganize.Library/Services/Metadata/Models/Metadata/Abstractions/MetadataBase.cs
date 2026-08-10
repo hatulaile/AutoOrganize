@@ -12,7 +12,7 @@ public abstract class MetadataBase
 
     public DateTime? AirDate { get; set; }
 
-    public ProviderIds ProviderIds { get; init; } = new();
+    public IProviderIds ProviderIds { get; init; } = new ProviderIds();
 }
 
 public abstract class MetadataBase<TSelf> : MetadataBase, IMetadataResult<TSelf>

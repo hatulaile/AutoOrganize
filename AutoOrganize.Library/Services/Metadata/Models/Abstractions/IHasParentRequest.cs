@@ -7,10 +7,11 @@ public interface IHasParentRequest
     ITypedRequest GetParentRequest();
 }
 
-public interface IHasParentRequest<TParentRequest> : IHasParentRequest
-    where TParentRequest : IMetadataRequest
+public interface IHasParentRequest<out TParentRequest, TParentResult> : IHasParentRequest
+    where TParentRequest : IMetadataRequest<TParentRequest, TParentResult>
+    where TParentResult : IMetadataResult<TParentResult>
 {
     ITypedRequest IHasParentRequest.GetParentRequest() => GetParentRequest();
 
-    new ITypedRequest GetParentRequest();
+    new ITypedRequest<TParentRequest, TParentResult> GetParentRequest();
 }
