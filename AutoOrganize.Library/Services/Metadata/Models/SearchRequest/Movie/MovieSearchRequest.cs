@@ -7,7 +7,7 @@ namespace AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Movie;
 
 public sealed class MovieSearchRequest : ISearchRequest<MovieSearchRequest, MovieSearchResult>, IHasCache
 {
-    public string Name { get; init; } = string.Empty;
+    public string? Name { get; set; }
 
     public int? Year { get; init; }
 
@@ -19,6 +19,7 @@ public sealed class MovieSearchRequest : ISearchRequest<MovieSearchRequest, Movi
 
     public IEnumerable<string> GetCacheNames()
     {
-        yield return $"movie_search_{(ProviderIds is null ? string.Empty : ProviderIds.GetAllProviderCache())}_{Name}_{Year ?? 0}_{Language}";
+        yield return
+            $"movie_search_{(ProviderIds is null ? string.Empty : ProviderIds.GetAllProviderCache())}_{Name}_{Year ?? 0}_{Language}";
     }
 }

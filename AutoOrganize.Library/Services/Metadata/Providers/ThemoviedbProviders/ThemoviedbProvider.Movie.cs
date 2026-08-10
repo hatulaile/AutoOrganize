@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using AutoOrganize.Library.Models;
+using AutoOrganize.Library.Services.Metadata.Models.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Movie;
@@ -14,11 +15,24 @@ namespace AutoOrganize.Library.Services.Metadata.Providers.ThemoviedbProviders;
 public sealed partial class ThemoviedbProvider
 {
     public async Task<IEnumerable<MovieSearchResult>?> SearchAsync
-        (MovieSearchRequest request, bool ignoreCache = false, CancellationToken token = default) =>
-        (await SearchMovieRawAsync(request, ignoreCache, token).ConfigureAwait(false)).Select(SearchMovieToResult);
+        (MovieSearchRequest request, bool ignoreCache = false, CancellationToken token = default)
+    {
+        IEnumerable<MovieSearchResult>? results =
+            await SearchMovieRawForIdAsync(request, ignoreCache, token).ConfigureAwait(false);
+        if (results is not null) return results;
+        return (await SearchMovieRawForNameAsync(request, ignoreCache, token).ConfigureAwait(false)).Select(SearchMovieToResult);
+    }
 
     public async Task<MovieMetadata?> GetMetadataAsync(MovieMetadataRequest request,
         bool ignoreCache = false, CancellationToken token = default)
+    {
+        var result = await GetMovieMetadataRaw(request, ignoreCache, token).ConfigureAwait(false);
+        if (!result.HasValue) return null;
+        return MovieToMetadata(result.Value.movie, result.Value.images);
+    }
+
+    private async Task<(Movie movie, ImagesWithId? images)?> GetMovieMetadataRaw
+        (MovieMetadataRequest request, bool ignoreCache, CancellationToken token = default)
     {
         int movieId;
         await IfNotHasConfigGet(token).ConfigureAwait(false);
@@ -29,7 +43,7 @@ public sealed partial class ThemoviedbProvider
         }
         else
         {
-            SearchMovie? first = (await SearchMovieRawAsync(new MovieSearchRequest
+            SearchMovie? first = (await SearchMovieRawForNameAsync(new MovieSearchRequest
             {
                 Name = request.Title ?? string.Empty,
                 Year = request.Year,
@@ -45,14 +59,15 @@ public sealed partial class ThemoviedbProvider
         ILease? lease;
         do
         {
+            if (!ignoreCache && _cache.TryGetValue(cacheKey, out (Movie movie, ImagesWithId? images)? cached) &&
+                cached is not null)
+                return cached;
+
             (bool acquired, lease) =
                 await _flightCoordinator.AcquireAsync(cacheKey, token).ConfigureAwait(false);
 
             if (acquired)
                 break;
-
-            if (!ignoreCache && _cache.TryGetValue(cacheKey, out MovieMetadata? cached) && cached is not null)
-                return cached;
         } while (true);
 
         try
@@ -64,7 +79,7 @@ public sealed partial class ThemoviedbProvider
 
             ImagesWithId? images = await Client.GetMovieImagesAsync(movieId, request.ImageLanguages, null, token)
                 .ConfigureAwait(false);
-            var metadata = MovieToMetadata(movie, images);
+            (Movie movie, ImagesWithId? images) metadata = (movie, images);
             _cache.Set(cacheKey, metadata, CacheTime);
             return metadata;
         }
@@ -74,9 +89,10 @@ public sealed partial class ThemoviedbProvider
         }
     }
 
-    private async Task<IEnumerable<SearchMovie>> SearchMovieRawAsync(MovieSearchRequest request, bool ignoreCache,
+    private async Task<IEnumerable<SearchMovie>> SearchMovieRawForNameAsync(MovieSearchRequest request, bool ignoreCache,
         CancellationToken token)
     {
+        if (request.Name is null) return [];
         string cacheKey = $"search_movie_{request.Name}_{request.Year}_{request.Language}_{request.IncludeAdult}";
 
         ILease? lease;
@@ -112,6 +128,25 @@ public sealed partial class ThemoviedbProvider
         }
     }
 
+    private async Task<IEnumerable<MovieSearchResult>?> SearchMovieRawForIdAsync
+        (MovieSearchRequest request, bool ignoreCache, CancellationToken token)
+    {
+        if (request.ProviderIds?.TryGetValue(nameof(ProviderType.ThemovieDB), out var id) is not true ||
+            !int.TryParse(id, out _))
+            return null;
+
+        (Movie movie, ImagesWithId? images)? raw =
+            await GetMovieMetadataRaw(new MovieMetadataRequest
+            {
+                ProviderIds = request.ProviderIds,
+                Language = request.Language
+            }, ignoreCache, token).ConfigureAwait(false);
+        if (!raw.HasValue)
+            return null;
+
+        return [MovieToSearchResult(raw.Value.movie)];
+    }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private MovieSearchResult SearchMovieToResult(SearchMovie searchMovie) => new()
@@ -120,7 +155,17 @@ public sealed partial class ThemoviedbProvider
         Adult = searchMovie.Adult,
         OriginalTitle = searchMovie.OriginalTitle,
         ReleaseDate = searchMovie.ReleaseDate,
-        ProviderIds = { [nameof(ProviderType.ThemovieDB)] = searchMovie.Id.ToString() }
+        ProviderIds = new ProviderIds { [nameof(ProviderType.ThemovieDB)] = searchMovie.Id.ToString() }
+    };
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private MovieSearchResult MovieToSearchResult(Movie movie) => new()
+    {
+        Title = movie.Title,
+        Adult = movie.Adult,
+        OriginalTitle = movie.OriginalTitle,
+        ReleaseDate = movie.ReleaseDate,
+        ProviderIds = new ProviderIds { [nameof(ProviderType.ThemovieDB)] = movie.Id.ToString() }
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -137,7 +182,7 @@ public sealed partial class ThemoviedbProvider
             Backdrops = ImageDataListToGroup(images?.Backdrops),
             Posters = ImageDataListToGroup(images?.Posters),
             Logos = ImageDataListToGroup(images?.Logos),
-            ProviderIds = { [nameof(ProviderType.ThemovieDB)] = movie.Id.ToString() }
+            ProviderIds = new ProviderIds { [nameof(ProviderType.ThemovieDB)] = movie.Id.ToString() }
         };
 
         return metadata;

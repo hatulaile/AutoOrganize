@@ -127,7 +127,7 @@ public sealed partial class ThemoviedbProvider :
             return null;
 
         var images = imageDatas.Select(ImageDataToData).WhereNotNull();
-        if (images.Any())
+        if (!images.Any())
             return null;
 
         return new ImageGroup(new ThemoviedbImageDataList(images));
