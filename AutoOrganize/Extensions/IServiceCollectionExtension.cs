@@ -24,7 +24,8 @@ public static class ServiceCollectionExtension
                     (IWindowProvider)provider.GetRequiredService<IWindowService>())
                 .AddSingleton<ILauncherServices, LauncherServices>()
                 .AddSingleton<IClipboardServices, ClipboardServices>()
-                .AddSingleton<INotificationServices, NotificationServices>();
+                .AddSingleton<INotificationServices, NotificationServices>()
+                .AddSingleton<IToastServices, ToastServices>();
 
             services.AddViewModels();
             return services;
