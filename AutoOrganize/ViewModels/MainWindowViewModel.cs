@@ -15,7 +15,7 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.None)]
-public sealed partial class MainWindowViewModel : SubNavigateViewModelBase
+public sealed partial class MainWindowViewModel : SubNavigateViewModelBase, IWindowViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly IWindowService _windowService;

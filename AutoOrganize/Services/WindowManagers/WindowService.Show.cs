@@ -9,10 +9,10 @@ namespace AutoOrganize.Services.WindowManagers;
 
 public partial class WindowService
 {
-    public void Show<TWindowViewModel>(Window? ownerWindow = null, TWindowViewModel? defaultViewModel = default)
+    public void Show<TWindowViewModel>(Window? ownerWindow = null)
         where TWindowViewModel :IWindowViewModel
     {
-        TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
+        TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
@@ -54,11 +54,11 @@ public partial class WindowService
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
 
-    public void Show<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = default)
+    public void Show<TWindowViewModel>(object ownerViewModel)
         where TWindowViewModel :IWindowViewModel
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        Show(ownerWindow, defaultViewModel);
+        Show<TWindowViewModel>(ownerWindow);
     }
 
     public void Show(Type viewModelType, object ownerViewModel)
@@ -67,11 +67,10 @@ public partial class WindowService
         Show(viewModelType, ownerWindow);
     }
 
-    public void Show<TWindowViewModel, TArgs>(TArgs args, Window? ownerWindow = null,
-        TWindowViewModel? defaultViewModel = default)
+    public void Show<TWindowViewModel, TArgs>(TArgs args, Window? ownerWindow = null)
         where TWindowViewModel :  IWindowViewModel<TArgs>
     {
-        TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
+        TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
@@ -90,12 +89,11 @@ public partial class WindowService
         ShowOrActiveWindow(hostWindow, ownerWindow);
     }
 
-    public void Show<TWindowViewModel, TArgs>(TArgs arg, object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default)
+    public void Show<TWindowViewModel, TArgs>(TArgs arg, object ownerViewModel)
         where TWindowViewModel :IWindowViewModel<TArgs>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        Show(arg, ownerWindow, defaultViewModel);
+        Show<TWindowViewModel, TArgs>(arg, ownerWindow);
     }
 
     private Window CreateOrGetWindow<TWindowViewModel>(TWindowViewModel viewModel)

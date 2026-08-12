@@ -15,4 +15,8 @@ public interface IWindowProvider
     Window? GetWindowByViewModel(IViewModel viewModel);
 
     Window GetRequiredWindowByViewModel(IViewModel viewModel);
+
+    Window? GetWindowByViewModel(IWindowViewModel viewModel);
+
+    Window GetRequiredWindowByViewModel(IWindowViewModel viewModel);
 }

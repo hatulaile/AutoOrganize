@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.ViewModels.Abstractions;
@@ -10,29 +10,29 @@ namespace AutoOrganize.Services.WindowManagers;
 public partial class WindowService
 {
     public Task ShowDialog<TWindowViewModel>(Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
+        CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel
     {
-        TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
+        TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         return ShowDialogAsync(hostWindow, ownerWindow, token);
     }
 
-    public Task ShowDialog<TWindowViewModel>(object ownerViewModel, TWindowViewModel? defaultViewModel = default,
+    public Task ShowDialog<TWindowViewModel>(object ownerViewModel,
         CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        return ShowDialog(ownerWindow, defaultViewModel, token);
+        return ShowDialog<TWindowViewModel>(ownerWindow, token);
     }
 
     public Task ShowDialog<TWindowViewModel, TArgs>(TArgs args, Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
+        CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel<TArgs>
     {
-        TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
+        TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
@@ -41,18 +41,18 @@ public partial class WindowService
     }
 
     public Task ShowDialog<TWindowViewModel, TArgs>(TArgs args, object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default, CancellationToken token = default)
+        CancellationToken token = default)
         where TWindowViewModel : IWindowViewModel<TArgs>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        return ShowDialog(args, ownerWindow, defaultViewModel, token);
+        return ShowDialog<TWindowViewModel, TArgs>(args, ownerWindow, token);
     }
 
     public Task<TResult> ShowDialog<TWindowViewModel, TResult>(Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
         where TWindowViewModel : IResultWindowViewModel<TResult>
     {
-        TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
+        TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.CancellationToken = cancellationToken;
@@ -61,18 +61,18 @@ public partial class WindowService
     }
 
     public Task<TResult> ShowDialog<TWindowViewModel, TResult>(object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
         where TWindowViewModel : IResultWindowViewModel<TResult>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        return ShowDialog<TWindowViewModel, TResult>(ownerWindow, defaultViewModel, cancellationToken);
+        return ShowDialog<TWindowViewModel, TResult>(ownerWindow, cancellationToken);
     }
 
     public Task<TResult> ShowDialog<TWindowViewModel, TArgs, TResult>(TArgs args, Window ownerWindow,
-        TWindowViewModel? defaultViewModel = default, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
         where TWindowViewModel : IResultWindowViewModel<TArgs, TResult>
     {
-        TWindowViewModel viewModel = defaultViewModel ?? _serviceProvider.GetRequiredService<TWindowViewModel>();
+        TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
         _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.CancellationToken = cancellationToken;
@@ -82,11 +82,11 @@ public partial class WindowService
     }
 
     public Task<TResult> ShowDialog<TWindowViewModel, TArgs, TResult>(TArgs args, object ownerViewModel,
-        TWindowViewModel? defaultViewModel = default, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
         where TWindowViewModel : IResultWindowViewModel<TArgs, TResult>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
-        return ShowDialog<TWindowViewModel, TArgs, TResult>(args, ownerWindow, defaultViewModel, cancellationToken);
+        return ShowDialog<TWindowViewModel, TArgs, TResult>(args, ownerWindow, cancellationToken);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
