@@ -5,5 +5,4 @@ namespace AutoOrganize.Library.Services.Metadata.Models.Metadata.Tv;
 public abstract class TvMetadata<TSelf> : MetadataBase<TSelf>
     where TSelf : TvMetadata<TSelf>
 {
-    public override MetadataType Type => MetadataType.Tv;
 }

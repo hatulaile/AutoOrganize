@@ -1,0 +1,119 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels.EditorViewModels.File"
+             xmlns:converters="using:AutoOrganize.Converters"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:iri="https://irihi.tech/shared"
+             mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="280"
+             Width="460" Height="290"
+             x:Class="AutoOrganize.Views.HomeViews.EditorViews.File.TvFileEditorView"
+             Name="TvFileEditor"
+             x:DataType="vm:TvFileEditorViewModel">
+
+    <u:LoadingContainer HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"
+                        Classes="big">
+        <u:LoadingContainer.IsLoading>
+            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                <Binding Path="AutoIdentifyCommand.IsRunning" />
+                <Binding Path="SupplementApplyFromMetadataCommand.IsRunning" />
+                <Binding Path="SupplementApplyFromNameCommand.IsRunning" />
+                <Binding Path="ApplyCommand.IsRunning" />
+            </MultiBinding>
+        </u:LoadingContainer.IsLoading>
+
+        <u:LoadingContainer.Styles>
+            <Style Selector="u|LoadingContainer /template/ u|Loading">
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Panel IsVisible="{TemplateBinding IsLoading}">
+                            <iri:PureRectangle
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                IsHitTestVisible="True" />
+                            <Grid
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RowDefinitions="*, Auto, Auto">
+                                <ContentPresenter Grid.Row="0" HorizontalAlignment="Center"
+                                                  Content="{TemplateBinding Indicator}" />
+                                <ContentPresenter
+                                    Name="PART_ContentPresenter"
+                                    Grid.Row="1"
+                                    Margin="0,8,0,0"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    IsVisible="{TemplateBinding Content,
+                                                        Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <Button Grid.Row="2"
+                                        Margin="0,8,0,0"
+                                        Content="取消"
+                                        Command="{Binding #TvFileEditor.DataContext?.CancelLoadingCommand}"/>
+                            </Grid>
+                        </Panel>
+                    </ControlTemplate>
+                </Setter>
+            </Style>
+            <Style Selector="u|LoadingContainer.big /template/ u|Loading u|LoadingIcon /template/ Arc#PART_Arc">
+                <Setter Property="Height" Value="48" />
+                <Setter Property="Width" Value="48" />
+                <Setter Property="StrokeThickness" Value="8" />
+            </Style>
+        </u:LoadingContainer.Styles>
+
+        <Border Padding="14">
+            <Grid RowDefinitions="*,Auto">
+                <StackPanel Spacing="12" HorizontalAlignment="Stretch" Margin="2,0,0,4">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="名称: " VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding Request?.SeriesName}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="年份: " VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding Request?.Year}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="季号: " VerticalAlignment="Center" />
+                        <u:NumericLongUpDown Grid.Column="1" Value="{Binding Season}"
+                                             ParsingNumberStyle="AllowLeadingWhite" ShowButtonSpinner="False" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="集号: " VerticalAlignment="Center" />
+                        <u:NumericLongUpDown Grid.Column="1" Value="{Binding Episode}"
+                                             ParsingNumberStyle="AllowLeadingWhite" ShowButtonSpinner="False" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="TMDBID: " VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding TmdbId, Delay=100}" />
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" HorizontalAlignment="Right" Spacing="12" Orientation="Horizontal">
+                    <Button Command="{Binding CancelCommand}" Content="取消" />
+                    <Button Command="{Binding AutoFillCommand}" Content="自动填写"
+                            IsVisible="{Binding Nodes, Converter={x:Static converters:CollectionConverters.CollectionCountIsOneConverter}}" />
+                    <Button Command="{Binding AutoIdentifyCommand}" Content="自动识别并应用"
+                            IsVisible="{Binding Nodes, Converter={x:Static converters:CollectionConverters.CollectionCountIsMoreThanOneConverter}}" />
+                    <SplitButton Content="填充并文件名识别应用" Command="{Binding SupplementApplyFromNameCommand}"
+                                 IsVisible="{Binding Nodes, Converter={x:Static converters:CollectionConverters.CollectionCountIsMoreThanOneConverter}}">
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="填充并文件名识别应用" Command="{Binding SupplementApplyFromNameCommand}" />
+                                <MenuItem Header="填充并从元数据识别应用" Command="{Binding SupplementApplyFromMetadataCommand}" />
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
+                    <Button Command="{Binding ApplyCommand}" Content="应用" Theme="{DynamicResource SolidButton}"
+                            IsVisible="{Binding Nodes, Converter={x:Static converters:CollectionConverters.CollectionCountIsOneConverter}}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </u:LoadingContainer>
+</UserControl>

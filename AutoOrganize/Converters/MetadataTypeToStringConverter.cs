@@ -14,7 +14,7 @@ public class MetadataTypeToStringConverter : IValueConverter
 
         return type switch
         {
-            MetadataType.Tv => "电视剧",
+            MetadataType.TvSeries => "电视剧",
             MetadataType.Movie => "电影",
             _ => "NONE"
         };

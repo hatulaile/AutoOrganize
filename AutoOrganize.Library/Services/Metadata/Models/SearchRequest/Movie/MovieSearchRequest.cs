@@ -9,11 +9,11 @@ public sealed class MovieSearchRequest : ISearchRequest<MovieSearchRequest, Movi
 {
     public string? Name { get; set; }
 
-    public int? Year { get; init; }
+    public int? Year { get; set; }
 
-    public string? Language { get; init; }
+    public string? Language { get; set; }
 
-    public bool IncludeAdult { get; init; }
+    public bool IncludeAdult { get; set; }
 
     public IProviderIds? ProviderIds { get; set; }
 

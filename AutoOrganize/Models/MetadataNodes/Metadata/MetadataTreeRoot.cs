@@ -33,6 +33,11 @@ public sealed class MetadataTreeRoot : MetadataTreeNodeBase
         AddOrGetMetadata(metadata).AddChild(fileModel);
     }
 
+    public void AddFile(MetadataBase metadata, SourceFileNode fileNode)
+    {
+        AddOrGetMetadata(metadata).AddChild(fileNode);
+    }
+
     public  MetadataTreeNodeBase AddOrGetMetadata(MetadataBase metadata)
     {
         return metadata switch

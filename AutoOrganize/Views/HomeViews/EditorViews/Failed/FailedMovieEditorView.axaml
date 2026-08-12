@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels.EditorViewModels.Failed"
+             xmlns:converters="using:AutoOrganize.Converters"
+             xmlns:u="https://irihi.tech/ursa"
+             xmlns:iri="https://irihi.tech/shared"
+             mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="280"
+             Width="460" Height="290"
+             x:Class="AutoOrganize.Views.HomeViews.EditorViews.Failed.FailedMovieEditorView"
+             Name="FailedMovieEditor"
+             x:DataType="vm:FailedMovieEditorViewModel">
+    <u:LoadingContainer HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"
+                        Classes="big">
+        <u:LoadingContainer.IsLoading>
+            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                <Binding Path="ApplyCommand.IsRunning" />
+                <Binding Path="SupplementApplyCommand.IsRunning" />
+                <Binding Path="AutoIdentifyCommand.IsRunning" />
+            </MultiBinding>
+        </u:LoadingContainer.IsLoading>
+
+        <u:LoadingContainer.Styles>
+            <Style Selector="u|LoadingContainer /template/ u|Loading">
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Panel IsVisible="{TemplateBinding IsLoading}">
+                            <iri:PureRectangle
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                IsHitTestVisible="True" />
+                            <Grid
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RowDefinitions="*, Auto, Auto">
+                                <ContentPresenter Grid.Row="0" HorizontalAlignment="Center"
+                                                  Content="{TemplateBinding Indicator}" />
+                                <ContentPresenter
+                                    Name="PART_ContentPresenter"
+                                    Grid.Row="1"
+                                    Margin="0,8,0,0"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    IsVisible="{TemplateBinding Content,
+                                                        Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <Button Grid.Row="2"
+                                        Margin="0,8,0,0"
+                                        Content="取消"
+                                        Command="{Binding #FailedMovieEditor.DataContext?.CancelLoadingCommand}"/>
+                            </Grid>
+                        </Panel>
+                    </ControlTemplate>
+                </Setter>
+            </Style>
+            <Style Selector="u|LoadingContainer.big /template/ u|Loading u|LoadingIcon /template/ Arc#PART_Arc">
+                <Setter Property="Height" Value="48" />
+                <Setter Property="Width" Value="48" />
+                <Setter Property="StrokeThickness" Value="8" />
+            </Style>
+        </u:LoadingContainer.Styles>
+
+        <Border Padding="14">
+            <Grid RowDefinitions="*,Auto">
+                <StackPanel Spacing="12" HorizontalAlignment="Stretch" Margin="2,0,0,4">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="名称: " VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding Request?.Title}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="年份: " VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding Request?.Year}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Text="TMDBID: " VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding TmdbId, Delay=100}" />
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" HorizontalAlignment="Right" Spacing="12" Orientation="Horizontal">
+                    <Button Command="{Binding CancelCommand}" Content="取消" />
+                    <Button Command="{Binding AutoFillCommand}" Content="自动识别并填入"
+                            IsVisible="{Binding Nodes, Converter={x:Static converters:CollectionConverters.CollectionCountIsOneConverter}}" />
+                    <Button Command="{Binding AutoIdentifyCommand}" Content="自动识别并应用" />
+                    <Button Command="{Binding SupplementApplyCommand}" Content="补充应用"
+                            IsVisible="{Binding Nodes, Converter={x:Static converters:CollectionConverters.CollectionCountIsMoreThanOneConverter}}"
+                            Theme="{DynamicResource SolidButton}" />
+                    <Button Command="{Binding ApplyCommand}" Content="应用" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </u:LoadingContainer>
+</UserControl>

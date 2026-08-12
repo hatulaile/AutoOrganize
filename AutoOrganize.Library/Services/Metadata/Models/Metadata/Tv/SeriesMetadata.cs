@@ -10,6 +10,8 @@ public sealed class SeriesMetadata : TvMetadata<SeriesMetadata>,
     IParentOf<SeriesMetadata, SeasonMetadata>,
     IOriginalName, IBackdrops, IPosters, ILogos, ILanguages, ICountries
 {
+    public override MetadataType Type => MetadataType.TvSeries;
+
     public string? OriginalName { get; set; }
 
     public bool? InProduction { get; set; }

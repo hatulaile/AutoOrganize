@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels.EditorViewModels.Search"
+             xmlns:converters="using:AutoOrganize.Converters"
+             xmlns:searchMovie="clr-namespace:AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Movie;assembly=AutoOrganize.Library"
+             xmlns:u="https://irihi.tech/ursa"
+             mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="480"
+             x:Class="AutoOrganize.Views.HomeViews.EditorViews.Search.MovieSearchView"
+             x:DataType="vm:MovieSearchViewModel">
+
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+    </UserControl.KeyBindings>
+
+    <UserControl.Resources>
+        <converters:DateTimeToYearConverter x:Key="DateTimeToYearConverter" />
+    </UserControl.Resources>
+
+    <Border Padding="14">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox x:Name="SearchTextBox"
+                         PlaceholderText="输入电影名搜索…"
+                         Text="{Binding MovieSearchRequest?.Name}"
+                         IsEnabled="{Binding !SearchCommand.IsRunning}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+
+                <Panel Grid.Column="1">
+                    <Button
+                        Content="搜索"
+                        Command="{Binding SearchCommand}"
+                        IsVisible="{Binding !SearchCommand.IsRunning}" />
+
+                    <Button
+                        Content="取消"
+                        Command="{Binding SearchCancelCommand}"
+                        IsVisible="{Binding SearchCommand.IsRunning}" />
+                </Panel>
+
+            </Grid>
+
+            <Panel Grid.Row="1">
+                <ListBox x:Name="ResultsList"
+                         ItemsSource="{Binding Results}"
+                         SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+                         IsEnabled="{Binding !SearchCommand.IsRunning}"
+                         DoubleTapped="OnResultsListDoubleTapped">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="CornerRadius" Value="8" />
+                            <Style Selector="^:not(:nth-last-child(1))">
+                                <Setter Property="Margin" Value="0,0,0,6" />
+                            </Style>
+                        </Style>
+                    </ListBox.Styles>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="searchMovie:MovieSearchResult">
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,0,6,0">
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="{Binding Title}"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding OriginalTitle}"
+                                               Foreground="{DynamicResource SemiColorText1}"
+                                               FontSize="12"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                                            VerticalAlignment="Center">
+                                    <TextBlock
+                                        Text="{Binding ReleaseDate, Converter={StaticResource DateTimeToYearConverter}}"
+                                        Foreground="{DynamicResource SemiColorText2}" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Text="未找到匹配的电影"
+                           Foreground="{DynamicResource SemiColorTextTertiary}"
+                           HorizontalAlignment="Center">
+                    <TextBlock.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!SearchCommand.IsRunning" />
+                            <Binding Path="!Results.Count" />
+                        </MultiBinding>
+                    </TextBlock.IsVisible>
+                </TextBlock>
+
+                <u:LoadingIcon HorizontalAlignment="Center" VerticalAlignment="Center"
+                               IsVisible="{Binding SearchCommand.IsRunning}" Classes="big">
+                    <u:LoadingIcon.Styles>
+                        <Style Selector="u|LoadingIcon.big">
+                            <Style Selector="^ /template/ Arc#PART_Arc">
+                                <Setter Property="Height" Value="40" />
+                                <Setter Property="Width" Value="40" />
+                                <Setter Property="StrokeThickness" Value="5" />
+                            </Style>
+                        </Style>
+                    </u:LoadingIcon.Styles>
+                </u:LoadingIcon>
+            </Panel>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="8">
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="16"
+                           Foreground="{DynamicResource SemiColorText2}">
+                    <Run Text="找到" />
+                    <Run Foreground="{DynamicResource SemiColorText0}" Text="{Binding Results.Count}" />
+                    <Run Text="个结果" />
+                </TextBlock>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Content="取消" Command="{Binding CancelCommand}" />
+                    <Button
+                        Content="确定"
+                        Command="{Binding ConfirmCommand}"
+                        Theme="{DynamicResource SolidButton}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

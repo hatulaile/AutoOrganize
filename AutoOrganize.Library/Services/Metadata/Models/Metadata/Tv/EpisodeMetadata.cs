@@ -9,6 +9,8 @@ public sealed class EpisodeMetadata :
     IBackdrops,
     IChildOf<EpisodeMetadata, SeasonMetadata>
 {
+    public override MetadataType Type => MetadataType.TvEpisode;
+
     public SeriesMetadata? Series => Season?.Series;
 
     public SeasonMetadata? Season { get; private set; }

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace AutoOrganize.Library.Models;
 
 public sealed class TvParseResult : IParseResult<TvParseResult>
@@ -16,10 +18,5 @@ public sealed class TvParseResult : IParseResult<TvParseResult>
         Year ??= other.Year;
         Season ??= other.Season;
         Episode ??= other.Episode;
-    }
-
-    public bool IsComplete()
-    {
-        return Title is not null && Year is not null && Season is not null && Episode is not null;
     }
 }

@@ -19,11 +19,6 @@ public sealed class NameParserService : INameParserService
             TResult partial = strategy.Parse(filePath);
             _logger.LogDebug("解析策略 {ParserType} 产生结果: {@Result}", strategy.GetType().Name, partial);
             result.Complement(partial);
-            if (result.IsComplete())
-            {
-                _logger.LogDebug("文件名解析完成: {FilePath} -> {@Result}", filePath, result);
-                break;
-            }
         }
 
         return result;

@@ -10,6 +10,8 @@ public sealed class SeasonMetadata :
     IParentOf<SeasonMetadata, EpisodeMetadata>,
     IChildOf<SeasonMetadata, SeriesMetadata>
 {
+    public override MetadataType Type => MetadataType.TvSeason;
+
     public SeriesMetadata? Series { get; private set; }
 
     public int? SeasonNumber { get; set; }

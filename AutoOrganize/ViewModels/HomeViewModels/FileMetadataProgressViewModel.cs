@@ -1,21 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.Library.Exceptions;
-using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Services.Metadata;
-using AutoOrganize.Library.Services.Metadata.Models.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
-using AutoOrganize.Library.Services.Metadata.Models.Metadata.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Movie;
 using AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
-using AutoOrganize.Library.Services.Metadata.Models.SearchRequest.Tv;
 using AutoOrganize.Library.Services.NameParsers;
 using AutoOrganize.Models;
-using AutoOrganize.Models.Options;
+using AutoOrganize.Models.Args;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.Utils;
@@ -31,7 +26,7 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration]
-public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavigationViewModel<FileProcessOptions>,
+public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavigationViewModel<FileProcessArgs>,
     IDisposable, IAsyncDisposable
 {
     public const int PROGRESS_MAX = 128;
@@ -75,7 +70,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         Dispose();
     }
 
-    private async Task StartAsync(FileProcessOptions options, CancellationToken token)
+    private async Task StartAsync(FileProcessArgs options, CancellationToken token)
     {
         _logger.LogDebug($"触发{nameof(StartAsync)}方法.");
 
@@ -121,11 +116,11 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
                     : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCound} 个.", NotificationType.Warning),
                 this);
 
-            _navigationService.Replace<MetadataEditorViewModel, MetadataEditOption>(this,
-                new MetadataEditOption
+            _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
+                new MetadataEditArgs
                 {
                     FileProcessResultInfos = Results,
-                    FileProcessOptions = options
+                    FileProcessArgs = options
                 });
             return;
         }
@@ -165,7 +160,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     private async Task<FileMetadataProcessingResult> ProcessMovieFileAsync(string filePath, CancellationToken token)
     {
         var movieParse = _nameParserService.ParseMovie(filePath);
-        if (movieParse.Title is not { } title)
+        if (movieParse is not { Title: { } title })
             throw new MetadataParseException(filePath, "movie", "无法解析成一个可用的电影元数据");
 
         var metadata =
@@ -200,9 +195,9 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         var metadata = await _metadataService.GetEpisodeAsync(
             new EpisodeMetadataRequest
             {
-                Name = title,
+                SeriesName = title,
                 SeasonNumber = season,
-                EpisodeNumber = (int)episode,
+                EpisodeNumber = episode,
                 Language = "zh-cn",
             }, token);
 
@@ -233,7 +228,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
         }
     }
 
-    public void OnNavigatedTo(FileProcessOptions args)
+    public void OnNavigatedTo(FileProcessArgs args)
     {
         _logger.LogDebug("导航到文件处理页，类型: {Type}", args.Type);
         _ = StartAsync(args, _cancellationTokenSource.Token);
@@ -258,7 +253,8 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     {
         if (disposing)
         {
-            _cancellationTokenSource.Cancel();
+            if (!_cancellationTokenSource.IsCancellationRequested)
+                _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _progressSemaphore.Dispose();
         }

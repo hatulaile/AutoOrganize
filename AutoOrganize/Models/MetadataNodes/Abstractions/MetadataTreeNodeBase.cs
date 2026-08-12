@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,6 +14,8 @@ public abstract class MetadataTreeNodeBase : ObservableObject
 
     public virtual bool HasChildren => false;
 
+    public MetadataTreeNodeBase? Parent { get; private set; }
+
     private AvaloniaList<MetadataTreeNodeBase> ChildrenInternal =>
         HasChildren ? field ??= InitializeChildren() : throw new NotSupportedException();
 
@@ -23,7 +26,12 @@ public abstract class MetadataTreeNodeBase : ObservableObject
         if (!HasChildren)
             throw new NotSupportedException();
 
+        if (metadataTreeNodeBase.Parent is not null)
+            throw new InvalidOperationException(
+                $"Node already has a parent and cannot be added again: {metadataTreeNodeBase.Title}");
+
         ChildrenInternal.Add(metadataTreeNodeBase);
+        metadataTreeNodeBase.Parent = this;
     }
 
     public virtual void InsertChild(int index, MetadataTreeNodeBase metadataTreeNodeBase)
@@ -31,7 +39,79 @@ public abstract class MetadataTreeNodeBase : ObservableObject
         if (!HasChildren)
             throw new NotSupportedException();
 
+        if (metadataTreeNodeBase.Parent is not null)
+            throw new InvalidOperationException(
+                $"Node already has a parent and cannot be inserted again: {metadataTreeNodeBase.Title}");
+
         ChildrenInternal.Insert(index, metadataTreeNodeBase);
+        metadataTreeNodeBase.Parent = this;
+    }
+
+    public bool RemoveFromParent()
+    {
+        return Parent?.RemoveChild(this) ?? false;
+    }
+
+    public MetadataTreeNodeBase? FindRootParent()
+    {
+        MetadataTreeNodeBase? root = Parent;
+        while (root?.Parent is not null)
+            root = root.Parent;
+        return root;
+    }
+
+    public TMetadataBase? FindParent<TMetadataBase>()
+    {
+        MetadataTreeNodeBase? current = Parent;
+        while (current is not null)
+        {
+            if (current is TMetadataBase metadataBase)
+                return metadataBase;
+            current = current.Parent;
+        }
+
+        return default;
+    }
+
+    public TMetadataBase? FindParent<TMetadataBase>(Func<TMetadataBase, bool> conditions)
+    {
+        MetadataTreeNodeBase? current = Parent;
+        while (current is not null)
+        {
+            if (current is TMetadataBase metadataBase && conditions(metadataBase))
+                return metadataBase;
+            current = current.Parent;
+        }
+
+        return default;
+    }
+
+    public bool HasParent<TMetadataBase>()
+    {
+        return FindParent<TMetadataBase>() is not null;
+    }
+
+    public bool HasParent<TMetadataBase>(Func<TMetadataBase, bool> conditions)
+    {
+        return FindParent(conditions) is not null;
+    }
+
+    public virtual bool RemoveChild(MetadataTreeNodeBase metadataTreeNodeBase)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        if (!ChildrenInternal.Remove(metadataTreeNodeBase))
+            return false;
+
+        metadataTreeNodeBase.Parent = null;
+        return true;
+    }
+
+    public virtual void RemoveChildAt(int index)
+    {
+        ChildrenInternal[index].Parent = null;
+        ChildrenInternal.RemoveAt(index);
     }
 
     public virtual int IndexOfChild(Func<MetadataTreeNodeBase, bool> conditions)
@@ -50,6 +130,169 @@ public abstract class MetadataTreeNodeBase : ObservableObject
             throw new NotSupportedException();
 
         return ChildrenInternal.IndexOf(metadataTreeNodeBase);
+    }
+
+    public virtual bool RemoveChildRecursive(MetadataTreeNodeBase target)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        if (RemoveChild(target))
+            return true;
+
+        for (int i = ChildrenInternal.Count - 1; i >= 0; i--)
+        {
+            if (ChildrenInternal[i].HasChildren && ChildrenInternal[i].RemoveChildRecursive(target))
+                return true;
+        }
+
+        return false;
+    }
+
+    public virtual bool RemoveChild<TMetadataBase>(Func<TMetadataBase, bool> conditions)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        bool result = false;
+        for (int i = ChildrenInternal.Count - 1; i >= 0; i--)
+        {
+            MetadataTreeNodeBase child = ChildrenInternal[i];
+            if (child is TMetadataBase metadataBase && conditions(metadataBase))
+            {
+                ChildrenInternal.RemoveAt(i);
+                child.Parent = null;
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    public virtual bool RemoveChildAndEmptyParent<TMetadataBase>(Func<TMetadataBase, bool> conditions, bool includeSelf)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        bool removed = false;
+
+        for (int i = ChildrenInternal.Count - 1; i >= 0; i--)
+        {
+            MetadataTreeNodeBase child = ChildrenInternal[i];
+
+            if (child is TMetadataBase metadataBase && conditions(metadataBase))
+            {
+                ChildrenInternal.RemoveAt(i);
+                child.Parent = null;
+                removed = true;
+                continue;
+            }
+
+            if (child.HasChildren)
+            {
+                if (child.RemoveChildAndEmptyParent(conditions, true))
+                    removed = true;
+            }
+        }
+
+        if (includeSelf && ChildrenInternal.Count == 0)
+            RemoveFromParent();
+
+        return removed;
+    }
+
+    public virtual bool RemoveChildAndEmptyParent(MetadataTreeNodeBase target, bool includeSelf)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        for (int i = ChildrenInternal.Count - 1; i >= 0; i--)
+        {
+            MetadataTreeNodeBase child = ChildrenInternal[i];
+
+            if (child == target)
+            {
+                ChildrenInternal.RemoveAt(i);
+                child.Parent = null;
+
+                if (includeSelf && ChildrenInternal.Count == 0)
+                    RemoveFromParent();
+                return true;
+            }
+
+            if (child.HasChildren)
+            {
+                if (child.RemoveChildAndEmptyParent(target, true))
+                {
+                    if (includeSelf && ChildrenInternal.Count == 0)
+                        RemoveFromParent();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public virtual bool RemoveChild<TMetadataBase, TSubMetadataBase>(Func<TMetadataBase, bool> conditions,
+        Func<TSubMetadataBase, bool> subConditions)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        for (int i = ChildrenInternal.Count - 1; i >= 0; i--)
+        {
+            MetadataTreeNodeBase child = ChildrenInternal[i];
+            if (child is TMetadataBase metadataBase && conditions(metadataBase))
+            {
+                ChildrenInternal.RemoveAt(i);
+                child.Parent = null;
+                return true;
+            }
+
+            if (child.HasChildren && child is TSubMetadataBase subMetadataBase)
+            {
+                if (!subConditions(subMetadataBase))
+                    continue;
+
+                if (child.RemoveChild(conditions, subConditions))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public virtual bool RemoveEmptyParent()
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        if (Children.Count != 0)
+            return false;
+
+        RemoveFromParent();
+        return true;
+    }
+
+    public virtual bool RemoveEmptyParentInChild(bool includeSelf)
+    {
+        if (!HasChildren)
+            throw new NotSupportedException();
+
+        bool result = false;
+        for (int i = ChildrenInternal.Count - 1; i >= 0; i--)
+        {
+            MetadataTreeNodeBase child = ChildrenInternal[i];
+            if (!child.HasChildren) continue;
+            if (child.RemoveEmptyParentInChild(true))
+                result = true;
+        }
+
+        if (includeSelf && RemoveEmptyParent())
+            result = true;
+
+        return result;
     }
 
     public TMetadataBase? GetChildren<TMetadataBase>(Func<TMetadataBase, bool> conditions)
@@ -89,6 +332,47 @@ public abstract class MetadataTreeNodeBase : ObservableObject
         }
 
         return default;
+    }
+
+    public IEnumerable<TNode> FindChildren<TNode>()
+    {
+        foreach (MetadataTreeNodeBase fileMetadataBase in Children)
+        {
+            if (fileMetadataBase is TNode node)
+                yield return node;
+
+            if (!fileMetadataBase.HasChildren) continue;
+            foreach (TNode nested in fileMetadataBase.FindChildren<TNode>())
+                yield return nested;
+        }
+    }
+
+    public IEnumerable<TNode> FindChildren<TNode>(Func<TNode, bool> conditions)
+    {
+        foreach (MetadataTreeNodeBase fileMetadataBase in Children)
+        {
+            if (fileMetadataBase is TNode node && conditions(node))
+                yield return node;
+
+            if (!fileMetadataBase.HasChildren) continue;
+            foreach (TNode nested in fileMetadataBase.FindChildren(conditions))
+                yield return nested;
+        }
+    }
+
+    public IEnumerable<TNode> FindChildren<TNode, TSubNode>(Func<TNode, bool> conditions,
+        Func<TSubNode, bool> subConditions)
+    {
+        foreach (MetadataTreeNodeBase fileMetadataBase in Children)
+        {
+            if (fileMetadataBase is TNode node && conditions(node))
+                yield return node;
+
+            if (!fileMetadataBase.HasChildren || fileMetadataBase is not TSubNode subNode || !subConditions(subNode))
+                continue;
+            foreach (TNode nested in fileMetadataBase.FindChildren(conditions, subConditions))
+                yield return nested;
+        }
     }
 
     private AvaloniaList<MetadataTreeNodeBase> InitializeChildren()

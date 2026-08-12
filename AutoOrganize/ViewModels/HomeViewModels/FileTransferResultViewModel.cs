@@ -1,11 +1,11 @@
-﻿using AsyncImageLoader.Loaders;
+using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Models.MetadataNodes.Metadata;
-using AutoOrganize.Models.Options;
+using AutoOrganize.Models.Args;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.ViewModels.Abstractions;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
@@ -20,7 +20,7 @@ namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton)]
 public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
-    INavigationViewModel<FileTransferResultOptions>
+    INavigationViewModel<FileTransferResultArgs>
 {
     private readonly INavigationService _navigationService;
     private readonly ILogger<FileTransferResultViewModel> _logger;
@@ -44,7 +44,7 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
         CreateHierarchicalModel();
     }
 
-    public void OnParametersChanged(FileTransferResultOptions args)
+    public void OnParametersChanged(FileTransferResultArgs args)
     {
         if (args.IsClear) FileTransferBatchInfos.Clear();
 
@@ -142,8 +142,8 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
     public void NavigateToMetadataEditViewModel()
     {
         _logger.LogDebug("导航到元数据编辑页面");
-        _navigationService.Replace<MetadataEditorViewModel, MetadataEditOption>(this,
-            new MetadataEditOption()
+        _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
+            new MetadataEditArgs()
             {
                 IsClear = false
             });

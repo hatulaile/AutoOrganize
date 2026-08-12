@@ -2,7 +2,7 @@ using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 
 namespace AutoOrganize.Models.MetadataNodes.Abstractions;
 
-public interface IFileMetadata
+public interface IFileMetadata : IMetadataNode
 {
     MetadataBase Metadata { get; }
 }

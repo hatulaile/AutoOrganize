@@ -121,11 +121,12 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
                 continue;
             foreach (TResult searchResult in providerResult)
             {
+                if (searchResult.ProviderIds is null) continue;
                 TResult? sourceResult = results.FirstOrDefault(x =>
                 {
                     foreach (var providerId in searchResult.ProviderIds)
                     {
-                        if (x.ProviderIds.TryGetValue(providerId.Key, out var p) && p.Equals(providerId.Value))
+                        if (x.ProviderIds?.TryGetValue(providerId.Key, out var p) is true && p.Equals(providerId.Value))
                             return true;
                     }
 
@@ -385,7 +386,7 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
             var existing = GetCachedMetadata<TResult>(identityKeys);
             if (existing is not null)
             {
-                existing.Merge(result);
+                TryCacheMetadata(identityKeys, existing);
                 TryCacheMetadata(requestCacheNames, existing);
                 return existing;
             }
@@ -398,14 +399,6 @@ public sealed class MetadataService : IMetadataService, IMetadataFetchService
 
         try
         {
-            var existing = GetCachedMetadata<TResult>(identityKeys);
-            if (existing is not null)
-            {
-                existing.Merge(result);
-                TryCacheMetadata(requestCacheNames, existing);
-                return existing;
-            }
-
             TryCacheMetadata(identityKeys, result);
             TryCacheMetadata(requestCacheNames, result);
             return result;

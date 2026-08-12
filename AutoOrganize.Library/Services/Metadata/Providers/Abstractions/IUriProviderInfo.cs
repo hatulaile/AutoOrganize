@@ -7,5 +7,5 @@ public interface IUriProviderInfo : IProviderInfo
 {
     public Uri? HomeUri { get; }
 
-    bool TryGetUri(string id, MetadataType type,[NotNullWhen(true)] out Uri? uri);
+    bool TryGetUri(MetadataBase metadataBase, [NotNullWhen(true)] out Uri? uri);
 }

@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models;
+using AutoOrganize.Library.Services.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Models.MetadataNodes.Metadata;
-using AutoOrganize.Models.Options;
+using AutoOrganize.Models.Args;
+using AutoOrganize.Models.MenuItemViewModelContext;
 using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.Services.TopLevelServices;
+using AutoOrganize.Services.WindowManagers;
 using AutoOrganize.ViewModels.Abstractions;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 using Avalonia.Collections;
@@ -22,30 +28,45 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton, ViewModelLifetime.Singleton)]
-public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, INavigationViewModel<MetadataEditOption>
+public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, INavigationViewModel<MetadataEditArgs>
 {
     private readonly INavigationService _navigationService;
-    private readonly ILogger<MetadataEditViewModel> _logger;
+    private readonly IWindowService _windowService;
+    private readonly ILogger<MetadataEditorViewModel> _logger;
 
     private MetadataTreeRoot _metadataTreeRoot = new();
 
-    private FailedSourceFileRoot _failedSourceFileRootSystem = new();
+    private FailedSourceFileRoot _failedSourceFileRoot = new();
+
+    public AvaloniaList<MetadataTreeNodeBase> SelectItems { get; }
 
     [ObservableProperty]
-    public partial MetadataTreeNodeBase? SelectedMetadata { get; set; }
+    public partial IMenuItemContext MenuItemContext { get; set; }
 
-    public IReadOnlyList<HierarchicalNode<MetadataTreeNodeBase>>? Rows => Model?.Flattened;
+    public IReadOnlyList<IMenuItem<MetadataEditorMenuItemContext>> MenuItemViewModels => field ??= CreateMenuItems();
 
     public AvaloniaList<MetadataTreeNodeBase> Source { get; } = [];
 
     public HierarchicalModel<MetadataTreeNodeBase>? Model { get; private set; }
 
+    public MetadataEditorViewModel(
+        INavigationService navigationViewModel, IWindowService windowService, ILogger<MetadataEditorViewModel> logger)
+    {
+        _navigationService = navigationViewModel;
+        _windowService = windowService;
+        _logger = logger;
+
+        SelectItems = [];
+        SelectItems.CollectionChanged += SelectItemsOnCollectionChanged;
+        MenuItemContext = CreateMenuItemContext();
+    }
+
     [RelayCommand(CanExecute = nameof(CanNext))]
     public void Next()
     {
         _logger.LogInformation("进入文件传输处理页面.");
-        _navigationService.Replace<FileTransferProcessedViewModel, FileTransferProcessedOption>(this,
-            new FileTransferProcessedOption(GetAllFileMetadataEntries(_metadataTreeRoot)));
+        _navigationService.Replace<FileTransferProcessedViewModel, FileTransferProcessedArgs>(this,
+            new FileTransferProcessedArgs(GetAllFileMetadataEntries(_metadataTreeRoot)));
     }
 
     [RelayCommand]
@@ -63,17 +84,26 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
         return Source.Any(x => x is not FailedSourceFileRoot);
     }
 
-    partial void OnSelectedMetadataChanged(MetadataTreeNodeBase? value)
-    {
-        if (value is null)
+    private MetadataEditorMenuItemContext CreateMenuItemContext() =>
+        new()
         {
-            _logger.LogDebug("取消选择元数据项");
-            _navigationService.Clear(RoutingState);
-            return;
-        }
+            SelectedItems = SelectItems,
+            FailedSourceFileRoot = _failedSourceFileRoot,
+            MetadataTreeRoot = _metadataTreeRoot,
+        };
 
-        _logger.LogDebug("选中元数据项: {Type} - {Name}", value.GetType().Name, value.Title);
-        switch (value)
+    private void SelectItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        MenuItemContext = CreateMenuItemContext();
+
+        if (e.NewItems is not { Count: > 0 })
+            return;
+
+        var selectedItem = (MetadataTreeNodeBase?)e.NewItems[0];
+        if (selectedItem is null)
+            return;
+
+        switch (selectedItem)
         {
             case IFileMetadata<MetadataBase> metadata:
                 _navigationService.Replace<MetadataViewModel, MetadataBase>
@@ -101,32 +131,56 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
         }
     }
 
-    public void OnParametersChanged(MetadataEditOption option)
+    private IReadOnlyList<IMenuItem<MetadataEditorMenuItemContext>> CreateMenuItems() =>
+    [
+        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中剧", ReIdentifySeriesCommand,
+            static context => context.SelectedItems.Any(x => x is SeriesMetadataTreeNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中季", ReIdentifySeasonCommand,
+            static context => context.SelectedItems.Any(x => x is SeasonMetadataTreeNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中集", ReIdentifyEpisodeCommand,
+            static context => context.SelectedItems.Any(x => x is EpisodeMetadataTreeNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中为电影", ReIdentifyMovieCommand,
+            static context => context.SelectedItems.Any(x => x is MovieMetadataTreeNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中文件为电影", ReIdentifyFileAsMovieCommand,
+            static context => context.SelectedItems.Any(x => x is SourceFileNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中文件为剧集", ReIdentifyFileAsTvCommand,
+            static context => context.SelectedItems.Any(x => x is SourceFileNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("将失败文件识别为剧集", ReIdentifyFailedFileAsTvCommand,
+            static context => context.SelectedItems.Any(x => x is IFailedNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("将失败文件识别为电影", ReIdentifyFailedFileAsMovieCommand,
+            static context => context.SelectedItems.Any(x => x is IFailedNode)),
+        new MenuItem<MetadataEditorMenuItemContext>("取消识别项目", UnIdentifyMetadataCommand,
+            static context => context.SelectedItems.Any(x => x is not IFailedFile)),
+    ];
+
+    public void OnParametersChanged(MetadataEditArgs args)
     {
         if (_logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug("参数变更，IsClear: {IsClear}, 处理结果数量: {Count}",
-                option.IsClear, option.FileProcessResultInfos?.Count() ?? 0);
-        CreateSource(option);
+                args.IsClear, args.FileProcessResultInfos?.Count() ?? 0);
+        CreateSource(args);
     }
 
-    private void CreateSource(MetadataEditOption options)
+    private void CreateSource(MetadataEditArgs args)
     {
-        if (options.IsClear)
+        if (args.IsClear)
         {
             _logger.LogDebug("清空现有源数据");
+            _metadataTreeRoot.Children.CollectionChanged -= ChildrenOnCollectionChanged;
             _metadataTreeRoot = new MetadataTreeRoot();
-            _failedSourceFileRootSystem = new FailedSourceFileRoot();
+            _metadataTreeRoot.Children.CollectionChanged += ChildrenOnCollectionChanged;
+            _failedSourceFileRoot = new FailedSourceFileRoot();
             Source.Clear();
         }
 
-        if (options.FileProcessResultInfos is null || options.FileProcessOptions is null)
+        if (args.FileProcessResultInfos is null || args.FileProcessArgs is null)
         {
             _logger.LogDebug("无处理结果或处理选项，跳过构建源");
             return;
         }
 
         int successCount = 0, failedCount = 0;
-        foreach (FileMetadataProcessingResult result in options.FileProcessResultInfos)
+        foreach (FileMetadataProcessingResult result in args.FileProcessResultInfos)
         {
             if (result.IsSuccess)
             {
@@ -138,28 +192,26 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
                 catch (Exception e)
                 {
                     _logger.LogWarning(e, "添加成功元数据到树失败: {FilePath}", result.FilePath);
-                    _failedSourceFileRootSystem.AddOrGetFailedMetadata(result.FilePath, e);
+                    _failedSourceFileRoot.AddOrGetFailedMetadata(result.FilePath, e);
                     failedCount++;
                 }
             }
             else
             {
-                _failedSourceFileRootSystem.AddOrGetFailedMetadata(result.FilePath, result.Error,
-                    options.FileProcessOptions.Value);
+                _failedSourceFileRoot.AddOrGetFailedMetadata(result.FilePath, result.Error,
+                    args.FileProcessArgs.Value);
                 failedCount++;
             }
         }
 
         _logger.LogDebug("构建源数据完成: 成功 {Success}, 失败 {Failed}", successCount, failedCount);
 
-        if (options.IsClear)
+        if (args.IsClear)
         {
-            if (_failedSourceFileRootSystem.Children.Count > 0)
-            {
-                Source.Add(_failedSourceFileRootSystem);
-            }
+            if (_failedSourceFileRoot.Children.Count > 0)
+                Source.Insert(0, _failedSourceFileRoot);
 
-            Source.AddRange(_metadataTreeRoot.Children);
+            //这里忽略 _metadataTreeRoot 的内容，因为下面有对应的事件
         }
 
         if (Model is null)
@@ -174,6 +226,15 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
             Model.SetRoots(Source);
             _logger.LogDebug("分层模型已创建");
         }
+    }
+
+    private void ChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems is not null)
+            Source.RemoveAll(e.OldItems.Cast<MetadataTreeNodeBase>());
+
+        if (e.NewItems is not null)
+            Source.AddRange(e.NewItems.Cast<MetadataTreeNodeBase>());
     }
 
     private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(MetadataTreeNodeBase metadataTreeNode)
@@ -196,12 +257,5 @@ public sealed partial class MetadataEditViewModel : SubNavigateViewModelBase, IN
                 yield return allFileMetadataEntry;
             }
         }
-    }
-
-    public MetadataEditViewModel(
-        INavigationService navigationViewModel, ILogger<MetadataEditViewModel> logger)
-    {
-        _navigationService = navigationViewModel;
-        _logger = logger;
     }
 }

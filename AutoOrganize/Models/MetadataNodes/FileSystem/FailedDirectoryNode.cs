@@ -3,7 +3,7 @@ using AutoOrganize.Models.MetadataNodes.Abstractions;
 
 namespace AutoOrganize.Models.MetadataNodes.FileSystem;
 
-public sealed class FailedDirectoryNode : MetadataTreeNodeBase, IFullPath
+public sealed class FailedDirectoryNode : MetadataTreeNodeBase, IFullPath, IFailedNode
 {
     public override string? Title { get; }
 

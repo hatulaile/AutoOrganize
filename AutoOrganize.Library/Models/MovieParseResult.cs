@@ -11,9 +11,4 @@ public sealed class MovieParseResult : IParseResult<MovieParseResult>
         Title ??= other.Title;
         Year ??= other.Year;
     }
-
-    public bool IsComplete()
-    {
-        return Title is not null && Year is not null;
-    }
 }

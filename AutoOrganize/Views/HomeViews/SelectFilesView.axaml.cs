@@ -8,11 +8,14 @@ namespace AutoOrganize.Views.HomeViews;
 
 public partial class SelectFilesView : UserControl
 {
-    public AvaloniaList<MetadataType> MetadataTypes { get; } = [];
+    public AvaloniaList<MetadataType> MetadataTypes { get; } =
+        [
+            MetadataType.TvSeries,
+            MetadataType.Movie
+        ];
 
     public SelectFilesView()
     {
-        MetadataTypes.AddRange(Enum.GetValues<MetadataType>().Skip(1));
         InitializeComponent();
     }
 }

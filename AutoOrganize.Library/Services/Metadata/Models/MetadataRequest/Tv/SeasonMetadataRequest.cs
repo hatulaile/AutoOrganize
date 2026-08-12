@@ -7,7 +7,7 @@ namespace AutoOrganize.Library.Services.Metadata.Models.MetadataRequest.Tv;
 
 public sealed class SeasonMetadataRequest :
     IMetadataRequest<SeasonMetadataRequest, SeasonMetadata>,
-    IHasParentRequest<SeriesMetadataRequest,SeriesMetadata>,
+    IHasParentRequest<SeriesMetadataRequest, SeriesMetadata>,
     IHasCache
 {
     public string? SeriesName { get; set; }
@@ -18,11 +18,11 @@ public sealed class SeasonMetadataRequest :
 
     public string? ImageLanguages { get; set; }
 
-    public required IProviderIds? SeriesProviderIds { get; set; }
+    public IProviderIds? SeriesProviderIds { get; set; }
 
-    public required IProviderIds? ProviderIds { get; set; }
+    public IProviderIds? ProviderIds { get; set; }
 
-    public ITypedRequest<SeriesMetadataRequest,SeriesMetadata> GetParentRequest()
+    public ITypedRequest<SeriesMetadataRequest, SeriesMetadata> GetParentRequest()
         => new CacheTypedRequest<SeriesMetadataRequest, SeriesMetadata>(new SeriesMetadataRequest
         {
             Name = SeriesName,

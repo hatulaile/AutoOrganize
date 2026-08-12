@@ -777,9 +777,16 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
                 source.AppendLine($"        //No supported services.None<{classNameView}>();");
             }
 
-            source.AppendLine(viewModelLifetime is not null
-                ? $"        services.Add{viewModelLifetime}<{classNameViewModel}>();"
-                : $"        //services.None<{classNameView}>();");
+            if (viewModelLifetime is not null)
+            {
+                source.AppendLine(viewModelSymbol.IsGenericType
+                    ? $"        services.Add{viewModelLifetime}(typeof({classNameViewModel}));"
+                    : $"        services.Add{viewModelLifetime}<{classNameViewModel}>();");
+            }
+            else
+            {
+                source.AppendLine($"        //services.None<{classNameView}>();");
+            }
 
             IfHasAddConfigRegistration(viewModelSymbol, source);
             source.AppendLine();

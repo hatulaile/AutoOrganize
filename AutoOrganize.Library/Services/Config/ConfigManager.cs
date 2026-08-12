@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -142,7 +142,7 @@ public class FileConfigManager : IFileConfigManager
             {
                 SaveConfig(info);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //todo: logger
             }
@@ -301,7 +301,7 @@ public class FileConfigManager : IFileConfigManager
             {
                 await SaveConfigAsync(info, token).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //todo: logger
             }

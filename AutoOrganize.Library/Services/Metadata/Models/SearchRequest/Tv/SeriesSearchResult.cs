@@ -14,5 +14,5 @@ public sealed class SeriesSearchResult : ISearchResult<SeriesSearchResult>
 
     public DateTime? FirstAirDate { get; set; }
 
-    public IProviderIds ProviderIds { get; set; } = new ProviderIds();
+    public IProviderIds? ProviderIds { get; set; }
 }

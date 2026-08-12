@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 
-namespace AutoOrganize.Models.Options;
+namespace AutoOrganize.Models.Args;
 
-public readonly struct MetadataEditOption
+public readonly struct MetadataEditArgs
 {
-    public MetadataEditOption()
+    public MetadataEditArgs()
     {
     }
 
-    public FileProcessOptions? FileProcessOptions { get; init; } = null;
+    public FileProcessArgs? FileProcessArgs { get; init; } = null;
 
     public IEnumerable<FileMetadataProcessingResult>? FileProcessResultInfos { get; init; } = null;
 

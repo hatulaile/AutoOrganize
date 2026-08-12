@@ -13,19 +13,21 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
     [ObservableProperty]
     public partial long? ErrorCount { get; set; }
 
-    protected override void MetadataChanging(FailedSourceFileRoot? value)
+    protected override void MetadataChanging(FailedSourceFileRoot? oldValue, FailedSourceFileRoot? newValue)
     {
-        base.MetadataChanging(value);
-        if (value is not null)
-        {
-            RegisteredEvent(value);
-            ErrorCount = CountErrors(value);
-        }
-    }
+        base.MetadataChanging(oldValue, newValue);
 
-    protected override void MetadataChanged(FailedSourceFileRoot? value)
-    {
-        base.MetadataChanged(value);
+        if (oldValue is not null)
+        {
+            UnregisteredEvent(oldValue);
+            ErrorCount = 0;
+        }
+
+        if (newValue is not null)
+        {
+            RegisteredEvent(newValue);
+            ErrorCount = CountErrors(newValue);
+        }
     }
 
     private static long CountErrors(MetadataTreeNodeBase metadataTreeNode)
@@ -81,6 +83,6 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
             }
         }
 
-        ErrorCount = CountErrors(Metadata!);
+        ErrorCount = Metadata is null ? 0 : CountErrors(Metadata);
     }
 }

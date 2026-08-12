@@ -36,13 +36,13 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <!-- 用于显示图标 -->
-                <StackPanel Grid.Column="0" MaxWidth="160" Margin="0,0,0,8" Spacing="8">
-                    <ail:AdvancedImage Name="LogoImage"
-                                       Source="{Binding Logo, Mode=OneWay}" />
-                    <ail:AdvancedImage Name="PosterImage"
-                                       Source="{Binding Poster, Mode=OneWay}" />
-                </StackPanel>
+                <!-- 用于显示图标 先不开 内存占用有点大-->
+                <!-- <StackPanel Grid.Column="0" MaxWidth="160" Margin="0,0,0,8" Spacing="8"> -->
+                <!--     <ail:AdvancedImage Name="LogoImage" -->
+                <!--                        Source="{Binding Logo, Mode=OneWay}" /> -->
+                <!--     <ail:AdvancedImage Name="PosterImage" -->
+                <!--                        Source="{Binding Poster, Mode=OneWay}" /> -->
+                <!-- </StackPanel> -->
 
                 <StackPanel Grid.Column="1">
                     <!-- 用于显示标题 -->

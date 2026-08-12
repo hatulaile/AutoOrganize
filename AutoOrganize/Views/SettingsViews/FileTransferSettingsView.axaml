@@ -68,8 +68,7 @@
                 </u:UrsaGroupBox.Header>
                 <Border Background="{DynamicResource SemiColorBackground1}" Padding="12,8" CornerRadius="8">
                     <Grid ColumnDefinitions="*, Auto">
-                        <TextBox Name="OutputDirectoryTextBox" Grid.Column="0" Margin="0,0,8,0" Text="{Binding NewConfig.OutputDirectory}"
-                                 DataValidationErrors.Errors="{Binding}"/>
+                        <TextBox Name="OutputDirectoryTextBox" Grid.Column="0" Margin="0,0,8,0" Text="{Binding NewConfig.OutputDirectory}"/>
                         <Button Grid.Column="1" Padding="6,0" Command="{Binding BrowseFolderCommand}">
                             <PathIcon Data="{StaticResource SemiIconFolderOpen}" />
                         </Button>

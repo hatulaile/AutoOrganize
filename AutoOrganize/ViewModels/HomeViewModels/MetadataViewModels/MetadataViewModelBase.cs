@@ -4,7 +4,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 
-public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMetadataViewModel<TFileMetadata>, INavigationViewModel<TFileMetadata>
+public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMetadataViewModel<TFileMetadata>,
+    INavigationViewModel<TFileMetadata>
 {
     public virtual void OnNavigatingTo(TFileMetadata metadata)
     {
@@ -36,16 +37,34 @@ public partial class MetadataViewModelBase<TFileMetadata> : ViewModelBase, IMeta
         MetadataChanging(value);
     }
 
+    partial void OnMetadataChanging(TFileMetadata? oldValue, TFileMetadata? newValue)
+    {
+        MetadataChanging(oldValue, newValue);
+    }
+
     partial void OnMetadataChanged(TFileMetadata? value)
     {
         MetadataChanged(value);
+    }
+
+    partial void OnMetadataChanged(TFileMetadata? oldValue, TFileMetadata? newValue)
+    {
+        MetadataChanged(oldValue, newValue);
     }
 
     protected virtual void MetadataChanging(TFileMetadata? value)
     {
     }
 
+    protected virtual void MetadataChanging(TFileMetadata? oldValue, TFileMetadata? newValue)
+    {
+    }
+
     protected virtual void MetadataChanged(TFileMetadata? value)
+    {
+    }
+
+    protected virtual void MetadataChanged(TFileMetadata? oldValue, TFileMetadata? newValue)
     {
     }
 

@@ -1,0 +1,14 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels.EditorViewModels"
+        xmlns:controls="using:AutoOrganize.Views.Controls"
+        mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="280"
+        CanResize="False" SizeToContent="WidthAndHeight"
+        x:Class="AutoOrganize.Views.HomeViews.EditorViews.MetadataEditorWindow"
+        x:DataType="vm:MetadataEditorWindowViewModelBase"
+        Title="识别" WindowStartupLocation="CenterOwner">
+
+    <controls:RoutedViewHost Router="{Binding RoutingState}" />
+</Window>

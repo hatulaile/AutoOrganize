@@ -7,7 +7,7 @@ using AutoOrganize.Library.Models;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.FileTransferServices;
 using AutoOrganize.Library.Services.Observers;
-using AutoOrganize.Models.Options;
+using AutoOrganize.Models.Args;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.ViewModels.Abstractions;
@@ -24,7 +24,7 @@ namespace AutoOrganize.ViewModels.HomeViewModels;
 [ViewModelRegistration]
 [ViewModelConfigRegistration(typeof(FileTransferConfig))]
 public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
-    INavigationViewModel<FileTransferProcessedOption>, IDisposable
+    INavigationViewModel<FileTransferProcessedArgs>, IDisposable
 {
     private readonly INavigationService _navigationService;
     private readonly ILogger<FileTransferProcessedViewModel> _logger;
@@ -53,7 +53,7 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     }
 
     [MemberNotNull(nameof(Entries))]
-    public void OnNavigatedTo(FileTransferProcessedOption args)
+    public void OnNavigatedTo(FileTransferProcessedArgs args)
     {
         _logger.LogDebug("开始处理文件");
 
@@ -129,8 +129,8 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
                         this);
                 }
 
-                _navigationService.Replace<FileTransferResultViewModel, FileTransferResultOptions>(this,
-                    new FileTransferResultOptions
+                _navigationService.Replace<FileTransferResultViewModel, FileTransferResultArgs>(this,
+                    new FileTransferResultArgs
                     {
                         BatchInfos = _transferBatchInfos
                     });
@@ -146,8 +146,8 @@ public sealed partial class FileTransferProcessedViewModel : ViewModelBase,
     private void GoBack()
     {
         _logger.LogDebug($"触发了返回方法, 返回{nameof(MetadataEditorViewModel)}");
-        _navigationService.Replace<MetadataEditorViewModel, MetadataEditOption>(this,
-            new MetadataEditOption
+        _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
+            new MetadataEditArgs
             {
                 IsClear = false
             });

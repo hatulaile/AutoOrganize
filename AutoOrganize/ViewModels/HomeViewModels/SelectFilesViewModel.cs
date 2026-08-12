@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
-using AutoOrganize.Models.Options;
+using AutoOrganize.Models.Args;
 using AutoOrganize.Services.NavigationServices;
 using AutoOrganize.Services.TopLevelServices;
 using AutoOrganize.ViewModels.Abstractions;
@@ -17,14 +17,14 @@ using ViewModelRegistrationGenerator;
 namespace AutoOrganize.ViewModels.HomeViewModels;
 
 [ViewModelRegistration(ViewModelLifetime.Singleton)]
-public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationViewModel<SelectFilesOptions>
+public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationViewModel<SelectFilesArgs>
 {
     private readonly INavigationService _navigationService;
     private readonly IStorageServices _storageProvider;
     private readonly ILogger<SelectFilesViewModel> _logger;
 
     [ObservableProperty]
-    public partial MetadataType SelectedMetadataType { get; set; } = MetadataType.Tv;
+    public partial MetadataType SelectedMetadataType { get; set; } = MetadataType.TvSeries;
 
     public AvaloniaList<string> Source { get; } = [];
 
@@ -120,8 +120,8 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     {
         _logger.LogInformation("用户前往 FileMetadataProgressViewModel, 类型: {Type}, 文件数量: {Count}", SelectedMetadataType,
             Source.Count);
-        _navigationService.Replace<FileMetadataProgressViewModel, FileProcessOptions>(this,
-            new FileProcessOptions
+        _navigationService.Replace<FileMetadataProgressViewModel, FileProcessArgs>(this,
+            new FileProcessArgs
             {
                 Type = SelectedMetadataType,
                 FilesPaths = Source
@@ -135,7 +135,7 @@ public sealed partial class SelectFilesViewModel : ViewModelBase, INavigationVie
     public bool CanNext() => Source.Count > 0;
 
     [SuppressMessage("ReSharper", "PossibleMultipleEnumeration", Justification = "只有在 DEBUG 下才会调用, 所以性能损失抑制")]
-    public void OnNavigatingTo(SelectFilesOptions args)
+    public void OnNavigatingTo(SelectFilesArgs args)
     {
         if (args.CanClearOld)
             Source.Clear();

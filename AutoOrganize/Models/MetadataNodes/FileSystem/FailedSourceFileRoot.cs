@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
-using AutoOrganize.Models.Options;
+using AutoOrganize.Models.Args;
 using AutoOrganize.Utils;
 
 namespace AutoOrganize.Models.MetadataNodes.FileSystem;
@@ -21,10 +21,39 @@ public sealed class FailedSourceFileRoot : MetadataTreeNodeBase
         return failedFileMetadata;
     }
 
-    public FailedFileNode AddOrGetFailedMetadata(string filePath, Exception exception, FileProcessOptions options)
+    public FailedFileNode AddOrGetFailedMetadata(FailedFileNode failedFileMetadata, Exception exception)
+    {
+        AddChild(failedFileMetadata);
+        return failedFileMetadata;
+    }
+
+    public FailedFileNode AddFailedSourceFile(SourceFileNode sourceFile, Exception exception)
+    {
+        var failedFile = new FailedFileNode(sourceFile.FullPath, exception);
+
+        string? directoryName = Path.GetDirectoryName(sourceFile.FullPath);
+        if (directoryName is null)
+        {
+            AddChild(failedFile);
+            return failedFile;
+        }
+
+        FailedDirectoryNode? directory = GetChildren<FailedDirectoryNode>(
+            x => PathUtils.IsSamePath(x.FullPath, directoryName));
+        if (directory is null)
+        {
+            directory = new FailedDirectoryNode(directoryName);
+            AddChild(directory);
+        }
+
+        directory.AddChild(failedFile);
+        return failedFile;
+    }
+
+    public FailedFileNode AddOrGetFailedMetadata(string filePath, Exception exception, FileProcessArgs args)
     {
         var failedFile = new FailedFileNode(filePath, exception);
-        foreach (string path in options.FilesPaths)
+        foreach (string path in args.FilesPaths)
         {
             if (!PathUtils.IsSubPath(path, filePath))
                 continue;
@@ -43,7 +72,7 @@ public sealed class FailedSourceFileRoot : MetadataTreeNodeBase
             }
 
 
-            FailedDirectoryNode? directoryMetadata = AddOrGetFailedDirectoryMetadata(directoryName, options);
+            FailedDirectoryNode? directoryMetadata = AddOrGetFailedDirectoryMetadata(directoryName, args);
             if (directoryMetadata is null)
             {
                 AddChild(failedFile);
@@ -59,7 +88,7 @@ public sealed class FailedSourceFileRoot : MetadataTreeNodeBase
     }
 
     public FailedDirectoryNode? AddOrGetFailedDirectoryMetadata(string directoryPath,
-        FileProcessOptions options)
+        FileProcessArgs args)
     {
         FailedDirectoryNode? failedDirectoryMetadataCache =
             GetChildren<FailedDirectoryNode, FailedDirectoryNode>(
@@ -69,7 +98,7 @@ public sealed class FailedSourceFileRoot : MetadataTreeNodeBase
             return failedDirectoryMetadataCache;
 
         var failedDirectoryTreeMetadata = new FailedDirectoryNode(directoryPath);
-        foreach (string filePath in options.FilesPaths)
+        foreach (string filePath in args.FilesPaths)
         {
             if (!PathUtils.IsSamePath(filePath, directoryPath)) continue;
             AddChild(failedDirectoryTreeMetadata);
@@ -78,7 +107,7 @@ public sealed class FailedSourceFileRoot : MetadataTreeNodeBase
 
         string? path = Path.GetDirectoryName(directoryPath);
         if (path is null || PathUtils.IsSamePath(path, directoryPath)) return null;
-        FailedDirectoryNode? directoryTreeMetadata = AddOrGetFailedDirectoryMetadata(path, options);
+        FailedDirectoryNode? directoryTreeMetadata = AddOrGetFailedDirectoryMetadata(path, args);
         if (directoryTreeMetadata is null) return null;
         directoryTreeMetadata.AddChild(failedDirectoryTreeMetadata);
         return failedDirectoryTreeMetadata;

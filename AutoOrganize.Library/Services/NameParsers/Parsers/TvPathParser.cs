@@ -16,7 +16,7 @@ public sealed class TvPathParser : INameParserStrategy<TvParseResult>
         DirectoryInfo? parent = info.Directory;
         for (int i = 0; i < _options.MaxNestingLevel; i++)
         {
-            if (parent is null || result.IsComplete()) break;
+            if (parent is null || result is not { Title: null, Episode: null, Season: null, Year: null }) break;
             result.Complement(ParseInternal(parent.Name, false));
             parent = parent.Parent;
         }

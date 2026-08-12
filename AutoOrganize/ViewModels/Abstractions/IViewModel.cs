@@ -1,6 +1,8 @@
-﻿namespace AutoOrganize.ViewModels.Abstractions;
+﻿using System.ComponentModel;
 
-public interface IViewModel
+namespace AutoOrganize.ViewModels.Abstractions;
+
+public interface IViewModel : INotifyPropertyChanged
 {
     IParentViewModel? OwnerViewModel { get; set; }
 }

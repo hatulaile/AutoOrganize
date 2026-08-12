@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,6 @@ public partial class WindowService : IWindowService, IWindowProvider
     private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<object, Window> _windowByViewModel = [];
     private bool _isMainClosing;
-    private bool _isMainClosed;
 
     public IReadOnlyList<Window> Windows => (IReadOnlyList<Window>)_windowByViewModel.Values;
 
@@ -60,7 +59,6 @@ public partial class WindowService : IWindowService, IWindowProvider
     {
         window.ClosingBehavior = WindowClosingBehavior.OwnerWindowOnly;
         window.Closing += OnMainWindowClosing;
-        window.Closed += WindowOnClosed;
 
         EventHandler<RoutedEventArgs>? handler;
         handler = (sender, ev) => _windowByViewModel.TryAdd(window.DataContext!, window);
@@ -91,10 +89,5 @@ public partial class WindowService : IWindowService, IWindowProvider
                 window.Close();
             }
         }
-    }
-
-    private void WindowOnClosed(object? sender, EventArgs e)
-    {
-        _isMainClosed = true;
     }
 }

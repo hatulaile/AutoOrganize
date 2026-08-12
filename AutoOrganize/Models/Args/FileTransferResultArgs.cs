@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 
-namespace AutoOrganize.Models.Options;
+namespace AutoOrganize.Models.Args;
 
-public readonly struct FileTransferResultOptions
+public readonly struct FileTransferResultArgs
 {
-    public FileTransferResultOptions()
+    public FileTransferResultArgs()
     {
     }
 

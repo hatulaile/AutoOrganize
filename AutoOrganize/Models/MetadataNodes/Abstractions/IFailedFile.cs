@@ -2,7 +2,7 @@ using System;
 
 namespace AutoOrganize.Models.MetadataNodes.Abstractions;
 
-public interface IFailedFile
+public interface IFailedFile : IFailedNode
 {
     Exception Exception { get; }
 }
