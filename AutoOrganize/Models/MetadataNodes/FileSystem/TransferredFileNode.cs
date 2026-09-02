@@ -3,7 +3,7 @@ using AutoOrganize.Models.MetadataNodes.Abstractions;
 
 namespace AutoOrganize.Models.MetadataNodes.FileSystem;
 
-public sealed class TransferredFileNode : MetadataTreeNodeBase, IFullPath, ISubheading
+public sealed class TransferredFileNode : MetadataTreeNodeBase, ITransferredFileNode, ISubheading
 {
     public override string? Title { get; }
 

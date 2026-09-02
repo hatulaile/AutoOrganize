@@ -28,17 +28,17 @@
                         BorderThickness="2,2,0,2"
                         BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
                         HierarchicalModel="{Binding Model}"
-                        SelectedItem="{Binding SelectedMetadata}"
+                        SelectedItems="{Binding SelectItems}"
                         SelectionUnit="FullRow"
-                        SelectionMode="Single"
+                        SelectionMode="Extended"
                         AutoGenerateColumns="False"
                         HierarchicalRowsEnabled="True"
                         CanUserSortColumns="False"
                         CanUserResizeColumns="True">
 
-                        <!-- todo: 右键菜单 -->
                         <DataGrid.ContextFlyout>
-                            <MenuFlyout></MenuFlyout>
+                            <controls:DynamicMenuFlyout ItemsSource="{Binding MenuItemViewModels}"
+                                                        MenuItemContext="{Binding MenuItemContext}" />
                         </DataGrid.ContextFlyout>
 
                         <DataGrid.Columns>

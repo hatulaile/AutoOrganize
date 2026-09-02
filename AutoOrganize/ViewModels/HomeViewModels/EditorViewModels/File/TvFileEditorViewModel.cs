@@ -173,16 +173,17 @@ public partial class TvFileEditorViewModel
                 token.ThrowIfCancellationRequested();
                 TvParseResult parseResult = _nameParserService.ParseTv(fileNode.FullPath);
                 parseResult.Season ??= 1;
-                if (Season is null && parseResult.Season is null || Episode is null && parseResult.Episode is null)
+                int? season = Season ?? parseResult.Season;
+                long? episode = Episode ?? parseResult.Episode;
+                if (season is null || episode is null)
                     continue;
 
                 EpisodeMetadata? episodeMetadata = await _metadataService.GetEpisodeAsync(new EpisodeMetadataRequest
                 {
                     SeriesName = selected?.Name ?? parseResult.Title,
                     Year = selected?.FirstAirDate?.Year ?? Request?.Year ?? parseResult.Year,
-                    //这里应该不会为null，上面判断了 ...应该？
-                    SeasonNumber = Season ?? parseResult.Season!.Value,
-                    EpisodeNumber = Episode ?? parseResult.Episode!.Value,
+                    SeasonNumber = season.Value,
+                    EpisodeNumber = episode.Value,
                     Language = "zh-cn",
                     SeriesProviderIds = selected?.ProviderIds ?? ProviderIds
                 }, token: token);
@@ -225,7 +226,7 @@ public partial class TvFileEditorViewModel
             CancellationToken token = CancellationTokenSource
                 .CreateLinkedTokenSource(cancellationToken, CancellationToken).Token;
 
-            SeriesSearchResult? selected = null;
+            SeriesSearchResult? selected = await TrySearchSeriesAsync(token);
             var results = new List<TvIdentifyResult>(Nodes.Count);
             foreach (SourceFileNode fileNode in Nodes)
             {
@@ -254,16 +255,17 @@ public partial class TvFileEditorViewModel
                 {
                     TvParseResult parseResult = _nameParserService.ParseTv(fileNode.FullPath);
                     parseResult.Season ??= 1;
-                    if (Season is null && parseResult.Season is null || Episode is null && parseResult.Episode is null)
+                    int? season = Season ?? parseResult.Season;
+                    long? episode = Episode ?? parseResult.Episode;
+                    if (season is null || episode is null)
                         continue;
 
                     episodeMetadata = await _metadataService.GetEpisodeAsync(new EpisodeMetadataRequest
                     {
                         SeriesName = selected?.Name ?? parseResult.Title,
                         Year = selected?.FirstAirDate?.Year ?? Request?.Year ?? parseResult.Year,
-                        //这里应该不会为null，上面判断了 ...应该？
-                        SeasonNumber = Season ?? parseResult.Season!.Value,
-                        EpisodeNumber = Episode ?? parseResult.Episode!.Value,
+                        SeasonNumber = season.Value,
+                        EpisodeNumber = episode.Value,
                         Language = "zh-cn",
                         SeriesProviderIds = selected?.ProviderIds ?? ProviderIds
                     }, token: token);

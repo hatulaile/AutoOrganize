@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:AutoOrganize.ViewModels.HomeViewModels"
+        xmlns:converters="using:AutoOrganize.Converters"
+        mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="160"
+        Width="440" SizeToContent="Height" MinHeight="120"
+        CanResize="False" WindowStartupLocation="CenterOwner" Title="确认删除"
+        x:Class="AutoOrganize.Views.HomeViews.RemoveTransferConfirmWindow"
+        x:DataType="vm:RemoveTransferConfirmWindowViewModel">
+
+    <Window.Resources>
+        <converters:RemoveTransferMessageConverter x:Key="RemoveTransferMessageConverter" />
+    </Window.Resources>
+
+    <Grid Margin="16" RowDefinitions="*,Auto,Auto">
+        <TextBlock TextWrapping="Wrap">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource RemoveTransferMessageConverter}">
+                    <Binding Path="SuccessCount" />
+                    <Binding Path="FailedCount" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+        <CheckBox Grid.Row="1" IsChecked="{Binding IsDeleteFilesOnDisk}">
+            是否允许同时删除磁盘上的文件
+        </CheckBox>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="取消" Command="{Binding CancelCommand}" />
+            <Button Content="确认" Command="{Binding ConfirmCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

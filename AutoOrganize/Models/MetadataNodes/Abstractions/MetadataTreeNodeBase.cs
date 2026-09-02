@@ -96,6 +96,76 @@ public abstract class MetadataTreeNodeBase : ObservableObject
         return FindParent(conditions) is not null;
     }
 
+    public bool HasChild<TNode>()
+    {
+        if (!HasChildren) throw new NotSupportedException();
+        foreach (MetadataTreeNodeBase child in Children)
+        {
+            if (child is TNode)
+                return true;
+
+            if (child.HasChild<TNode>())
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool HasChild<TNode>(Func<TNode, bool> conditions)
+    {
+        if (!HasChildren) throw new NotSupportedException();
+        foreach (MetadataTreeNodeBase child in Children)
+        {
+            if (child is TNode node && conditions(node))
+                return true;
+
+            if (child.HasChild(conditions))
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool IsRelated(MetadataTreeNodeBase other)
+    {
+        if (ReferenceEquals(this, other))
+            return true;
+
+        for (MetadataTreeNodeBase? current = Parent; current is not null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, other))
+                return true;
+        }
+
+        for (MetadataTreeNodeBase? current = other.Parent; current is not null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, this))
+                return true;
+        }
+
+        return false;
+    }
+
+    public NodeRelationship GetRelationship(MetadataTreeNodeBase other)
+    {
+        if (ReferenceEquals(this, other))
+            return NodeRelationship.Self;
+
+        for (MetadataTreeNodeBase? current = Parent; current is not null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, other))
+                return NodeRelationship.Descendant;
+        }
+
+        for (MetadataTreeNodeBase? current = other.Parent; current is not null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, this))
+                return NodeRelationship.Ancestor;
+        }
+
+        return NodeRelationship.None;
+    }
+
     public virtual bool RemoveChild(MetadataTreeNodeBase metadataTreeNodeBase)
     {
         if (!HasChildren)

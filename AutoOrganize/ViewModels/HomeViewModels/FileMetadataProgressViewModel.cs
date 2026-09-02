@@ -55,10 +55,10 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalCount))]
     [NotifyPropertyChangedFor(nameof(TotalProgress))]
-    public partial int FailedCound { get; set; }
+    public partial int FailedCount { get; set; }
 
-    public int TotalProgress => SuccessCount + FailedCound;
-    public int TotalCount => SuccessCount + FailedCound + CurrentProgress;
+    public int TotalProgress => SuccessCount + FailedCount;
+    public int TotalCount => SuccessCount + FailedCount + CurrentProgress;
 
     public AvaloniaList<FileMetadataProcessingResult> Results { get; } = [];
 
@@ -109,11 +109,11 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
 
         if (SuccessCount > 0)
         {
-            _logger.LogInformation("源数据处理完成, 成功: {successCount}, 失败: {failedCound}", SuccessCount, FailedCound);
+            _logger.LogInformation("源数据处理完成, 成功: {SuccessCount}, 失败: {FailedCount}", SuccessCount, FailedCount);
             _notificationServices.Show(
-                FailedCound == 0
+                FailedCount == 0
                     ? new Notification("处理结果", $"成功 {SuccessCount} 个, 无一失败.", NotificationType.Success)
-                    : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCound} 个.", NotificationType.Warning),
+                    : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCount} 个.", NotificationType.Warning),
                 this);
 
             _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
@@ -125,7 +125,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             return;
         }
 
-        _logger.LogWarning("源数据处理全部失败: {failedCound}", FailedCound);
+        _logger.LogWarning("源数据处理全部失败: {FailedCount}", FailedCount);
         _notificationServices.Show(new Notification("处理结果", "没有任何成功的文件", NotificationType.Error), this);
         _navigationService.Replace<SelectFilesViewModel>(this);
     }
@@ -283,7 +283,7 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
             foreach (FileMetadataProcessingResult info in args.NewItems)
             {
                 if (info.IsSuccess) SuccessCount++;
-                else FailedCound++;
+                else FailedCount++;
             }
         };
     }

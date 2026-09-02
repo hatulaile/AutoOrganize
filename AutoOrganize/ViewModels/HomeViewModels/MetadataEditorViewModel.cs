@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using AsyncImageLoader.Loaders;
 using AutoOrganize.Library.Models;
-using AutoOrganize.Library.Services.Metadata;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
 using AutoOrganize.Models.MetadataNodes.Abstractions;
@@ -32,6 +30,7 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
 {
     private readonly INavigationService _navigationService;
     private readonly IWindowService _windowService;
+    private readonly ILauncherServices _launcherServices;
     private readonly ILogger<MetadataEditorViewModel> _logger;
 
     private MetadataTreeRoot _metadataTreeRoot = new();
@@ -43,17 +42,17 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
     [ObservableProperty]
     public partial IMenuItemContext MenuItemContext { get; set; }
 
-    public IReadOnlyList<IMenuItem<MetadataEditorMenuItemContext>> MenuItemViewModels => field ??= CreateMenuItems();
-
     public AvaloniaList<MetadataTreeNodeBase> Source { get; } = [];
 
     public HierarchicalModel<MetadataTreeNodeBase>? Model { get; private set; }
 
     public MetadataEditorViewModel(
-        INavigationService navigationViewModel, IWindowService windowService, ILogger<MetadataEditorViewModel> logger)
+        INavigationService navigationViewModel, IWindowService windowService, ILauncherServices launcherServices,
+        ILogger<MetadataEditorViewModel> logger)
     {
         _navigationService = navigationViewModel;
         _windowService = windowService;
+        _launcherServices = launcherServices;
         _logger = logger;
 
         SelectItems = [];
@@ -130,28 +129,6 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
                 break;
         }
     }
-
-    private IReadOnlyList<IMenuItem<MetadataEditorMenuItemContext>> CreateMenuItems() =>
-    [
-        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中剧", ReIdentifySeriesCommand,
-            static context => context.SelectedItems.Any(x => x is SeriesMetadataTreeNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中季", ReIdentifySeasonCommand,
-            static context => context.SelectedItems.Any(x => x is SeasonMetadataTreeNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中集", ReIdentifyEpisodeCommand,
-            static context => context.SelectedItems.Any(x => x is EpisodeMetadataTreeNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中为电影", ReIdentifyMovieCommand,
-            static context => context.SelectedItems.Any(x => x is MovieMetadataTreeNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中文件为电影", ReIdentifyFileAsMovieCommand,
-            static context => context.SelectedItems.Any(x => x is SourceFileNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("重新识别选中文件为剧集", ReIdentifyFileAsTvCommand,
-            static context => context.SelectedItems.Any(x => x is SourceFileNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("将失败文件识别为剧集", ReIdentifyFailedFileAsTvCommand,
-            static context => context.SelectedItems.Any(x => x is IFailedNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("将失败文件识别为电影", ReIdentifyFailedFileAsMovieCommand,
-            static context => context.SelectedItems.Any(x => x is IFailedNode)),
-        new MenuItem<MetadataEditorMenuItemContext>("取消识别项目", UnIdentifyMetadataCommand,
-            static context => context.SelectedItems.Any(x => x is not IFailedFile)),
-    ];
 
     public void OnParametersChanged(MetadataEditArgs args)
     {

@@ -15,10 +15,6 @@ namespace AutoOrganize.Views.Controls;
 
 public class DynamicMenuFlyout : MenuFlyout
 {
-    static DynamicMenuFlyout()
-    {
-    }
-
     public static readonly StyledProperty<IMenuItemContext?> MenuItemContextProperty =
         AvaloniaProperty.Register<DynamicMenuFlyout, IMenuItemContext?>(nameof(MenuItemContext), inherits: true);
 
@@ -104,8 +100,7 @@ public class DynamicMenuFlyoutPresenter : MenuFlyoutPresenter
                 menuItemControl[!MenuItem.CommandParameterProperty] = this[!MenuItemContextProperty];
                 return;
             case IMenuSeparator:
-                menuItemControl.Header = '-';
-                menuItemControl.ClearValue(HeaderedSelectingItemsControl.HeaderProperty);
+                menuItemControl.Header = "-";
                 menuItemControl.ClearValue(ItemsSourceProperty);
                 menuItemControl.ClearValue(IsEnabledProperty);
                 menuItemControl.ClearValue(MenuItem.CommandProperty);

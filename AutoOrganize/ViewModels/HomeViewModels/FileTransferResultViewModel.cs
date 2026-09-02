@@ -1,4 +1,6 @@
+using System.Collections.Specialized;
 using AsyncImageLoader.Loaders;
+using AutoOrganize.Library.Services.Config;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
@@ -6,7 +8,10 @@ using AutoOrganize.Models.MetadataNodes.Abstractions;
 using AutoOrganize.Models.MetadataNodes.FileSystem;
 using AutoOrganize.Models.MetadataNodes.Metadata;
 using AutoOrganize.Models.Args;
+using AutoOrganize.Models.MenuItemViewModelContext;
 using AutoOrganize.Services.NavigationServices;
+using AutoOrganize.Services.TopLevelServices;
+using AutoOrganize.Services.WindowManagers;
 using AutoOrganize.ViewModels.Abstractions;
 using AutoOrganize.ViewModels.HomeViewModels.MetadataViewModels;
 using Avalonia.Collections;
@@ -23,20 +28,52 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
     INavigationViewModel<FileTransferResultArgs>
 {
     private readonly INavigationService _navigationService;
+    private readonly ILauncherServices _launcherServices;
+    private readonly IFileTransferBatchService _fileTransferBatchService;
+    private readonly IClipboardServices _clipboardServices;
+    private readonly IFileConfigManager _fileConfigManager;
+    private readonly INotificationServices _notificationServices;
+    private readonly IWindowService _windowService;
     private readonly ILogger<FileTransferResultViewModel> _logger;
+    private readonly FileTransferResultMenuItemContext _menuItemContext;
 
     private MetadataTreeRoot? _metadataRoot;
 
     public AvaloniaList<IFileTransferBatchInfo> FileTransferBatchInfos { get; } = [];
 
+    public AvaloniaList<MetadataTreeNodeBase> SelectItems { get; }
+
     [ObservableProperty]
     public partial HierarchicalModel<MetadataTreeNodeBase>? Model { get; set; }
 
     [ObservableProperty]
-    public partial MetadataTreeNodeBase? SelectedMetadata { get; set; }
+    public partial IMenuItemContext MenuItemContext { get; set; }
 
     [ObservableProperty]
     public partial FileTransferFilterType FileTransferFilterType { get; set; }
+
+    public FileTransferResultViewModel(INavigationService navigationService,
+        ILauncherServices launcherServices, IFileTransferBatchService fileTransferBatchService,
+        IClipboardServices clipboardServices, IFileConfigManager fileConfigManager,
+        INotificationServices notificationServices, IWindowService windowService,
+        ILogger<FileTransferResultViewModel> logger)
+    {
+        _navigationService = navigationService;
+        _launcherServices = launcherServices;
+        _fileTransferBatchService = fileTransferBatchService;
+        _clipboardServices = clipboardServices;
+        _fileConfigManager = fileConfigManager;
+        _notificationServices = notificationServices;
+        _windowService = windowService;
+        _logger = logger;
+
+        SelectItems = [];
+        SelectItems.CollectionChanged += SelectItemsOnCollectionChanged;
+        MenuItemContext = _menuItemContext = new FileTransferResultMenuItemContext
+        {
+            SelectedItems = SelectItems,
+        };
+    }
 
     partial void OnFileTransferFilterTypeChanged(FileTransferFilterType value)
     {
@@ -54,22 +91,26 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
         CreateHierarchicalModel();
     }
 
-    partial void OnSelectedMetadataChanged(MetadataTreeNodeBase? value)
+    private void SelectItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (value is null)
+        if (e.NewItems is not { Count: > 0 })
         {
-            _logger.LogDebug("取消选中传输结果项");
+            _navigationService.Clear(RoutingState);
             return;
         }
 
-        _logger.LogDebug("选中传输结果项: {Type} - {Name}", value.GetType().Name, value.Title);
-        if (value is IFileMetadata fileMetadata)
+        var selectedItem = (MetadataTreeNodeBase?)e.NewItems[0];
+        if (selectedItem is null)
+            return;
+
+        _logger.LogDebug("选中传输结果项: {Type} - {Name}", selectedItem.GetType().Name, selectedItem.Title);
+        if (selectedItem is IFileMetadata fileMetadata)
         {
             _navigationService.Replace<MetadataViewModel, MetadataBase>(RoutingState, fileMetadata.Metadata);
             return;
         }
 
-        switch (value)
+        switch (selectedItem)
         {
             case TransferredFileNode transferFileModel:
                 _navigationService.Replace<TransferredFileViewModel, TransferredFileNode>
@@ -99,7 +140,7 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
             _logger.LogDebug("分层模型实例初始化成功");
         }
 
-        SelectedMetadata = null;
+        SelectItems.Clear();
         _metadataRoot = new MetadataTreeRoot();
         int successCount = 0, failedCount = 0;
         foreach (IFileTransferBatchInfo info in FileTransferBatchInfos)
@@ -147,12 +188,5 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
             {
                 IsClear = false
             });
-    }
-
-    public FileTransferResultViewModel(INavigationService navigationService,
-        ILogger<FileTransferResultViewModel> logger)
-    {
-        _navigationService = navigationService;
-        _logger = logger;
     }
 }
