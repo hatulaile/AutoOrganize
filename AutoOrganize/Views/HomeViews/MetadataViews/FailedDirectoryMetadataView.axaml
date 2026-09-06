@@ -34,6 +34,7 @@
                     <Border
                         BorderThickness="2"
                         BorderBrush="{DynamicResource ButtonBackground}"
+                        CornerRadius="4"
                         Padding="6,2"
                         Margin="0,0,4,0">
                         <SelectableTextBlock

@@ -39,6 +39,7 @@
                     <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
                         <TextBlock Text="输入路径:" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                CornerRadius="4"
                                 Padding="6,2">
                             <SelectableTextBlock
                                 Text="{Binding FileInfo.FullName}"
@@ -61,6 +62,7 @@
                     <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
                         <TextBlock Text="输出路径:" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                CornerRadius="4"
                                 Padding="6,2">
                             <SelectableTextBlock
                                 Text="{Binding Metadata.OutputPath}"

@@ -37,6 +37,7 @@
             <Border>
                 <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
                     <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                            CornerRadius="4"
                             Padding="6,2">
                         <SelectableTextBlock
                             Name="SelectableTextBlock"

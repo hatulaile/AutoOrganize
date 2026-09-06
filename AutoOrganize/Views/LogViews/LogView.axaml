@@ -24,8 +24,12 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <ScrollViewer Name="MainScrollViewer">
-        <Border Padding="20,12">
+    <Border Margin="12"
+            Padding="8"
+            BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+        <ScrollViewer Name="MainScrollViewer">
             <ItemsControl ItemsSource="{Binding LogEvents}" Name="ItemsRepeater" HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch">
 
@@ -113,6 +117,6 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </Border>
-    </ScrollViewer>
+        </ScrollViewer>
+    </Border>
 </UserControl>

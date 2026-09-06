@@ -19,6 +19,7 @@
                     BorderThickness="2"
                     Width="200"
                     Padding="12"
+                    CornerRadius="8"
                     BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}">
 
                     <StackPanel Spacing="8">

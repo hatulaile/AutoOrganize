@@ -43,6 +43,7 @@
                     <Border>
                         <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
                             <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                    CornerRadius="4"
                                     Padding="6,2">
                                 <SelectableTextBlock
                                     Text="{Binding FileInfo.FullName}"
@@ -91,7 +92,8 @@
                         </StackPanel>
                     </Border>
 
-                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
+                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" CornerRadius="4"
+                            Padding="6,2,2,2">
                         <Grid ColumnDefinitions="*, Auto">
                             <SelectableTextBlock Grid.Column="0"
                                                  Text="{Binding Metadata.Exception.Message, Mode=OneWay}"
@@ -106,7 +108,8 @@
                         </Grid>
                     </Border>
 
-                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
+                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" CornerRadius="4"
+                            Padding="6,2,2,2">
                         <Grid ColumnDefinitions="*, Auto">
                             <SelectableTextBlock Grid.Column="0" Text="{Binding Metadata.Exception, Mode=OneWay}"
                                                  FontSize="14" TextWrapping="Wrap"

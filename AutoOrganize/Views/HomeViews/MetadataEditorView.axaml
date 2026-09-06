@@ -26,6 +26,7 @@
                               Classes="hideFocus"
                               BorderThickness="2,2,0,2"
                               BorderBrush="#2D2D2D"
+                              CornerRadius="8,0,0,8"
                               HierarchicalModel="{Binding Model}"
                               SelectedItems="{Binding SelectItems}"
                               SelectionUnit="FullRow"
@@ -74,7 +75,8 @@
 
                     <Border Grid.Column="2"
                             BorderBrush="#2D2D2D"
-                            BorderThickness="2">
+                            BorderThickness="2"
+                            CornerRadius="0,8,8,0">
                         <ScrollViewer>
                             <control:RoutedViewHost Router="{Binding RoutingState}"
                                                     IsVisible="{Binding RoutingState.CurrentPageViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">

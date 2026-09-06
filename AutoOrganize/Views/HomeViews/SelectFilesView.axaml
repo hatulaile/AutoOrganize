@@ -19,6 +19,7 @@
             <Panel Grid.Row="0">
                 <DataGrid BorderThickness="2"
                           BorderBrush="{DynamicResource SystemControlTransientBackgroundBrush}"
+                          CornerRadius="8"
                           ItemsSource="{Binding Source}"
                           SelectedItems="{Binding SelectionItems}"
                           SelectionMode="Extended"

@@ -44,6 +44,7 @@
                             <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
                                 <TextBlock Text="输入路径:" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                        CornerRadius="4"
                                         Padding="6,2">
                                     <SelectableTextBlock
                                         Text="{Binding FileInfo.FullName}"
@@ -66,6 +67,7 @@
                             <WrapPanel Orientation="Horizontal" LineSpacing="4" ItemSpacing="4">
                                 <TextBlock Text="原定输出路径:" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2"
+                                        CornerRadius="4"
                                         Padding="6,2">
                                     <SelectableTextBlock
                                         Text="{Binding Metadata.OutputPath}"
@@ -117,7 +119,8 @@
                         </StackPanel>
                     </Border>
 
-                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
+                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" CornerRadius="4"
+                            Padding="6,2,2,2">
                         <Grid ColumnDefinitions="*, Auto">
                             <SelectableTextBlock Grid.Column="0"
                                                  Text="{Binding Metadata.Exception.Message, Mode=OneWay}"
@@ -132,7 +135,8 @@
                         </Grid>
                     </Border>
 
-                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" Padding="6,2,2,2">
+                    <Border BorderBrush="{DynamicResource ButtonBackground}" BorderThickness="2" CornerRadius="4"
+                            Padding="6,2,2,2">
                         <Grid ColumnDefinitions="*, Auto">
                             <SelectableTextBlock Grid.Column="0" Text="{Binding Metadata.Exception, Mode=OneWay}"
                                                  FontSize="14" TextWrapping="Wrap"
