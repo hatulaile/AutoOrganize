@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Specialized;
+using System.Linq;
 using AsyncImageLoader.Loaders;
-using AutoOrganize.Library.Services.Config;
 using AutoOrganize.Library.Services.FileTransferBatchServices;
 using AutoOrganize.Library.Services.Metadata.Models.Metadata.Abstractions;
 using AutoOrganize.Models;
@@ -28,16 +29,12 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
     INavigationViewModel<FileTransferResultArgs>
 {
     private readonly INavigationService _navigationService;
-    private readonly ILauncherServices _launcherServices;
     private readonly IFileTransferBatchService _fileTransferBatchService;
-    private readonly IClipboardServices _clipboardServices;
-    private readonly IFileConfigManager _fileConfigManager;
     private readonly INotificationServices _notificationServices;
     private readonly IWindowService _windowService;
     private readonly ILogger<FileTransferResultViewModel> _logger;
-    private readonly FileTransferResultMenuItemContext _menuItemContext;
 
-    private MetadataTreeRoot? _metadataRoot;
+    private readonly MetadataTreeRoot _metadataRoot = new();
 
     public AvaloniaList<IFileTransferBatchInfo> FileTransferBatchInfos { get; } = [];
 
@@ -53,42 +50,101 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
     public partial FileTransferFilterType FileTransferFilterType { get; set; }
 
     public FileTransferResultViewModel(INavigationService navigationService,
-        ILauncherServices launcherServices, IFileTransferBatchService fileTransferBatchService,
-        IClipboardServices clipboardServices, IFileConfigManager fileConfigManager,
-        INotificationServices notificationServices, IWindowService windowService,
-        ILogger<FileTransferResultViewModel> logger)
+        IFileTransferBatchService fileTransferBatchService, INotificationServices notificationServices,
+        IWindowService windowService, ILogger<FileTransferResultViewModel> logger)
     {
         _navigationService = navigationService;
-        _launcherServices = launcherServices;
         _fileTransferBatchService = fileTransferBatchService;
-        _clipboardServices = clipboardServices;
-        _fileConfigManager = fileConfigManager;
         _notificationServices = notificationServices;
         _windowService = windowService;
         _logger = logger;
 
         SelectItems = [];
         SelectItems.CollectionChanged += SelectItemsOnCollectionChanged;
-        MenuItemContext = _menuItemContext = new FileTransferResultMenuItemContext
+        MenuItemContext = new FileTransferResultMenuItemContext
         {
             SelectedItems = SelectItems,
         };
     }
 
-    partial void OnFileTransferFilterTypeChanged(FileTransferFilterType value)
+
+    [RelayCommand]
+    public void NavigateToSelectFilesViewModel()
     {
-        _logger.LogDebug("传输结果筛选条件变更: {Filter}", value);
-        CreateHierarchicalModel();
+        _logger.LogDebug("导航到文件选择页面");
+        _navigationService.Replace<SelectFilesViewModel>(this);
+
+        if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
+            ram.ClearRamCache();
+    }
+
+    [RelayCommand]
+    public void NavigateToMetadataEditViewModel()
+    {
+        _logger.LogDebug("导航到元数据编辑页面");
+        _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
+            new MetadataEditArgs()
+            {
+                IsClear = false
+            });
+    }
+
+    partial void OnFileTransferFilterTypeChanged(FileTransferFilterType oldValue, FileTransferFilterType newValue)
+    {
+        _logger.LogDebug("传输结果筛选条件变更: {Filter}", newValue);
+
+        switch (oldValue, newValue)
+        {
+            case (FileTransferFilterType.None, FileTransferFilterType.SuccessOnly):
+                _metadataRoot.RemoveChildAndEmptyParent<FailedTransferFileNode>(static _ => true, false);
+                break;
+            case (FileTransferFilterType.None, FileTransferFilterType.FailedOnly):
+                _metadataRoot.RemoveChildAndEmptyParent<TransferredFileNode>(static _ => true, false);
+                break;
+            case (FileTransferFilterType.SuccessOnly, FileTransferFilterType.FailedOnly):
+            case (FileTransferFilterType.FailedOnly, FileTransferFilterType.SuccessOnly):
+                _metadataRoot.ClearChildren();
+                foreach (IFileTransferBatchInfo info in FileTransferBatchInfos.Where(IsVisible))
+                    AddTreeNode(info);
+                break;
+            case (FileTransferFilterType.SuccessOnly, FileTransferFilterType.None):
+                foreach (FileTransferBatchErrorInfo info in FileTransferBatchInfos.OfType<FileTransferBatchErrorInfo>())
+                    AddTreeNode(info);
+                break;
+            case (FileTransferFilterType.FailedOnly, FileTransferFilterType.None):
+                foreach (FileTransferBatchInfo info in FileTransferBatchInfos.OfType<FileTransferBatchInfo>())
+                    AddTreeNode(info);
+                break;
+        }
+
+        RemoveDetachedSelectedItems();
     }
 
     public void OnParametersChanged(FileTransferResultArgs args)
     {
-        if (args.IsClear) FileTransferBatchInfos.Clear();
+        EnsureHierarchicalModel();
+
+        if (args.IsClear)
+        {
+            FileTransferBatchInfos.Clear();
+            _metadataRoot.ClearChildren();
+            RemoveDetachedSelectedItems();
+        }
 
         if (args.BatchInfos is not null)
-            FileTransferBatchInfos.AddRange(args.BatchInfos);
-
-        CreateHierarchicalModel();
+        {
+            if (FileTransferBatchInfos.Count == 0)
+            {
+                FileTransferBatchInfos.AddRange(args.BatchInfos);
+                foreach (IFileTransferBatchInfo info in args.BatchInfos)
+                    AddTreeNode(info);
+            }
+            else
+            {
+                foreach (IFileTransferBatchInfo info in args.BatchInfos)
+                    UpsertBatchInfo(info);
+            }
+        }
     }
 
     private void SelectItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -124,69 +180,113 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
         }
     }
 
-    public void CreateHierarchicalModel()
+    private void UpsertBatchInfo(IFileTransferBatchInfo info)
     {
-        _logger.LogDebug("开始构建传输结果分层模型，当前筛选: {Filter}, 批次总数: {Count}",
-            FileTransferFilterType, FileTransferBatchInfos.Count);
-
-        if (Model is null)
+        EnsureHierarchicalModel();
+        string filePath = GetInfoFilePath(info);
+        int index = -1;
+        for (int i = 0; i < FileTransferBatchInfos.Count; i++)
         {
-            Model = new HierarchicalModel<MetadataTreeNodeBase>(new HierarchicalOptions<MetadataTreeNodeBase>
-            {
-                ChildrenSelector = x => x.Children,
-                IsLeafSelector = x => !x.HasChildren,
-                VirtualizeChildren = true,
-            });
-            _logger.LogDebug("分层模型实例初始化成功");
+            if (!string.Equals(GetInfoFilePath(FileTransferBatchInfos[i]), filePath, StringComparison.Ordinal))
+                continue;
+
+            index = i;
+            break;
         }
 
-        SelectItems.Clear();
-        _metadataRoot = new MetadataTreeRoot();
-        int successCount = 0, failedCount = 0;
-        foreach (IFileTransferBatchInfo info in FileTransferBatchInfos)
+        if (index >= 0) FileTransferBatchInfos[index] = info;
+        else FileTransferBatchInfos.Add(info);
+
+        MetadataBase metadata = GetInfoMetadata(info);
+        MetadataTreeNodeBase metadataNode = _metadataRoot.AddOrGetMetadata(metadata);
+        metadataNode.RemoveChild<ITransferredFileNode>(x =>
+            x.FullPath.Equals(filePath, StringComparison.InvariantCultureIgnoreCase));
+        RemoveDetachedSelectedItems();
+
+        if (IsVisible(info)) AddTreeNode(info, metadataNode);
+    }
+
+    private void RemoveDetachedSelectedItems()
+    {
+        for (int i = SelectItems.Count - 1; i >= 0; i--)
+        {
+            if (!SelectItems[i].HasParent(_metadataRoot))
+                SelectItems.RemoveAt(i);
+        }
+    }
+
+    private void EnsureHierarchicalModel()
+    {
+        if (Model is not null)
+            return;
+
+        Model = new HierarchicalModel<MetadataTreeNodeBase>(new HierarchicalOptions<MetadataTreeNodeBase>
+        {
+            ChildrenSelector = x => x.Children,
+            IsLeafSelector = x => !x.HasChildren,
+            VirtualizeChildren = true,
+        });
+        Model.SetRoots(_metadataRoot.Children);
+        _logger.LogDebug("传输结果分层模型实例初始化成功");
+    }
+
+    private void AddTreeNode(IFileTransferBatchInfo info, MetadataTreeNodeBase? metadataNode = null)
+    {
+        if (metadataNode is not null)
         {
             switch (info)
             {
                 case FileTransferBatchInfo batchInfo:
-                    if (FileTransferFilterType is FileTransferFilterType.FailedOnly) break;
-                    _metadataRoot.AddTransferFile(batchInfo.FilePath, batchInfo.OutputPath, batchInfo.Metadata);
-                    successCount++;
+                    metadataNode.AddChild(new TransferredFileNode(batchInfo.FilePath, batchInfo.OutputPath));
                     break;
                 case FileTransferBatchErrorInfo errorInfo:
-                    if (FileTransferFilterType is FileTransferFilterType.SuccessOnly) break;
-                    _metadataRoot.AddFailedTransferFile(errorInfo.FilePath, errorInfo.OutputPath, errorInfo.Metadata,
-                        errorInfo.Exception);
-                    failedCount++;
+                    metadataNode.AddChild(new FailedTransferFileNode(errorInfo.FilePath, errorInfo.OutputPath,
+                        errorInfo.Exception));
                     break;
                 default:
                     _logger.LogWarning("未知的传输结果类型: {Type}", info.GetType().Name);
                     break;
             }
+
+            return;
         }
 
-        _logger.LogDebug(
-            "传输结果分层模型构建完成: 成功 {Success}, 失败 {Failed}", successCount, failedCount);
-        Model.SetRoots(_metadataRoot.Children);
+        switch (info)
+        {
+            case FileTransferBatchInfo batchInfo:
+                _metadataRoot.AddTransferFile(batchInfo.FilePath, batchInfo.OutputPath, batchInfo.Metadata);
+                break;
+            case FileTransferBatchErrorInfo errorInfo:
+                _metadataRoot.AddFailedTransferFile(errorInfo.FilePath, errorInfo.OutputPath, errorInfo.Metadata,
+                    errorInfo.Exception);
+                break;
+            default:
+                _logger.LogWarning("未知的传输结果类型: {Type}", info.GetType().Name);
+                break;
+        }
     }
 
-    [RelayCommand]
-    public void NavigateToSelectFilesViewModel()
-    {
-        _logger.LogDebug("导航到文件选择页面");
-        _navigationService.Replace<SelectFilesViewModel>(this);
+    private bool IsVisible(IFileTransferBatchInfo info) =>
+        FileTransferFilterType switch
+        {
+            FileTransferFilterType.SuccessOnly => info is FileTransferBatchInfo,
+            FileTransferFilterType.FailedOnly => info is FileTransferBatchErrorInfo,
+            _ => true,
+        };
 
-        if (AsyncImageLoader.ImageLoader.AsyncImageLoader is RamCachedWebImageLoader ram)
-            ram.ClearRamCache();
-    }
+    private static MetadataBase GetInfoMetadata(IFileTransferBatchInfo info) =>
+        info switch
+        {
+            FileTransferBatchInfo batch => batch.Metadata,
+            FileTransferBatchErrorInfo error => error.Metadata,
+            _ => throw new ArgumentOutOfRangeException(nameof(info), info, null),
+        };
 
-    [RelayCommand]
-    public void NavigateToMetadataEditViewModel()
-    {
-        _logger.LogDebug("导航到元数据编辑页面");
-        _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
-            new MetadataEditArgs()
-            {
-                IsClear = false
-            });
-    }
+    private static string GetInfoFilePath(IFileTransferBatchInfo info) =>
+        info switch
+        {
+            FileTransferBatchInfo batch => batch.FilePath,
+            FileTransferBatchErrorInfo error => error.FilePath,
+            _ => throw new ArgumentOutOfRangeException(nameof(info), info, null),
+        };
 }

@@ -365,6 +365,11 @@ public abstract class MetadataTreeNodeBase : ObservableObject
         return result;
     }
 
+    public virtual void ClearChildren()
+    {
+        ChildrenInternal.Clear();
+    }
+
     public TMetadataBase? GetChildren<TMetadataBase>(Func<TMetadataBase, bool> conditions)
     {
         foreach (MetadataTreeNodeBase fileMetadataBase in Children)

@@ -23,7 +23,8 @@
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>
-        <CheckBox Grid.Row="1" IsChecked="{Binding IsDeleteFilesOnDisk}">
+        <CheckBox Grid.Row="1" IsChecked="{Binding IsDeleteFilesOnDisk}"
+                  IsVisible="{Binding SuccessCount}">
             是否允许同时删除磁盘上的文件
         </CheckBox>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">

@@ -66,20 +66,20 @@ public partial class FileTransferResultViewModel
     [RelayCommand]
     private async Task RemoveTransferItemAsync(FileTransferResultMenuItemContext? context)
     {
-        if (context is null || context.SelectedItems.Count == 0 || _metadataRoot is null)
+        if (context is null || context.SelectedItems.Count == 0)
             return;
 
         try
         {
             List<MetadataTreeNodeBase> selectedItems = CollectSelectedNodes(context.SelectedItems);
+            var fileNodes = selectedItems
+                .SelectMany(static node => node is ITransferredFileNode fileNode
+                    ? [fileNode]
+                    : node.FindChildren<ITransferredFileNode>())
+                .ToArray();
 
-            int failedCount = 0;
-            int successCount = 0;
-            foreach (MetadataTreeNodeBase node in selectedItems)
-            {
-                successCount += node.FindChildren<TransferredFileNode>().Count();
-                failedCount += node.FindChildren<FailedTransferFileNode>().Count();
-            }
+            int failedCount = fileNodes.Count(static node => node is FailedTransferFileNode);
+            int successCount = fileNodes.Count(static node => node is TransferredFileNode);
 
             RemoveTransferConfirmResult result = await _windowService.ShowDialog
                 <RemoveTransferConfirmWindowViewModel, RemoveTransferConfirmArgs, RemoveTransferConfirmResult>
@@ -94,6 +94,11 @@ public partial class FileTransferResultViewModel
             foreach (MetadataTreeNodeBase node in selectedItems)
                 _metadataRoot.RemoveChildAndEmptyParent(node, false);
 
+
+            foreach (ITransferredFileNode node in fileNodes)
+                node.RemoveFromParent();
+
+            _metadataRoot.RemoveEmptyParentInChild(false);
             _notificationServices.Show(new Notification("删除完成",
                 $"已移除 {successCount + failedCount} 个条目", NotificationType.Success), this);
         }
@@ -103,6 +108,10 @@ public partial class FileTransferResultViewModel
         catch (Exception e)
         {
             _logger.LogError(e, "删除传输条目异常");
+        }
+        finally
+        {
+            RemoveDetachedSelectedItems();
         }
 
         return;
@@ -149,38 +158,17 @@ public partial class FileTransferResultViewModel
 
     private async Task RetryFilesAsyncInternal(IReadOnlyList<MetadataTreeNodeBase> nodes)
     {
-        if (_metadataRoot is null)
-            return;
-
         try
         {
             var observer =
                 new ProcessObserver<FileTransferBatchInfo, FileTransferBatchResult, FileTransferBatchErrorInfo>();
-            observer.Success += info =>
-            {
-                Dispatcher.UIThread.Invoke(() =>
-                {
-                    var x = FileTransferBatchInfos.FirstOrDefault(x => GetFilePath(x).Equals(info.FilePath));
-                    if (x is not null) FileTransferBatchInfos.Remove(x);
-                    FileTransferBatchInfos.Add(info);
-                });
-            };
+            observer.Success += info => { Dispatcher.UIThread.Invoke(() => UpsertBatchInfo(info)); };
 
-            observer.Failure += info =>
-            {
-                Dispatcher.UIThread.Invoke(() =>
-                {
-                    var x = FileTransferBatchInfos.FirstOrDefault(x => GetFilePath(x).Equals(info.FilePath));
-                    if (x is not null) FileTransferBatchInfos.Remove(x);
-                    FileTransferBatchInfos.Add(info);
-                });
-            };
+            observer.Failure += info => { Dispatcher.UIThread.Invoke(() => UpsertBatchInfo(info)); };
 
             FileTransferBatchResult result =
                 await _fileTransferBatchService.ProcessFilesAsync
-                    (ExpandToFileMetadataEntry(nodes), observer);
-
-            CreateHierarchicalModel();
+                    ([.. ExpandToFileMetadataEntry(nodes)], observer);
 
             _notificationServices.Show(new Notification("重试传输完成",
                 $"成功 {result.Succeed} 个, 失败 {result.Failed} 个",
@@ -212,13 +200,6 @@ public partial class FileTransferResultViewModel
                     : null;
             }
         }
-
-        static string GetFilePath(IFileTransferBatchInfo info) => info switch
-        {
-            FileTransferBatchInfo batch => batch.FilePath,
-            FileTransferBatchErrorInfo error => error.FilePath,
-            _ => throw new ArgumentOutOfRangeException(nameof(info), info, null)
-        };
     }
 
     private static List<MetadataTreeNodeBase> CollectSelectedNodes(IReadOnlyList<MetadataTreeNodeBase> nodes)
