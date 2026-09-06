@@ -98,7 +98,7 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
         if (e.NewItems is not { Count: > 0 })
             return;
 
-        var selectedItem = (MetadataTreeNodeBase?)e.NewItems[0];
+        var selectedItem = (IMetadataTreeNode?)e.NewItems[0];
         if (selectedItem is null)
             return;
 
@@ -214,7 +214,7 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
             Source.AddRange(e.NewItems.Cast<MetadataTreeNodeBase>());
     }
 
-    private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(MetadataTreeNodeBase metadataTreeNode)
+    private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(IMetadataTreeNode metadataTreeNode)
     {
         if (metadataTreeNode is EpisodeMetadataTreeNode episodeMetadata)
         {

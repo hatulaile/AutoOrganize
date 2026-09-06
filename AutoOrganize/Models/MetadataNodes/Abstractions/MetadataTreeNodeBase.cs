@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AutoOrganize.Models.MetadataNodes.Abstractions;
 
-public abstract class MetadataTreeNodeBase : ObservableObject
+public abstract class MetadataTreeNodeBase : ObservableObject, IMetadataTreeNode
 {
     public abstract string? Title { get; }
 
@@ -96,6 +96,17 @@ public abstract class MetadataTreeNodeBase : ObservableObject
         return FindParent(conditions) is not null;
     }
 
+    public bool HasParent(IMetadataTreeNode node)
+    {
+        for (MetadataTreeNodeBase? current = Parent; current is not null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, node))
+                return true;
+        }
+
+        return false;
+    }
+
     public bool HasChild<TNode>()
     {
         if (!HasChildren) throw new NotSupportedException();
@@ -120,6 +131,17 @@ public abstract class MetadataTreeNodeBase : ObservableObject
                 return true;
 
             if (child.HasChild(conditions))
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool HasChild(IMetadataTreeNode node)
+    {
+        for (MetadataTreeNodeBase? current = node.Parent; current is not null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, this))
                 return true;
         }
 
@@ -367,6 +389,9 @@ public abstract class MetadataTreeNodeBase : ObservableObject
 
     public virtual void ClearChildren()
     {
+        foreach (MetadataTreeNodeBase child in ChildrenInternal)
+            child.Parent = null;
+
         ChildrenInternal.Clear();
     }
 

@@ -5,23 +5,23 @@ namespace AutoOrganize.Utils;
 
 public static class FileMetadataUtils
 {
-    public static string? IfHasSubtitleGetSubtitle(MetadataTreeNodeBase? metadataBase)
+    public static string? IfHasSubtitleGetSubtitle(IMetadataTreeNode? metadataBase)
     {
         if (metadataBase is ISubheading subheadingMetadataTree)
             return subheadingMetadataTree.Subheading;
         return null;
     }
 
-    public static string? IfHasExceptionGetMessage(MetadataTreeNodeBase? metadataBase)
+    public static string? IfHasExceptionGetMessage(IMetadataTreeNode? metadataBase)
     {
         if (metadataBase is IFailedFile failedFileSystemMetadataTree)
             return failedFileSystemMetadataTree.Exception.Message;
         return null;
     }
 
-    public static string? IfHasFullPathGetFullPath(MetadataTreeNodeBase? metadataBase)
+    public static string? IfHasFullPathGetFullPath(IMetadataTreeNode? metadataBase)
     {
-        if (metadataBase is IFullPath fullPathMetadataTree)
+        if (metadataBase is IFileSystemNode fullPathMetadataTree)
             return fullPathMetadataTree.FullPath;
         return null;
     }

@@ -72,7 +72,7 @@ public partial class FailedMovieEditorViewModel :
     [RelayCommand]
     private void AutoFill()
     {
-        if (Nodes is not [IFullPath { FullPath: var path }])
+        if (Nodes is not [IFileSystemNode { FullPath: var path }])
             return;
 
         MovieParseResult parse = _nameParserService.ParseMovie(path);

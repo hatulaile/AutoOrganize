@@ -30,10 +30,10 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
         }
     }
 
-    private static long CountErrors(MetadataTreeNodeBase metadataTreeNode)
+    private static long CountErrors(IMetadataTreeNode metadataTreeNode)
     {
         long count = 0;
-        foreach (MetadataTreeNodeBase fileMetadataBase in metadataTreeNode.Children)
+        foreach (IMetadataTreeNode fileMetadataBase in metadataTreeNode.Children)
         {
             if (fileMetadataBase is FailedFileNode)
                 count++;
@@ -45,7 +45,7 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
         return count;
     }
 
-    private void RegisteredEvent(MetadataTreeNodeBase children)
+    private void RegisteredEvent(IMetadataTreeNode children)
     {
         if (!children.HasChildren)
             return;
@@ -55,7 +55,7 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
             RegisteredEvent(item);
     }
 
-    private void UnregisteredEvent(MetadataTreeNodeBase children)
+    private void UnregisteredEvent(IMetadataTreeNode children)
     {
         if (!children.HasChildren)
             return;
@@ -69,7 +69,7 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
     {
         if (args.NewItems is not null)
         {
-            foreach (var item in args.NewItems.Cast<MetadataTreeNodeBase>())
+            foreach (IMetadataTreeNode item in args.NewItems.Cast<IMetadataTreeNode>())
             {
                 RegisteredEvent(item);
             }
@@ -77,7 +77,7 @@ public sealed partial class FailedFileRootViewModel : MetadataViewModelBase<Fail
 
         if (args.OldItems is not null)
         {
-            foreach (var item in args.OldItems.Cast<MetadataTreeNodeBase>())
+            foreach (IMetadataTreeNode item in args.OldItems.Cast<IMetadataTreeNode>())
             {
                 UnregisteredEvent(item);
             }

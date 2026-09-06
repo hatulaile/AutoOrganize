@@ -86,7 +86,7 @@ public partial class FailedTvEditorViewModel :
     [RelayCommand]
     private void AutoFill()
     {
-        if (Nodes is not [IFullPath { FullPath: var path }])
+        if (Nodes is not [IFileSystemNode { FullPath: var path }])
             return;
 
         var request = new EpisodeMetadataRequest();

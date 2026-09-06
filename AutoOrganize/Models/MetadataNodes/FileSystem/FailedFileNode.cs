@@ -4,7 +4,7 @@ using AutoOrganize.Models.MetadataNodes.Abstractions;
 
 namespace AutoOrganize.Models.MetadataNodes.FileSystem;
 
-public sealed class FailedFileNode : MetadataTreeNodeBase, IFullPath, IFailedFile
+public sealed class FailedFileNode : MetadataTreeNodeBase, IFileSystemNode, IFailedFile
 {
     public string FullPath { get; }
 

@@ -1,6 +1,6 @@
 namespace AutoOrganize.Models.MetadataNodes.Abstractions;
 
-public interface IFullPath
+public interface IFileSystemNode : IMetadataTreeNode
 {
     string FullPath { get; }
 }

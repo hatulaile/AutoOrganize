@@ -45,7 +45,7 @@ public partial class MetadataEditorViewModel
         new MenuItem<MetadataEditorMenuItemContext>("取消识别项目", UnIdentifyMetadataCommand,
             static context => context.SelectedItems.Any(x => x is not IFailedFile)),
         new MenuItem<MetadataEditorMenuItemContext>("打开源文件位置", OpenSourceFileLocationCommand,
-            static context => context.SelectedItems is [IFullPath]),
+            static context => context.SelectedItems is [IFileSystemNode]),
     ];
 
     private void ApplyFileResult(SourceFileNode file, MetadataBase? metadata, Exception? error)
@@ -422,7 +422,7 @@ public partial class MetadataEditorViewModel
     {
         try
         {
-            IFullPath? node = (IFullPath?)context?.SelectedItems[0];
+            IFileSystemNode? node = (IFileSystemNode?)context?.SelectedItems[0];
             if (node is null)
                 return;
 

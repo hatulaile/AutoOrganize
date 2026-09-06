@@ -8,24 +8,24 @@ namespace AutoOrganize.Converters;
 
 public static class MetadataViewConverters
 {
-    public static FuncValueConverter<MetadataTreeNodeBase, string?> TitleConverter => field ??=
-        new FuncValueConverter<MetadataTreeNodeBase, string?>(metadata => metadata?.Title);
+    public static FuncValueConverter<IMetadataTreeNode, string?> TitleConverter => field ??=
+        new FuncValueConverter<IMetadataTreeNode, string?>(metadata => metadata?.Title);
 
-    public static FuncValueConverter<MetadataTreeNodeBase, string?> SubtitleConverter => field ??=
-        new FuncValueConverter<MetadataTreeNodeBase, string?>(FileMetadataUtils.IfHasSubtitleGetSubtitle);
+    public static FuncValueConverter<IMetadataTreeNode, string?> SubtitleConverter => field ??=
+        new FuncValueConverter<IMetadataTreeNode, string?>(FileMetadataUtils.IfHasSubtitleGetSubtitle);
 
-    public static FuncValueConverter<MetadataTreeNodeBase, bool> StateVisibleConverter => field ??=
-        new FuncValueConverter<MetadataTreeNodeBase, bool>(item => item is TransferredFileNode or FailedTransferFileNode);
+    public static FuncValueConverter<IMetadataTreeNode, bool> StateVisibleConverter => field ??=
+        new FuncValueConverter<IMetadataTreeNode, bool>(item => item is TransferredFileNode or FailedTransferFileNode);
 
-    public static FuncValueConverter<MetadataTreeNodeBase, string> StateTextConverter => field ??=
-        new FuncValueConverter<MetadataTreeNodeBase, string>(item => item is TransferredFileNode ? "成功" : "失败");
+    public static FuncValueConverter<IMetadataTreeNode, string> StateTextConverter => field ??=
+        new FuncValueConverter<IMetadataTreeNode, string>(item => item is TransferredFileNode ? "成功" : "失败");
 
     public static FuncValueConverter<object?, IBrush> StateBrushConverter => field ??=
         new FuncValueConverter<object?, IBrush>(item =>
             item is TransferredFileNode ? Brushes.LimeGreen : Brushes.IndianRed);
 
-    public static FuncValueConverter<MetadataTreeNodeBase, string?> MetadataBaseTypeDisplayConverter => field ??=
-        new FuncValueConverter<MetadataTreeNodeBase, string?>(metadata =>
+    public static FuncValueConverter<IMetadataTreeNode, string?> MetadataBaseTypeDisplayConverter => field ??=
+        new FuncValueConverter<IMetadataTreeNode, string?>(metadata =>
             metadata is null ? null : FileMetadataUtils.GetTypeDisplayName(metadata.NodeType));
 
     public static FuncValueConverter<MetadataNodeType, string?> TypeDisplayConverter => field ??=

@@ -155,7 +155,7 @@ public partial class FileTransferResultViewModel : SubNavigateViewModelBase,
             return;
         }
 
-        var selectedItem = (MetadataTreeNodeBase?)e.NewItems[0];
+        var selectedItem = (IMetadataTreeNode?)e.NewItems[0];
         if (selectedItem is null)
             return;
 

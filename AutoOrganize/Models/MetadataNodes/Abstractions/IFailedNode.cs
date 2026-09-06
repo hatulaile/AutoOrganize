@@ -1,3 +1,3 @@
 ﻿namespace AutoOrganize.Models.MetadataNodes.Abstractions;
 
-public interface IFailedNode;
+public interface IFailedNode : IMetadataTreeNode;
