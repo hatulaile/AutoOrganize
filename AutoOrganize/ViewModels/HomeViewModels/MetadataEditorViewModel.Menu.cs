@@ -61,8 +61,7 @@ public partial class MetadataEditorViewModel
         _metadataTreeRoot.AddFile(metadata, file);
     }
 
-    private void ApplyFailedFileResult(MetadataEditorMenuItemContext context,
-        FailedFileNode file, MetadataBase? metadata, Exception? error)
+    private void ApplyFailedFileResult(FailedFileNode file, MetadataBase? metadata, Exception? error)
     {
         if (metadata is null && error is null)
             return;
@@ -71,12 +70,12 @@ public partial class MetadataEditorViewModel
         if (metadata is not null)
         {
             _logger.LogDebug("应用失败文件识别结果: {FilePath}", file.FullPath);
-            context.MetadataTreeRoot.AddFile(metadata, new SourceFileNode(file.FullPath));
+            _metadataTreeRoot.AddFile(metadata, file.FullPath);
         }
         else if (error is not null)
         {
             _logger.LogWarning(error, "失败文件重新识别失败, 保留在失败列表: {FilePath}", file.FullPath);
-            context.FailedSourceFileRoot.AddOrGetFailedMetadata(file.FullPath, error);
+            _failedSourceFileRoot.AddOrGetFailedMetadata(file.FullPath, error);
         }
     }
 
@@ -344,7 +343,7 @@ public partial class MetadataEditorViewModel
             {
                 if (result.Metadata is null)
                     continue;
-                ApplyFailedFileResult(context, result.FailedFile, result.Metadata, result.Error);
+                ApplyFailedFileResult(result.FailedFile, result.Metadata, result.Error);
             }
 
             context.FailedSourceFileRoot.RemoveEmptyParentInChild(false);
@@ -384,7 +383,7 @@ public partial class MetadataEditorViewModel
             {
                 if (result.Metadata is null)
                     continue;
-                ApplyFailedFileResult(context, result.FailedFile, result.Metadata, result.Error);
+                ApplyFailedFileResult(result.FailedFile, result.Metadata, result.Error);
             }
 
             context.FailedSourceFileRoot.RemoveEmptyParentInChild(false);
