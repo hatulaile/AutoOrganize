@@ -23,7 +23,7 @@
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                 <TextBox x:Name="SearchTextBox"
                          PlaceholderText="输入电影名搜索…"
-                         Text="{Binding MovieSearchRequest?.Name}"
+                         Text="{Binding SearchText}"
                          IsEnabled="{Binding !SearchCommand.IsRunning}">
                     <TextBox.KeyBindings>
                         <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />

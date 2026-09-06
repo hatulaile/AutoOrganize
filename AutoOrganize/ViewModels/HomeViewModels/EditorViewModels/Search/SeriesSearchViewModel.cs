@@ -46,7 +46,7 @@ public sealed partial class SeriesSearchViewModel : ViewModelBase,
         _logger = logger;
     }
 
-    [RelayCommand(IncludeCancelCommand = true)]
+    [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanSearch))]
     private async Task SearchAsync(CancellationToken token)
     {
         try
@@ -86,6 +86,10 @@ public sealed partial class SeriesSearchViewModel : ViewModelBase,
         }
     }
 
+    private bool CanSearch() => !string.IsNullOrWhiteSpace(SearchText);
+
+    partial void OnSearchTextChanged(string? value) => SearchCommand.NotifyCanExecuteChanged();
+
     [RelayCommand(CanExecute = nameof(CanConfirm))]
     private void Confirm()
     {
@@ -105,6 +109,7 @@ public sealed partial class SeriesSearchViewModel : ViewModelBase,
     public void OnNavigatedTo(SeriesSearchArgs args)
     {
         SeriesSearchRequest = args.Request;
+        SearchText = args.Request.Name;
         SearchCommand.Execute(null);
     }
 }
