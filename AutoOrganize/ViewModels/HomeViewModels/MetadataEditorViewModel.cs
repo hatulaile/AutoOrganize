@@ -42,7 +42,7 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
     [ObservableProperty]
     public partial IMenuItemContext MenuItemContext { get; set; }
 
-    public AvaloniaList<MetadataTreeNodeBase> Source { get; } = [];
+    public AvaloniaList<MetadataTreeNodeBase> Source { get; }
 
     public HierarchicalModel<MetadataTreeNodeBase>? Model { get; private set; }
 
@@ -58,6 +58,8 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
         SelectItems = [];
         SelectItems.CollectionChanged += SelectItemsOnCollectionChanged;
         MenuItemContext = CreateMenuItemContext();
+        Source = [];
+        Source.CollectionChanged += SourceOnCollectionChanged;
     }
 
     [RelayCommand(CanExecute = nameof(CanNext))]
@@ -128,6 +130,11 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
                 _navigationService.Clear(RoutingState);
                 break;
         }
+    }
+
+    private void SourceOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        NextCommand.NotifyCanExecuteChanged();
     }
 
     public void OnParametersChanged(MetadataEditArgs args)
