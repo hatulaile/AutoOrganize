@@ -115,19 +115,20 @@ public sealed partial class FileMetadataProgressViewModel : ViewModelBase, INavi
                     ? new Notification("处理结果", $"成功 {SuccessCount} 个, 无一失败.", NotificationType.Success)
                     : new Notification("处理结果", $"成功 {SuccessCount} 个, 失败 {FailedCount} 个.", NotificationType.Warning),
                 this);
-
-            _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
-                new MetadataEditArgs
-                {
-                    FileProcessResultInfos = Results,
-                    FileProcessArgs = options
-                });
-            return;
+        }
+        else
+        {
+            _logger.LogWarning("源数据处理全部失败: {FailedCount}", FailedCount);
+            _notificationServices.Show(new Notification("处理结果", "没有任何成功的文件", NotificationType.Error),
+                this);
         }
 
-        _logger.LogWarning("源数据处理全部失败: {FailedCount}", FailedCount);
-        _notificationServices.Show(new Notification("处理结果", "没有任何成功的文件", NotificationType.Error), this);
-        _navigationService.Replace<SelectFilesViewModel>(this);
+        _navigationService.Replace<MetadataEditorViewModel, MetadataEditArgs>(this,
+            new MetadataEditArgs
+            {
+                FileProcessResultInfos = Results,
+                FileProcessArgs = options
+            });
     }
 
     private async Task ProgressAndAddFileAsync(string filePath, MetadataType type, CancellationToken token)
