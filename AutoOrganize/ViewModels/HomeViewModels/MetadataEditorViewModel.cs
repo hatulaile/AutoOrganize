@@ -60,6 +60,8 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
         MenuItemContext = CreateMenuItemContext();
         Source = [];
         Source.CollectionChanged += SourceOnCollectionChanged;
+        _metadataTreeRoot.Children.CollectionChanged += ChildrenOnCollectionChanged;
+        _failedSourceFileRoot.Children.CollectionChanged += FailedSourceChildrenOnCollectionChanged;
     }
 
     [RelayCommand(CanExecute = nameof(CanNext))]
@@ -150,11 +152,18 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
         if (args.IsClear)
         {
             _logger.LogDebug("清空现有源数据");
+
             _metadataTreeRoot.Children.CollectionChanged -= ChildrenOnCollectionChanged;
             _metadataTreeRoot = new MetadataTreeRoot();
             _metadataTreeRoot.Children.CollectionChanged += ChildrenOnCollectionChanged;
+
+            _failedSourceFileRoot.Children.CollectionChanged -= FailedSourceChildrenOnCollectionChanged;
             _failedSourceFileRoot = new FailedSourceFileRoot();
+            _failedSourceFileRoot.Children.CollectionChanged += FailedSourceChildrenOnCollectionChanged;
+
             Source.Clear();
+            SelectItems.Clear();
+            MenuItemContext = CreateMenuItemContext();
         }
 
         if (args.FileProcessResultInfos is null || args.FileProcessArgs is null)
@@ -190,14 +199,6 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
 
         _logger.LogDebug("构建源数据完成: 成功 {Success}, 失败 {Failed}", successCount, failedCount);
 
-        if (args.IsClear)
-        {
-            if (_failedSourceFileRoot.Children.Count > 0)
-                Source.Insert(0, _failedSourceFileRoot);
-
-            //这里忽略 _metadataTreeRoot 的内容，因为下面有对应的事件
-        }
-
         if (Model is null)
         {
             Model = new HierarchicalModel<MetadataTreeNodeBase>(new HierarchicalOptions<MetadataTreeNodeBase>
@@ -219,6 +220,18 @@ public sealed partial class MetadataEditorViewModel : SubNavigateViewModelBase, 
 
         if (e.NewItems is not null)
             Source.AddRange(e.NewItems.Cast<MetadataTreeNodeBase>());
+    }
+
+    private void FailedSourceChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (_failedSourceFileRoot.Children.Count == 0)
+        {
+            Source.Remove(_failedSourceFileRoot);
+            return;
+        }
+
+        if (Source.Count == 0 || !ReferenceEquals(Source[0], _failedSourceFileRoot))
+            Source.Insert(0, _failedSourceFileRoot);
     }
 
     private static IEnumerable<FileMetadataEntry> GetAllFileMetadataEntries(IMetadataTreeNode metadataTreeNode)
