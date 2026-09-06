@@ -17,13 +17,14 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
     public string GetTvSeriesFileName(SeriesMetadata seriesMetadata, ReadOnlySpan<char> pattern = default)
     {
-        if (_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("剧集: \n模板: {Pattern} \n{@metadata}", pattern.ToString(), seriesMetadata);
-        }
-
         if (pattern.IsEmpty)
             pattern = TV_SERIES_PATTERN;
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("生成剧集名称: 模板={Pattern}, 名称={Name}, 原名={OriginalName}, 年份={Year}",
+                pattern.ToString(), seriesMetadata.Name, seriesMetadata.OriginalName, seriesMetadata.AirDate?.Year);
+        }
 
         var name = seriesMetadata.Name.AsSpan();
         var originalName = seriesMetadata.OriginalName.AsSpan();
@@ -78,9 +79,7 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         string result = span[..pos].ToString();
         if (_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("剧集: \n生成结果: {Result} \n{@metadata}", result, seriesMetadata);
-        }
+            _logger.LogDebug("剧集名称生成完成: {Result}", result);
 
         return result;
     }
@@ -92,7 +91,9 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogDebug("剧集季: \n模板: {Pattern} \n{@metadata}", pattern.ToString(), seasonMetadata);
+            _logger.LogDebug("生成季度名称: 模板={Pattern}, 剧集={SeriesName}, 季={SeasonNumber}, 名称={SeasonName}, 年份={Year}",
+                pattern.ToString(), seasonMetadata.Series?.Name, seasonMetadata.SeasonNumber, seasonMetadata.Name,
+                seasonMetadata.AirDate?.Year);
         }
 
         if (seasonMetadata.SeasonNumber is not { } seasonNumber)
@@ -165,7 +166,7 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         var result = span[..pos].ToString();
         if (_logger.IsEnabled(LogLevel.Debug))
-            _logger.LogDebug("剧集季: \n结果: {Result} \n{@metadata}", result, seasonMetadata);
+            _logger.LogDebug("季度名称生成完成: {Result}", result);
         return result;
     }
 
@@ -177,7 +178,10 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogDebug("剧集集: \n模板: {Pattern} \n{@metadata}", pattern.ToString(), episodeMetadata);
+            _logger.LogDebug(
+                "生成单集文件名: 模板={Pattern}, 源文件={SourceFile}, 剧集={SeriesName}, 季={SeasonNumber}, 集={EpisodeNumber}, 名称={EpisodeName}",
+                pattern.ToString(), Path.GetFileName(path), episodeMetadata.Series?.Name, episodeMetadata.SeasonNumber,
+                episodeMetadata.EpisodeNumber, episodeMetadata.Name);
         }
 
         if (episodeMetadata.EpisodeNumber is not { } seasonNumber)
@@ -279,9 +283,7 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         var result = span[..pos].ToString();
         if (_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("剧集集 \n结果: {Result} \n{@metadata}", result, episodeMetadata);
-        }
+            _logger.LogDebug("单集文件名生成完成: {Result}", result);
 
         return result;
     }
@@ -293,8 +295,8 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogDebug("生成电影文件名 模板: {Pattern}, 电影:{Name}, 年份={Year}",
-                pattern.ToString(), movieMetadata.Name, movieMetadata.AirDate?.Year);
+            _logger.LogDebug("生成电影文件名: 模板={Pattern}, 源文件={SourceFile}, 名称={Name}, 年份={Year}",
+                pattern.ToString(), Path.GetFileName(path), movieMetadata.Name, movieMetadata.AirDate?.Year);
         }
 
         ReadOnlySpan<char> name = movieMetadata.Name is null ? [] : movieMetadata.Name.AsSpan();
@@ -363,9 +365,7 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         string result = span[..pos].ToString();
         if (_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("电影: \n 生成结果: {Result} \n{@metadata}", result, movieMetadata);
-        }
+            _logger.LogDebug("电影文件名生成完成: {Result}", result);
 
         return result;
     }
@@ -377,7 +377,8 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogDebug("电影: \n模板: {Pattern} \n{@metadata}", pattern.ToString(), movieMetadata);
+            _logger.LogDebug("生成电影目录名: 模板={Pattern}, 名称={Name}, 原名={OriginalName}, 年份={Year}",
+                pattern.ToString(), movieMetadata.Name, movieMetadata.OriginalName, movieMetadata.AirDate?.Year);
         }
 
         ReadOnlySpan<char> name = movieMetadata.Name is null ? [] : movieMetadata.Name;
@@ -435,9 +436,7 @@ public sealed class FileNameGenerator : IFileNameGenerator
 
         var result = PathUtils.GetValidFileName(span[..pos].ToString());
         if (_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("电影文件夹: \n生成: {Result} \n{@metadata}", result, movieMetadata);
-        }
+            _logger.LogDebug("电影目录名生成完成: {Result}", result);
 
         return result;
     }
