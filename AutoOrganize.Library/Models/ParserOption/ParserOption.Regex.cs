@@ -38,6 +38,10 @@ public sealed partial class ParserOptions
     [GeneratedRegex(@"\[(?<episode>\d{1,3})\]", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
     public static partial Regex EpisodeRegex4 { get; }
 
+    // 匹配形式：标题 - 21 / 标题 - 21.mkv
+    [GeneratedRegex(@"\s+-\s*(?<episode>\d{1,3})(?=\.[^.]+$|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    public static partial Regex EpisodeRegex5 { get; }
+
     [GeneratedRegex(@"(?<!\d)(?<year>(?:19|20)\d{2})(?!\d|×|x)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex YearRegex { get; }
 

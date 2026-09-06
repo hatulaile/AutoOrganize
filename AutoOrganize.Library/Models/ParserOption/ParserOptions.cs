@@ -20,6 +20,7 @@ public sealed partial class ParserOptions
         EpisodeRegex2,
         EpisodeRegex3,
         EpisodeRegex4,
+        EpisodeRegex5,
     ];
 
     public Regex[] YearRegexes { get; } =
