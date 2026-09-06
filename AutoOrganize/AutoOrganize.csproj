@@ -10,7 +10,7 @@
     <PropertyGroup>
 <!--        <VersionPrefix></VersionPrefix>-->
         <Version>0.0.0.1</Version>
-        <VersionSuffix>alpha1</VersionSuffix>
+        <VersionSuffix>alpha2</VersionSuffix>
         <FileVersion>$(Version)</FileVersion>
         <InformationalVersion>$(VersionPrefix)$(FileVersion).$(VersionSuffix)-$(Configuration)</InformationalVersion>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
