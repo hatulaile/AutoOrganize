@@ -184,11 +184,11 @@ public sealed class FileNameGenerator : IFileNameGenerator
                 episodeMetadata.EpisodeNumber, episodeMetadata.Name);
         }
 
-        if (episodeMetadata.EpisodeNumber is not { } seasonNumber)
-            throw new MetadataFieldNullException(nameof(EpisodeMetadata), nameof(episodeMetadata.SeasonNumber));
+        if (episodeMetadata.SeasonNumber is not { } seasonNumber)
+            throw new MetadataFieldNullException(nameof(EpisodeMetadata), nameof(seasonNumber));
 
         if (episodeMetadata.EpisodeNumber is not { } episodeNumber)
-            throw new MetadataFieldNullException(nameof(EpisodeMetadata), nameof(episodeMetadata.EpisodeNumber));
+            throw new MetadataFieldNullException(nameof(EpisodeMetadata), nameof(episodeNumber));
 
         ReadOnlySpan<char> seriesName =
             episodeMetadata.Series?.Name is null ? [] : episodeMetadata.Series.Name.AsSpan();
