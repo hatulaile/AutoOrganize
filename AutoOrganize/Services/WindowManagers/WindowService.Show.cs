@@ -10,11 +10,10 @@ namespace AutoOrganize.Services.WindowManagers;
 public partial class WindowService
 {
     public void Show<TWindowViewModel>(Window? ownerWindow = null)
-        where TWindowViewModel :IWindowViewModel
+        where TWindowViewModel : IWindowViewModel
     {
         TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         if (ownerWindow is null)
         {
@@ -34,11 +33,11 @@ public partial class WindowService
     {
         if (_serviceProvider.GetRequiredService(viewModelType) is not IWindowViewModel viewModel)
         {
-            throw new Exception("");
+            throw new InvalidOperationException(
+                $"类型 '{viewModelType.FullName}' 未实现 {nameof(IWindowViewModel)}。");
         }
 
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         if (ownerWindow is null)
         {
@@ -55,7 +54,7 @@ public partial class WindowService
     }
 
     public void Show<TWindowViewModel>(object ownerViewModel)
-        where TWindowViewModel :IWindowViewModel
+        where TWindowViewModel : IWindowViewModel
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
         Show<TWindowViewModel>(ownerWindow);
@@ -68,11 +67,10 @@ public partial class WindowService
     }
 
     public void Show<TWindowViewModel, TArgs>(TArgs args, Window? ownerWindow = null)
-        where TWindowViewModel :  IWindowViewModel<TArgs>
+        where TWindowViewModel : IWindowViewModel<TArgs>
     {
         TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         if (ownerWindow is null)
@@ -90,7 +88,7 @@ public partial class WindowService
     }
 
     public void Show<TWindowViewModel, TArgs>(TArgs arg, object ownerViewModel)
-        where TWindowViewModel :IWindowViewModel<TArgs>
+        where TWindowViewModel : IWindowViewModel<TArgs>
     {
         Window ownerWindow = GetRequiredWindowByViewModel(ownerViewModel);
         Show<TWindowViewModel, TArgs>(arg, ownerWindow);
@@ -113,10 +111,10 @@ public partial class WindowService
                 $"The view for ViewModel '{viewModel.GetType().Name}' could not be resolved ");
         }
 
-        InitializeIfNeeded(window);
-
         if (!ReferenceEquals(window.DataContext, viewModel))
             window.DataContext = viewModel;
+
+        InitializeIfNeeded(window);
         return window;
     }
 
@@ -139,6 +137,7 @@ public partial class WindowService
                 window.WindowState = WindowState.Normal;
                 return;
             }
+
             window.Activate();
             return;
         }
@@ -151,6 +150,9 @@ public partial class WindowService
     {
         if (window.IsLoaded)
             return;
+
+        if (window.DataContext is not null)
+            _windowByViewModel.TryAdd(window.DataContext!, window);
         window.Closing += (windowObj, ev) =>
         {
             var win = (Window?)windowObj ?? throw new ArgumentException("Window cannot be null", nameof(windowObj));
@@ -158,9 +160,15 @@ public partial class WindowService
 
             (win.DataContext as IViewModel)?.OwnerViewModel = null;
             viewModel?.OnCloseWindow();
-            if (!ReferenceEquals(win, MainWindow) && !CanCloseWindow(win) &&
+            // 这里有几个逻辑
+            // 1. 如果是主窗体则不直接关闭，
+            // 2. 如果主窗体关闭了也直接关闭
+            // 3. 如果是瞬态的也直接关闭，
+            // 4. 如果是系统通知的也直接关闭，
+            // 5. 如果 _windowByViewModel 不包含这个 vm 也直接关闭
+            if (!_isMainClosing && !ReferenceEquals(win, MainWindow) && !CanCloseWindow(win) &&
                 ev.CloseReason is not (WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown) &&
-                !_isMainClosing)
+                viewModel is not null && _windowByViewModel.ContainsKey(viewModel))
             {
                 ev.Cancel = true;
                 win.Hide();

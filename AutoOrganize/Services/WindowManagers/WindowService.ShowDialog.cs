@@ -1,9 +1,12 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoOrganize.ViewModels.Abstractions;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AutoOrganize.Services.WindowManagers;
 
@@ -15,7 +18,6 @@ public partial class WindowService
     {
         TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         return ShowDialogAsync(hostWindow, ownerWindow, token);
     }
@@ -34,7 +36,6 @@ public partial class WindowService
     {
         TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
         return ShowDialogAsync(hostWindow, ownerWindow, token);
@@ -54,7 +55,6 @@ public partial class WindowService
     {
         TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.CancellationToken = cancellationToken;
         viewModel.OnOpenWindow();
         return ShowDialogAsync<TResult>(hostWindow, ownerWindow, cancellationToken);
@@ -74,7 +74,6 @@ public partial class WindowService
     {
         TWindowViewModel viewModel = _serviceProvider.GetRequiredService<TWindowViewModel>();
         Window hostWindow = CreateOrGetWindow(viewModel);
-        _windowByViewModel.TryAdd(hostWindow.DataContext!, hostWindow);
         viewModel.CancellationToken = cancellationToken;
         viewModel.OnOpenWindow();
         viewModel.OnOpenWindow(args);
@@ -90,12 +89,45 @@ public partial class WindowService
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static  Task ShowDialogAsync
-        (Window hostWindow, Window ownerWindow, CancellationToken token) =>
-        hostWindow.ShowDialog(ownerWindow).WaitAsync(token);
+    private async Task ShowDialogAsync(Window hostWindow, Window ownerWindow, CancellationToken token)
+    {
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            await hostWindow.ShowDialog(ownerWindow).WaitAsync(token);
+        }
+        catch (OperationCanceledException)
+        {
+            hostWindow.Close();
+            throw;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "显示窗口 {WindowType} 时发生异常。", hostWindow.DataContext?.GetType().FullName);
+            hostWindow.Close();
+            throw;
+        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static  Task<TResult> ShowDialogAsync<TResult>
-        (Window hostWindow, Window ownerWindow, CancellationToken token) =>
-        hostWindow.ShowDialog<TResult>(ownerWindow).WaitAsync(token);
+    private async Task<TResult> ShowDialogAsync<TResult>
+        (Window hostWindow, Window ownerWindow, CancellationToken token)
+    {
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            return await hostWindow.ShowDialog<TResult>(ownerWindow).WaitAsync(token);
+        }
+        catch (OperationCanceledException)
+        {
+            hostWindow.Close();
+            throw;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "显示结果窗口 {WindowType} 时发生异常。", hostWindow.DataContext?.GetType().FullName);
+            hostWindow.Close();
+            throw;
+        }
+    }
 }

@@ -6,6 +6,7 @@ using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
+using Microsoft.Extensions.Logging;
 using ViewModelRegistrationGenerator;
 
 namespace AutoOrganize.Services.WindowManagers;
@@ -13,6 +14,7 @@ namespace AutoOrganize.Services.WindowManagers;
 public partial class WindowService : IWindowService, IWindowProvider
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<WindowService> _logger;
     private readonly ConcurrentDictionary<object, Window> _windowByViewModel = [];
     private bool _isMainClosing;
 
@@ -32,12 +34,13 @@ public partial class WindowService : IWindowService, IWindowProvider
         }
     }
 
-    public WindowService(IServiceProvider serviceProvider)
+    public WindowService(IServiceProvider serviceProvider, ILogger<WindowService> logger)
     {
         if (App.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime lifetime)
             throw new Exception("当前应用程序不支持经典桌面样式, 无法初始化窗口服务!");
 
         _serviceProvider = serviceProvider;
+        _logger = logger;
 
         if (lifetime.MainWindow is not null)
         {
