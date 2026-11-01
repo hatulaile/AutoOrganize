@@ -21,10 +21,13 @@ public partial class WindowService
         IViewModel? currentViewModel = viewModel;
         do
         {
-            if (currentViewModel is IWindowViewModel windowViewModel &&
-                TryGetWindowForViewModel(windowViewModel, out Window? window))
+            if (currentViewModel is IWindowViewModel windowViewModel)
             {
-                return window;
+                if (TryGetWindowForViewModel(windowViewModel, out Window? window))
+                    return window;
+
+                if (currentViewModel is not INavigationViewModel)
+                    return null;
             }
 
             currentViewModel = currentViewModel.OwnerViewModel;
