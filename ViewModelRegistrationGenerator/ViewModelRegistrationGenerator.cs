@@ -59,7 +59,7 @@ public class ViewModelRegistrationGenerator : IIncrementalGenerator
 
         namespace ViewModelRegistrationGenerator;
 
-        [global::System.AttributeUsageAttribute(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+        [global::System.AttributeUsageAttribute(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
         public sealed class ViewModelRegistrationAttribute : Attribute
         {
             public ViewModelLifetime ViewLifetime { get; }
